@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ranked Betweenness Bar + Network Overlay</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fafaf8;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: #333;
+    padding: 40px 48px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: -0.5px;
+  }
+  .question {
+    font-size: 15px;
+    color: #666;
+    margin-bottom: 6px;
+  }
+  .rationale {
+    font-size: 13px;
+    color: #888;
+    line-height: 1.7;
+    margin-bottom: 28px;
+    max-width: 880px;
+  }
+  .container {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+  }
+  svg {
+    border: 1px solid #e8e8e4;
+    border-radius: 8px;
+    background: #fff;
+    flex-shrink: 0;
+  }
+  .tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(30,30,30,0.92);
+    color: #fff;
+    padding: 10px 14px;
+    border-radius: 6px;
+    font-size: 12px;
+    line-height: 1.6;
+    max-width: 260px;
+    opacity: 0;
+    transition: opacity 0.15s;
+  }
+  .legend {
+    display: flex;
+    gap: 16px;
+    margin-top: 14px;
+    flex-wrap: wrap;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #666;
+  }
+  .legend-swatch {
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+  }
+</style>
+</head>
+<body>
+<h1>Ranked Betweenness Bar + Network Overlay</h1>
+<p class="question">이 시각화가 답하는 질문: "어떤 논문이 가장 중요한 다리(bridge)인가?"</p>
+<p class="rationale">
+  Betweenness centrality는 네트워크에서 최단 경로에 가장 많이 등장하는 노드를 식별하는 지표다.
+  막대 차트로 순위를 매기면 "누가 가장 중요한 매개자인가"를 즉시 비교할 수 있고,
+  옆에 네트워크를 함께 배치하면 해당 노드의 구조적 위치를 동시에 확인할 수 있다.
+  hover 시 막대와 네트워크가 연동되어, 추상 지표와 실제 토폴로지를 오가며 해석할 수 있다.
+</p>
+
+<div class="container">
+  <svg id="bar-chart"></svg>
+  <svg id="network-chart"></svg>
+</div>
+<div class="legend" id="legend"></div>
+<div class="tooltip" id="tooltip"></div>
+
+<script>
+// ─── Shared Data ───
+const clusterColors = {
+  "외부 메모리": "#7aaa7a",
+  "인지 아키텍처": "#7a7aaa",
+  "시뮬레이션": "#aa8a6a",
+  "RAG": "#8aaa8a",
+  "멀티모달": "#aa7a8a"
+};
+
+const nodes = [
+  { id: "P01", label: "MemFormer", cluster: "외부 메모리", degree: 0.57, betweenness: 0.12, bridgeScore: 0.35, citationCount: 142 },
+  { id: "P02", label: "RecallNet", cluster: "외부 메모리", degree: 0.43, betweenness: 0.08, bridgeScore: 0.18, citationCount: 87 },
+  { id: "P03", label: "EpisodicLLM", cluster: "외부 메모리", degree: 0.36, betweenness: 0.05, bridgeScore: 0.12, citationCount: 63 },
+  { id: "P04", label: "CogArch-T", cluster: "인지 아키텍처", degree: 0.50, betweenness: 0.22, bridgeScore: 0.61, citationCount: 210 },
+  { id: "P05", label: "ThinkLoop", cluster: "인지 아키텍처", degree: 0.43, betweenness: 0.15, bridgeScore: 0.42, citationCount: 156 },
+  { id: "P06", label: "MetaCog", cluster: "인지 아키텍처", degree: 0.29, betweenness: 0.04, bridgeScore: 0.09, citationCount: 44 },
+  { id: "P07", label: "SimWorld", cluster: "시뮬레이션", degree: 0.50, betweenness: 0.19, bridgeScore: 0.55, citationCount: 178 },
+  { id: "P08", label: "EnvSim", cluster: "시뮬레이션", degree: 0.36, betweenness: 0.07, bridgeScore: 0.20, citationCount: 91 },
+  { id: "P09", label: "WorldModel-X", cluster: "시뮬레이션", degree: 0.29, betweenness: 0.03, bridgeScore: 0.08, citationCount: 38 },
+  { id: "P10", label: "RAG-Fuse", cluster: "RAG", degree: 0.57, betweenness: 0.25, bridgeScore: 0.68, citationCount: 230 },
+  { id: "P11", label: "HybridRetriever", cluster: "RAG", degree: 0.43, betweenness: 0.10, bridgeScore: 0.30, citationCount: 115 },
+  { id: "P12", label: "ChunkRank", cluster: "RAG", degree: 0.29, betweenness: 0.03, bridgeScore: 0.07, citationCount: 52 },
+  { id: "P13", label: "ViLM-Bridge", cluster: "멀티모달", degree: 0.50, betweenness: 0.18, bridgeScore: 0.52, citationCount: 168 },
+  { id: "P14", label: "AudioCog", cluster: "멀티모달", degree: 0.36, betweenness: 0.06, bridgeScore: 0.15, citationCount: 72 },
+  { id: "P15", label: "SenseNet", cluster: "멀티모달", degree: 0.29, betweenness: 0.02, bridgeScore: 0.05, citationCount: 31 }
+];
+
+const edges = [
+  { source: "P01", target: "P02", weight: 0.8, confidence: 0.9 },
+  { source: "P01", target: "P03", weight: 0.6, confidence: 0.85 },
+  { source: "P01", target: "P04", weight: 0.5, confidence: 0.7 },
+  { source: "P01", target: "P10", weight: 0.4, confidence: 0.65 },
+  { source: "P02", target: "P03", weight: 0.7, confidence: 0.88 },
+  { source: "P02", target: "P11", weight: 0.3, confidence: 0.6 },
+  { source: "P04", target: "P05", weight: 0.9, confidence: 0.95 },
+  { source: "P04", target: "P06", weight: 0.6, confidence: 0.8 },
+  { source: "P04", target: "P07", weight: 0.5, confidence: 0.72 },
+  { source: "P04", target: "P13", weight: 0.45, confidence: 0.68 },
+  { source: "P05", target: "P06", weight: 0.7, confidence: 0.85 },
+  { source: "P05", target: "P07", weight: 0.4, confidence: 0.65 },
+  { source: "P05", target: "P10", weight: 0.35, confidence: 0.6 },
+  { source: "P07", target: "P08", weight: 0.8, confidence: 0.92 },
+  { source: "P07", target: "P09", weight: 0.6, confidence: 0.82 },
+  { source: "P07", target: "P13", weight: 0.5, confidence: 0.7 },
+  { source: "P08", target: "P09", weight: 0.7, confidence: 0.87 },
+  { source: "P10", target: "P11", weight: 0.85, confidence: 0.93 },
+  { source: "P10", target: "P12", weight: 0.65, confidence: 0.84 },
+  { source: "P10", target: "P13", weight: 0.5, confidence: 0.72 },
+  { source: "P10", target: "P01", weight: 0.4, confidence: 0.65 },
+  { source: "P11", target: "P12", weight: 0.7, confidence: 0.86 },
+  { source: "P13", target: "P14", weight: 0.8, confidence: 0.91 },
+  { source: "P13", target: "P15", weight: 0.55, confidence: 0.78 },
+  { source: "P14", target: "P15", weight: 0.6, confidence: 0.82 },
+  { source: "P08", target: "P14", weight: 0.3, confidence: 0.55 }
+];
+
+const tooltip = d3.select("#tooltip");
+
+// Legend
+const legend = d3.select("#legend");
+Object.entries(clusterColors).forEach(([name, color]) => {
+  const item = legend.append("div").attr("class", "legend-item");
+  item.append("div").attr("class", "legend-swatch").style("background", color);
+  item.append("span").text(name);
+});
+
+// ─── Bar Chart ───
+const barW = 320, barH = 540;
+const barMargin = { top: 24, right: 16, bottom: 24, left: 110 };
+const barInner = { w: barW - barMargin.left - barMargin.right, h: barH - barMargin.top - barMargin.bottom };
+
+const sorted = [...nodes].sort((a, b) => b.betweenness - a.betweenness);
+
+const barSvg = d3.select("#bar-chart").attr("width", barW).attr("height", barH);
+const barG = barSvg.append("g").attr("transform", `translate(${barMargin.left},${barMargin.top})`);
+
+const yScale = d3.scaleBand().domain(sorted.map(d => d.id)).range([0, barInner.h]).padding(0.2);
+const xScale = d3.scaleLinear().domain([0, d3.max(nodes, d => d.betweenness) * 1.1]).range([0, barInner.w]);
+
+// Axis
+barG.append("g")
+  .call(d3.axisLeft(yScale).tickFormat(id => nodes.find(n => n.id === id).label))
+  .selectAll("text")
+  .attr("font-size", 11)
+  .attr("font-family", "'Noto Sans KR', sans-serif");
+
+barG.append("g")
+  .attr("transform", `translate(0,${barInner.h})`)
+  .call(d3.axisBottom(xScale).ticks(5).tickFormat(d3.format(".2f")))
+  .selectAll("text")
+  .attr("font-size", 10);
+
+// Title
+barSvg.append("text")
+  .attr("x", barW / 2)
+  .attr("y", 16)
+  .attr("text-anchor", "middle")
+  .attr("font-size", 12)
+  .attr("font-weight", 500)
+  .attr("fill", "#777")
+  .text("Betweenness Centrality");
+
+// Bars
+const bars = barG.selectAll(".bar")
+  .data(sorted)
+  .join("rect")
+  .attr("class", "bar")
+  .attr("x", 0)
+  .attr("y", d => yScale(d.id))
+  .attr("width", d => xScale(d.betweenness))
+  .attr("height", yScale.bandwidth())
+  .attr("fill", d => clusterColors[d.cluster])
+  .attr("opacity", 0.8)
+  .attr("rx", 3)
+  .style("cursor", "pointer");
+
+// Value labels
+barG.selectAll(".val-label")
+  .data(sorted)
+  .join("text")
+  .attr("x", d => xScale(d.betweenness) + 4)
+  .attr("y", d => yScale(d.id) + yScale.bandwidth() / 2 + 4)
+  .attr("font-size", 10)
+  .attr("fill", "#999")
+  .text(d => d.betweenness.toFixed(2));
+
+// ─── Network Chart ───
+const netW = 540, netH = 540;
+const netSvg = d3.select("#network-chart").attr("width", netW).attr("height", netH);
+const netG = netSvg.append("g");
+
+// Title
+netSvg.append("text")
+  .attr("x", netW / 2)
+  .attr("y", 16)
+  .attr("text-anchor", "middle")
+  .attr("font-size", 12)
+  .attr("font-weight", 500)
+  .attr("fill", "#777")
+  .text("Network Topology");
+
+// Build simulation data
+const simNodes = nodes.map(d => ({ ...d }));
+const simEdges = edges.map(d => ({ source: d.source, target: d.target, weight: d.weight, confidence: d.confidence }));
+
+const radiusScale = d3.scaleSqrt().domain([0, 250]).range([5, 22]);
+const edgeWidthScale = d3.scaleLinear().domain([0.2, 1]).range([0.8, 4]);
+
+const simulation = d3.forceSimulation(simNodes)
+  .force("link", d3.forceLink(simEdges).id(d => d.id).distance(80).strength(d => d.weight * 0.5))
+  .force("charge", d3.forceManyBody().strength(-200))
+  .force("center", d3.forceCenter(netW / 2, netH / 2 + 10))
+  .force("collide", d3.forceCollide().radius(d => radiusScale(d.citationCount) + 8));
+
+const linkElements = netG.selectAll(".net-link")
+  .data(simEdges)
+  .join("line")
+  .attr("class", "net-link")
+  .attr("stroke", "#ccc")
+  .attr("stroke-width", d => edgeWidthScale(d.weight))
+  .attr("stroke-opacity", 0.5);
+
+const nodeElements = netG.selectAll(".net-node")
+  .data(simNodes)
+  .join("g")
+  .attr("class", "net-node");
+
+nodeElements.append("circle")
+  .attr("r", d => radiusScale(d.citationCount))
+  .attr("fill", d => clusterColors[d.cluster])
+  .attr("stroke", "#fff")
+  .attr("stroke-width", 1.5)
+  .attr("opacity", 0.85);
+
+const nodeLabels = nodeElements.append("text")
+  .attr("dy", d => radiusScale(d.citationCount) + 12)
+  .attr("text-anchor", "middle")
+  .attr("font-size", 10)
+  .attr("fill", "#777")
+  .text(d => d.label);
+
+simulation.on("tick", () => {
+  linkElements
+    .attr("x1", d => d.source.x)
+    .attr("y1", d => d.source.y)
+    .attr("x2", d => d.target.x)
+    .attr("y2", d => d.target.y);
+  nodeElements.attr("transform", d => `translate(${d.x},${d.y})`);
+});
+
+// ─── Interaction: hover bar highlights network ───
+function highlight(nodeId) {
+  const connectedIds = new Set([nodeId]);
+  const connectedEdges = new Set();
+  simEdges.forEach((e, i) => {
+    const sid = typeof e.source === 'object' ? e.source.id : e.source;
+    const tid = typeof e.target === 'object' ? e.target.id : e.target;
+    if (sid === nodeId || tid === nodeId) {
+      connectedIds.add(sid);
+      connectedIds.add(tid);
+      connectedEdges.add(i);
+    }
+  });
+
+  // Bars
+  bars.attr("opacity", d => d.id === nodeId ? 1 : 0.25);
+
+  // Network nodes
+  nodeElements.select("circle")
+    .attr("opacity", d => connectedIds.has(d.id) ? 1 : 0.12)
+    .attr("stroke", d => d.id === nodeId ? "#333" : "#fff")
+    .attr("stroke-width", d => d.id === nodeId ? 3 : 1.5);
+
+  nodeLabels.attr("opacity", d => connectedIds.has(d.id) ? 1 : 0.15);
+
+  // Network edges
+  linkElements
+    .attr("stroke", (d, i) => connectedEdges.has(i) ? clusterColors[nodes.find(n => n.id === nodeId).cluster] : "#ccc")
+    .attr("stroke-opacity", (d, i) => connectedEdges.has(i) ? 0.8 : 0.08)
+    .attr("stroke-width", (d, i) => connectedEdges.has(i) ? edgeWidthScale(d.weight) * 1.8 : edgeWidthScale(d.weight));
+}
+
+function unhighlight() {
+  bars.attr("opacity", 0.8);
+  nodeElements.select("circle")
+    .attr("opacity", 0.85)
+    .attr("stroke", "#fff")
+    .attr("stroke-width", 1.5);
+  nodeLabels.attr("opacity", 1);
+  linkElements
+    .attr("stroke", "#ccc")
+    .attr("stroke-opacity", 0.5)
+    .attr("stroke-width", d => edgeWidthScale(d.weight));
+}
+
+// Bar hover
+bars.on("mouseover", function(event, d) {
+  highlight(d.id);
+  tooltip.style("opacity", 1).html(
+    `<strong>${d.label}</strong><br>` +
+    `클러스터: ${d.cluster}<br>` +
+    `Betweenness: ${d.betweenness.toFixed(3)}<br>` +
+    `Degree: ${d.degree.toFixed(2)}<br>` +
+    `Bridge Score: ${d.bridgeScore.toFixed(2)}<br>` +
+    `인용: ${d.citationCount}`
+  );
+})
+.on("mousemove", function(event) {
+  tooltip.style("left", (event.pageX + 14) + "px").style("top", (event.pageY - 14) + "px");
+})
+.on("mouseout", function() {
+  unhighlight();
+  tooltip.style("opacity", 0);
+});
+
+// Network node hover
+nodeElements.on("mouseover", function(event, d) {
+  highlight(d.id);
+  tooltip.style("opacity", 1).html(
+    `<strong>${d.label}</strong><br>` +
+    `클러스터: ${d.cluster}<br>` +
+    `Betweenness: ${d.betweenness.toFixed(3)}<br>` +
+    `Degree: ${d.degree.toFixed(2)}<br>` +
+    `Bridge Score: ${d.bridgeScore.toFixed(2)}<br>` +
+    `인용: ${d.citationCount}`
+  );
+})
+.on("mousemove", function(event) {
+  tooltip.style("left", (event.pageX + 14) + "px").style("top", (event.pageY - 14) + "px");
+})
+.on("mouseout", function() {
+  unhighlight();
+  tooltip.style("opacity", 0);
+});
+
+// Drag
+nodeElements.call(d3.drag()
+  .on("start", (event, d) => {
+    if (!event.active) simulation.alphaTarget(0.3).restart();
+    d.fx = d.x; d.fy = d.y;
+  })
+  .on("drag", (event, d) => {
+    d.fx = event.x; d.fy = event.y;
+  })
+  .on("end", (event, d) => {
+    if (!event.active) simulation.alphaTarget(0);
+    d.fx = null; d.fy = null;
+  })
+);
+</script>
+</body>
+</html>

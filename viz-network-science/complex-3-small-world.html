@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Small World Diagram</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+  background: #fafaf8;
+  font-family: 'Noto Sans KR', sans-serif;
+  color: #2a2a2a;
+  padding: 40px 48px;
+}
+h1 {
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 8px;
+  letter-spacing: -0.5px;
+}
+.question {
+  font-size: 16px;
+  font-weight: 500;
+  color: #5a5a5a;
+  margin-bottom: 12px;
+  padding-left: 2px;
+}
+.rationale {
+  font-size: 14px;
+  font-weight: 300;
+  color: #6a6a6a;
+  line-height: 1.7;
+  max-width: 960px;
+  margin-bottom: 32px;
+  padding-left: 2px;
+}
+.container {
+  display: flex;
+  gap: 40px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.chart-section { flex: 1; min-width: 380px; }
+.chart-title {
+  font-size: 13px;
+  font-weight: 500;
+  color: #888;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+svg { display: block; }
+.tooltip {
+  position: absolute;
+  background: #fff;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px 14px;
+  font-size: 13px;
+  line-height: 1.5;
+  pointer-events: none;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  max-width: 300px;
+}
+.tooltip strong { font-weight: 600; }
+.axis-label {
+  font-size: 12px;
+  fill: #888;
+}
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-top: 16px;
+}
+.legend-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #666;
+}
+.legend-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+}
+.metrics-row {
+  display: flex;
+  gap: 24px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+.metric-card {
+  background: #fff;
+  border: 1px solid #eee;
+  border-radius: 8px;
+  padding: 14px 18px;
+  min-width: 140px;
+}
+.metric-card .val {
+  font-size: 22px;
+  font-weight: 700;
+  margin-bottom: 2px;
+}
+.metric-card .lbl {
+  font-size: 12px;
+  color: #888;
+}
+.metric-card .sub {
+  font-size: 11px;
+  color: #aaa;
+  margin-top: 4px;
+}
+</style>
+</head>
+<body>
+
+<h1>Small World Diagram</h1>
+<p class="question">이 시각화가 답하는 질문: "이 분야의 연구자들은 얼마나 밀접하게 연결되어 있는가?"</p>
+<p class="rationale">
+  Watts & Strogatz (1998)가 정의한 small-world 네트워크는 두 가지 특성을 동시에 가진다:
+  (1) 높은 clustering coefficient (이웃끼리도 연결됨), (2) 짧은 average path length (아무 두 노드 사이를 적은 홉으로 이동 가능).
+  같은 크기의 random network (Erdos-Renyi)와 비교하여 C >> C_random이고 L ~ L_random이면 small-world다.
+  논문 인용 네트워크에서 이 특성이 있다면, 클러스터 내부는 밀접하면서도 클러스터 간 "다리" 역할을 하는 논문이 존재하여 분야 전체가 소통한다는 의미다.
+</p>
+
+<div class="container">
+  <div class="chart-section">
+    <div class="chart-title">Small-World Space (C vs L)</div>
+    <div id="scatter-chart"></div>
+    <div class="metrics-row" id="metrics"></div>
+  </div>
+  <div class="chart-section">
+    <div class="chart-title">Network: Clustering & Bridge Paths</div>
+    <div id="network-chart"></div>
+    <div class="legend" id="legend"></div>
+  </div>
+</div>
+
+<div class="tooltip" id="tooltip" style="display:none;"></div>
+
+<script>
+const clusters = [
+  { id: 'external-memory', label: '외부 메모리', color: '#7aaa7a' },
+  { id: 'cognitive-arch',  label: '인지 아키텍처', color: '#7a7aaa' },
+  { id: 'simulation',      label: '시뮬레이션', color: '#aa8a6a' },
+  { id: 'rag',             label: 'RAG', color: '#8aaa8a' },
+  { id: 'multimodal',      label: '멀티모달', color: '#aa7a8a' }
+];
+
+const nodes = [
+  { id: 0,  label: 'MemoryBank: Long-term Storage for LLM Agents', cluster: 0, degree: 8, betweenness: 0.42, citationCount: 312, year: 2024 },
+  { id: 1,  label: 'Cognitive Architectures for Language Agents', cluster: 1, degree: 7, betweenness: 0.38, citationCount: 287, year: 2023 },
+  { id: 2,  label: 'Generative Agents: Interactive Simulacra', cluster: 2, degree: 6, betweenness: 0.31, citationCount: 1843, year: 2023 },
+  { id: 3,  label: 'Retrieval-Augmented Generation for Knowledge', cluster: 3, degree: 6, betweenness: 0.28, citationCount: 2104, year: 2020 },
+  { id: 4,  label: 'Reflexion: Language Agents with Verbal RL', cluster: 1, degree: 5, betweenness: 0.25, citationCount: 541, year: 2023 },
+  { id: 5,  label: 'Self-RAG: Learning to Retrieve and Reflect', cluster: 3, degree: 5, betweenness: 0.22, citationCount: 389, year: 2024 },
+  { id: 6,  label: 'Voyager: Open-Ended Embodied Agent with LLM', cluster: 2, degree: 4, betweenness: 0.19, citationCount: 612, year: 2023 },
+  { id: 7,  label: 'VisualGPT: Multimodal Memory Reasoning', cluster: 4, degree: 4, betweenness: 0.17, citationCount: 178, year: 2024 },
+  { id: 8,  label: 'RAISE: Retrieval-Augmented Impersonation', cluster: 0, degree: 3, betweenness: 0.14, citationCount: 95, year: 2024 },
+  { id: 9,  label: 'RET-LLM: General Read-Write Memory for LLM', cluster: 0, degree: 3, betweenness: 0.12, citationCount: 67, year: 2023 },
+  { id: 10, label: 'SCM: Structured Context Memory Architecture', cluster: 1, degree: 3, betweenness: 0.10, citationCount: 42, year: 2024 },
+  { id: 11, label: 'AgentSims: Open-Source Sandbox for LLM Eval', cluster: 2, degree: 2, betweenness: 0.07, citationCount: 156, year: 2023 },
+  { id: 12, label: 'LLM-Augmented Autonomous Agents Survey', cluster: 3, degree: 2, betweenness: 0.05, citationCount: 203, year: 2023 },
+  { id: 13, label: 'AudioPalm: Multimodal Agent Memory', cluster: 4, degree: 1, betweenness: 0.03, citationCount: 88, year: 2024 },
+  { id: 14, label: 'MemGPT: Towards LLMs as Operating Systems', cluster: 0, degree: 1, betweenness: 0.02, citationCount: 421, year: 2023 }
+];
+
+const edges = [
+  { source: 0, target: 1, weight: 0.8, type: 'cross' },
+  { source: 0, target: 2, weight: 0.6, type: 'cross' },
+  { source: 0, target: 3, weight: 0.7, type: 'cross' },
+  { source: 0, target: 8, weight: 0.9, type: 'intra' },
+  { source: 0, target: 9, weight: 0.85, type: 'intra' },
+  { source: 0, target: 14, weight: 0.8, type: 'intra' },
+  { source: 0, target: 5, weight: 0.5, type: 'cross' },
+  { source: 0, target: 4, weight: 0.55, type: 'cross' },
+  { source: 1, target: 4, weight: 0.9, type: 'intra' },
+  { source: 1, target: 10, weight: 0.85, type: 'intra' },
+  { source: 1, target: 2, weight: 0.7, type: 'cross' },
+  { source: 1, target: 6, weight: 0.5, type: 'cross' },
+  { source: 1, target: 3, weight: 0.55, type: 'cross' },
+  { source: 1, target: 12, weight: 0.4, type: 'cross' },
+  { source: 2, target: 6, weight: 0.9, type: 'intra' },
+  { source: 2, target: 11, weight: 0.85, type: 'intra' },
+  { source: 2, target: 7, weight: 0.45, type: 'cross' },
+  { source: 2, target: 4, weight: 0.5, type: 'cross' },
+  { source: 3, target: 5, weight: 0.9, type: 'intra' },
+  { source: 3, target: 12, weight: 0.85, type: 'intra' },
+  { source: 3, target: 8, weight: 0.5, type: 'cross' },
+  { source: 3, target: 9, weight: 0.4, type: 'cross' },
+  { source: 4, target: 10, weight: 0.7, type: 'intra' },
+  { source: 4, target: 5, weight: 0.45, type: 'cross' },
+  { source: 5, target: 8, weight: 0.5, type: 'cross' },
+  { source: 5, target: 12, weight: 0.6, type: 'intra' },
+  { source: 6, target: 11, weight: 0.8, type: 'intra' },
+  { source: 6, target: 7, weight: 0.4, type: 'cross' },
+  { source: 7, target: 13, weight: 0.9, type: 'intra' },
+  { source: 7, target: 2, weight: 0.35, type: 'cross' },
+  { source: 8, target: 9, weight: 0.8, type: 'intra' },
+  { source: 9, target: 14, weight: 0.7, type: 'intra' },
+  { source: 10, target: 12, weight: 0.35, type: 'cross' },
+];
+
+// --- Compute network metrics ---
+const n = nodes.length;
+const adj = {};
+nodes.forEach(nd => adj[nd.id] = new Set());
+edges.forEach(e => {
+  adj[e.source].add(e.target);
+  adj[e.target].add(e.source);
+});
+
+// Local clustering coefficient for each node
+function localCC(nodeId) {
+  const neighbors = [...adj[nodeId]];
+  const k = neighbors.length;
+  if (k < 2) return 0;
+  let triangles = 0;
+  for (let i = 0; i < k; i++) {
+    for (let j = i + 1; j < k; j++) {
+      if (adj[neighbors[i]].has(neighbors[j])) triangles++;
+    }
+  }
+  return (2 * triangles) / (k * (k - 1));
+}
+
+nodes.forEach(nd => {
+  nd.cc = localCC(nd.id);
+});
+
+const avgCC = d3.mean(nodes, d => d.cc);
+
+// BFS shortest paths
+function bfs(startId) {
+  const dist = {};
+  dist[startId] = 0;
+  const queue = [startId];
+  let i = 0;
+  while (i < queue.length) {
+    const curr = queue[i++];
+    for (const nb of adj[curr]) {
+      if (dist[nb] === undefined) {
+        dist[nb] = dist[curr] + 1;
+        queue.push(nb);
+      }
+    }
+  }
+  return dist;
+}
+
+let totalDist = 0, pathCount = 0;
+const allDists = {};
+nodes.forEach(nd => {
+  allDists[nd.id] = bfs(nd.id);
+  for (const other of nodes) {
+    if (other.id > nd.id && allDists[nd.id][other.id] !== undefined) {
+      totalDist += allDists[nd.id][other.id];
+      pathCount++;
+    }
+  }
+});
+const avgPathLength = totalDist / pathCount;
+
+// Random network baselines (Erdos-Renyi)
+const m = edges.length;
+const p = (2 * m) / (n * (n - 1));
+const ccRandom = p; // E[C] = p for ER
+const lRandom = Math.log(n) / Math.log(n * p); // L ~ ln(n)/ln(<k>)
+
+// Small-world coefficient
+const sigma = (avgCC / ccRandom) / (avgPathLength / lRandom);
+
+// Generate comparison points for scatter
+const comparisonPoints = [
+  { label: 'This Network', L: avgPathLength, C: avgCC, type: 'actual', size: 14 },
+  { label: 'Random (Erdos-Renyi)', L: lRandom, C: ccRandom, type: 'random', size: 10 },
+  // Lattice (ring) reference
+  { label: 'Regular Lattice', L: n / (2 * Math.round(2 * m / n)), C: 0.65, type: 'lattice', size: 10 },
+  // Watts-Strogatz rewiring sweep
+  ...d3.range(0.05, 1, 0.1).map(beta => {
+    const cWS = avgCC * Math.pow(1 - beta, 3); // approximate
+    const lWS = lRandom + (avgPathLength - lRandom) * Math.pow(1 - beta, 2);
+    return { label: `WS (p=${beta.toFixed(1)})`, L: lWS, C: cWS, type: 'ws', size: 5 };
+  })
+];
+
+// --- Scatter Plot ---
+(function() {
+  const w = 440, h = 400;
+  const margin = { top: 30, right: 30, bottom: 56, left: 64 };
+  const iw = w - margin.left - margin.right;
+  const ih = h - margin.top - margin.bottom;
+
+  const svg = d3.select('#scatter-chart')
+    .append('svg').attr('width', w).attr('height', h)
+    .append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+
+  const allL = comparisonPoints.map(d => d.L);
+  const allC = comparisonPoints.map(d => d.C);
+
+  const xScale = d3.scaleLinear().domain([0, d3.max(allL) * 1.3]).range([0, iw]).nice();
+  const yScale = d3.scaleLinear().domain([0, d3.max(allC) * 1.2]).range([ih, 0]).nice();
+
+  // grid
+  svg.append('g').selectAll('line').data(yScale.ticks(5)).enter()
+    .append('line').attr('x1', 0).attr('x2', iw)
+    .attr('y1', d => yScale(d)).attr('y2', d => yScale(d))
+    .attr('stroke', '#f0f0f0');
+  svg.append('g').selectAll('line').data(xScale.ticks(5)).enter()
+    .append('line').attr('y1', 0).attr('y2', ih)
+    .attr('x1', d => xScale(d)).attr('x2', d => xScale(d))
+    .attr('stroke', '#f0f0f0');
+
+  // Small-world zone
+  svg.append('rect')
+    .attr('x', xScale(0)).attr('y', yScale(d3.max(allC) * 1.2))
+    .attr('width', xScale(lRandom * 1.5) - xScale(0))
+    .attr('height', yScale(ccRandom * 2) - yScale(d3.max(allC) * 1.2))
+    .attr('fill', '#e8f4e8').attr('opacity', 0.5);
+
+  svg.append('text')
+    .attr('x', xScale(lRandom * 0.7)).attr('y', yScale(d3.max(allC) * 1.1))
+    .attr('font-size', '10px').attr('fill', '#5a8a5a').attr('font-weight', 500)
+    .text('Small-World Zone');
+
+  // axes
+  svg.append('g').attr('transform', `translate(0,${ih})`)
+    .call(d3.axisBottom(xScale).ticks(5)).selectAll('text').style('font-size', '11px').style('fill', '#888');
+  svg.append('g')
+    .call(d3.axisLeft(yScale).ticks(5)).selectAll('text').style('font-size', '11px').style('fill', '#888');
+
+  svg.append('text').attr('class', 'axis-label')
+    .attr('x', iw / 2).attr('y', ih + 42).attr('text-anchor', 'middle')
+    .text('Average Path Length (L)');
+  svg.append('text').attr('class', 'axis-label')
+    .attr('transform', 'rotate(-90)').attr('x', -ih / 2).attr('y', -48)
+    .attr('text-anchor', 'middle').text('Clustering Coefficient (C)');
+
+  // WS curve
+  const wsPoints = comparisonPoints.filter(d => d.type === 'ws').sort((a, b) => a.L - b.L);
+  wsPoints.unshift(comparisonPoints.find(d => d.type === 'lattice'));
+  wsPoints.push(comparisonPoints.find(d => d.type === 'random'));
+
+  svg.append('path')
+    .datum(wsPoints.filter(d => d))
+    .attr('fill', 'none')
+    .attr('stroke', '#bbb')
+    .attr('stroke-width', 1.5)
+    .attr('stroke-dasharray', '5,4')
+    .attr('d', d3.line().curve(d3.curveCatmullRom)
+      .x(d => xScale(d.L)).y(d => yScale(d.C)));
+
+  svg.append('text')
+    .attr('x', xScale(wsPoints[Math.floor(wsPoints.length / 2)]?.L || 2) + 10)
+    .attr('y', yScale(wsPoints[Math.floor(wsPoints.length / 2)]?.C || 0.3) - 8)
+    .attr('font-size', '10px').attr('fill', '#999')
+    .text('Watts-Strogatz rewiring path');
+
+  // dots
+  const colorMap = { actual: '#cc4444', random: '#6a9fd8', lattice: '#8a8a8a', ws: '#bbb' };
+  const shapeMap = { actual: d3.symbolStar, random: d3.symbolSquare, lattice: d3.symbolTriangle, ws: d3.symbolCircle };
+
+  comparisonPoints.forEach(pt => {
+    if (pt.type === 'ws') {
+      svg.append('circle')
+        .attr('cx', xScale(pt.L)).attr('cy', yScale(pt.C))
+        .attr('r', 3).attr('fill', '#ccc');
+      return;
+    }
+
+    const g = svg.append('g')
+      .attr('transform', `translate(${xScale(pt.L)},${yScale(pt.C)})`)
+      .attr('cursor', 'pointer');
+
+    g.append('path')
+      .attr('d', d3.symbol().type(shapeMap[pt.type]).size(pt.size * pt.size * 3)())
+      .attr('fill', colorMap[pt.type])
+      .attr('stroke', '#fff').attr('stroke-width', 1.5);
+
+    if (pt.type === 'actual') {
+      g.append('circle').attr('r', 20).attr('fill', colorMap[pt.type]).attr('opacity', 0.12);
+    }
+
+    g.append('text')
+      .attr('dy', pt.type === 'actual' ? -20 : -14)
+      .attr('text-anchor', 'middle')
+      .attr('font-size', '10px')
+      .attr('font-weight', pt.type === 'actual' ? 700 : 400)
+      .attr('fill', colorMap[pt.type])
+      .text(pt.label);
+
+    g.on('mouseenter', function(event) {
+      d3.select('#tooltip').style('display', 'block')
+        .html(`<strong>${pt.label}</strong><br>
+               Clustering Coefficient: ${pt.C.toFixed(3)}<br>
+               Avg Path Length: ${pt.L.toFixed(2)}<br>
+               ${pt.type === 'actual' ? `Small-world coefficient (sigma): ${sigma.toFixed(2)}<br>(sigma > 1 = small-world)` : ''}`)
+        .style('left', (event.pageX + 14) + 'px')
+        .style('top', (event.pageY - 10) + 'px');
+    })
+    .on('mouseleave', function() {
+      d3.select('#tooltip').style('display', 'none');
+    });
+  });
+
+  // metrics cards
+  const metricsDiv = d3.select('#metrics');
+  [
+    { val: avgCC.toFixed(3), lbl: 'Clustering Coeff (C)', sub: `Random: ${ccRandom.toFixed(3)}` },
+    { val: avgPathLength.toFixed(2), lbl: 'Avg Path Length (L)', sub: `Random: ${lRandom.toFixed(2)}` },
+    { val: sigma.toFixed(2), lbl: 'Small-World Coeff (sigma)', sub: sigma > 1 ? 'Small-world!' : 'Not small-world' },
+    { val: (avgCC / ccRandom).toFixed(1) + 'x', lbl: 'C / C_random', sub: 'Higher = more clustered' },
+  ].forEach(m => {
+    const card = metricsDiv.append('div').attr('class', 'metric-card');
+    card.append('div').attr('class', 'val').style('color', m.lbl.includes('sigma') && sigma > 1 ? '#5a8a5a' : '#333').text(m.val);
+    card.append('div').attr('class', 'lbl').text(m.lbl);
+    card.append('div').attr('class', 'sub').text(m.sub);
+  });
+})();
+
+// --- Network with clustering highlights ---
+(function() {
+  const w = 480, h = 440;
+  const svg = d3.select('#network-chart')
+    .append('svg').attr('width', w).attr('height', h);
+
+  const rScale = d3.scaleSqrt().domain([0, 1]).range([5, 18]);
+  const edgeData = edges.map(e => ({ ...e }));
+
+  const sim = d3.forceSimulation(nodes)
+    .force('link', d3.forceLink(edgeData).id(d => d.id).distance(d => d.type === 'intra' ? 50 : 90))
+    .force('charge', d3.forceManyBody().strength(-160))
+    .force('center', d3.forceCenter(w / 2, h / 2))
+    .force('collision', d3.forceCollide().radius(d => rScale(d.cc) + 6));
+
+  // identify bridge edges (cross-cluster with high betweenness endpoints)
+  const bridgeEdges = edgeData.filter(e => e.type === 'cross');
+
+  const link = svg.append('g')
+    .selectAll('line').data(edgeData).enter()
+    .append('line')
+    .attr('stroke', d => d.type === 'cross' ? '#e8a060' : '#ddd')
+    .attr('stroke-width', d => d.type === 'cross' ? 2.5 : d.weight * 2)
+    .attr('stroke-opacity', d => d.type === 'cross' ? 0.7 : 0.35)
+    .attr('stroke-dasharray', d => d.type === 'cross' ? '6,3' : 'none');
+
+  // cluster convex hulls to show clustering
+  const clusterGroups = d3.group(nodes, d => d.cluster);
+
+  const hullG = svg.append('g').attr('class', 'hulls');
+
+  function updateHulls() {
+    hullG.selectAll('path').remove();
+    for (const [cid, cnodes] of clusterGroups) {
+      if (cnodes.length < 3) continue;
+      const points = cnodes.map(nd => [nd.x, nd.y]);
+      const hull = d3.polygonHull(points);
+      if (hull) {
+        // expand hull slightly
+        const centroid = d3.polygonCentroid(hull);
+        const expanded = hull.map(p => [
+          centroid[0] + (p[0] - centroid[0]) * 1.3,
+          centroid[1] + (p[1] - centroid[1]) * 1.3
+        ]);
+        hullG.append('path')
+          .attr('d', `M${expanded.join('L')}Z`)
+          .attr('fill', clusters[cid].color)
+          .attr('fill-opacity', 0.06)
+          .attr('stroke', clusters[cid].color)
+          .attr('stroke-opacity', 0.15)
+          .attr('stroke-width', 1.5);
+      }
+    }
+  }
+
+  const nodeG = svg.append('g')
+    .selectAll('g').data(nodes).enter().append('g')
+    .attr('cursor', 'pointer')
+    .call(d3.drag()
+      .on('start', (e, d) => { if (!e.active) sim.alphaTarget(0.3).restart(); d.fx = d.x; d.fy = d.y; })
+      .on('drag', (e, d) => { d.fx = e.x; d.fy = e.y; })
+      .on('end', (e, d) => { if (!e.active) sim.alphaTarget(0); d.fx = null; d.fy = null; })
+    );
+
+  // high CC glow
+  nodeG.filter(d => d.cc > 0.3).append('circle')
+    .attr('r', d => rScale(d.cc) + 7)
+    .attr('fill', d => clusters[d.cluster].color)
+    .attr('opacity', 0.15);
+
+  nodeG.append('circle')
+    .attr('r', d => rScale(d.cc))
+    .attr('fill', d => clusters[d.cluster].color)
+    .attr('stroke', d => d.cc > 0.3 ? '#555' : '#fff')
+    .attr('stroke-width', d => d.cc > 0.3 ? 2 : 1.5);
+
+  // CC value labels
+  nodeG.filter(d => d.cc > 0).append('text')
+    .attr('dy', d => rScale(d.cc) + 14)
+    .attr('text-anchor', 'middle')
+    .attr('font-size', '9px')
+    .attr('fill', '#999')
+    .text(d => `C=${d.cc.toFixed(2)}`);
+
+  nodeG.on('mouseenter', function(event, d) {
+    d3.select(this).select('circle:last-of-type').attr('stroke', '#111').attr('stroke-width', 3);
+
+    // find shortest path to show "small world" effect
+    const dist = bfs(d.id);
+    const farthest = nodes.reduce((best, nd) => {
+      const dd = dist[nd.id];
+      return (dd !== undefined && dd > (dist[best.id] || 0)) ? nd : best;
+    }, d);
+
+    // highlight path
+    let pathIds = new Set();
+    if (farthest.id !== d.id) {
+      // trace back via BFS (simple: just highlight nodes at each distance)
+      let curr = farthest.id;
+      const parentMap = {};
+      const queue = [d.id];
+      const visited = new Set([d.id]);
+      outer:
+      while (queue.length > 0) {
+        const node = queue.shift();
+        for (const nb of adj[node]) {
+          if (!visited.has(nb)) {
+            visited.add(nb);
+            parentMap[nb] = node;
+            if (nb === farthest.id) break outer;
+            queue.push(nb);
+          }
+        }
+      }
+      curr = farthest.id;
+      while (curr !== undefined) {
+        pathIds.add(curr);
+        curr = parentMap[curr];
+      }
+    }
+
+    nodeG.attr('opacity', nd => pathIds.size > 0 && pathIds.has(nd.id) ? 1 : 0.25);
+    d3.select(this).attr('opacity', 1);
+    link.attr('stroke-opacity', e => {
+      const s = typeof e.source === 'object' ? e.source.id : e.source;
+      const t = typeof e.target === 'object' ? e.target.id : e.target;
+      return (pathIds.has(s) && pathIds.has(t)) ? 0.9 : 0.05;
+    }).attr('stroke-width', e => {
+      const s = typeof e.source === 'object' ? e.source.id : e.source;
+      const t = typeof e.target === 'object' ? e.target.id : e.target;
+      return (pathIds.has(s) && pathIds.has(t)) ? 3 : 1;
+    });
+
+    d3.select('#tooltip').style('display', 'block')
+      .html(`<strong>${d.label}</strong><br>
+             Cluster: ${clusters[d.cluster].label}<br>
+             Local Clustering Coeff: ${d.cc.toFixed(3)}<br>
+             Degree: ${d.degree}<br>
+             Farthest node: ${dist[farthest.id]} hops away<br>
+             <span style="color:#e8a060">Orange dashed = cross-cluster bridge</span>`)
+      .style('left', (event.pageX + 14) + 'px')
+      .style('top', (event.pageY - 10) + 'px');
+  })
+  .on('mouseleave', function(event, d) {
+    d3.select(this).select('circle:last-of-type')
+      .attr('stroke', d.cc > 0.3 ? '#555' : '#fff')
+      .attr('stroke-width', d.cc > 0.3 ? 2 : 1.5);
+    nodeG.attr('opacity', 1);
+    link.attr('stroke-opacity', e => e.type === 'cross' ? 0.7 : 0.35)
+        .attr('stroke-width', e => e.type === 'cross' ? 2.5 : e.weight * 2);
+    d3.select('#tooltip').style('display', 'none');
+  });
+
+  sim.on('tick', () => {
+    link.attr('x1', d => d.source.x).attr('y1', d => d.source.y)
+        .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+    nodeG.attr('transform', d => `translate(${d.x},${d.y})`);
+    updateHulls();
+  });
+
+  // legend
+  const legend = d3.select('#legend');
+  clusters.forEach(c => {
+    const item = legend.append('div').attr('class', 'legend-item');
+    item.append('div').attr('class', 'legend-dot').style('background', c.color);
+    item.append('span').text(c.label);
+  });
+  const bridgeItem = legend.append('div').attr('class', 'legend-item');
+  bridgeItem.append('div').attr('class', 'legend-dot').style('background', '#e8a060');
+  bridgeItem.append('span').text('Cross-cluster bridge');
+})();
+</script>
+</body>
+</html>
