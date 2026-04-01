@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>중심성 & 다리 — Light House</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: #fafaf8; color: #1a1a1a; min-height: 100vh; line-height: 1.7; }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 8vh 24px 12vh; }
+
+  .back-link {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 400;
+    color: #888;
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: #1a1a1a; }
+
+  h1 { font-size: 28px; font-weight: 500; letter-spacing: -0.03em; margin-bottom: 8px; }
+  .question { font-size: 16px; font-weight: 500; color: #cc8844; margin-bottom: 40px; }
+
+  h2 { font-size: 18px; font-weight: 500; margin-top: 40px; margin-bottom: 12px; letter-spacing: -0.02em; }
+
+  p, .body-text {
+    font-size: 14px;
+    font-weight: 300;
+    color: #555;
+    line-height: 1.8;
+  }
+
+  .card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 24px;
+  }
+
+  .card p { margin-bottom: 12px; }
+  .card p:last-child { margin-bottom: 0; }
+
+  .ref {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 12px;
+    line-height: 1.6;
+  }
+
+  .viz-section { margin-bottom: 48px; }
+  .viz-label { font-size: 16px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .viz-why {
+    font-size: 14px;
+    font-weight: 300;
+    color: #555;
+    line-height: 1.8;
+    margin-bottom: 14px;
+  }
+
+  iframe {
+    width: 100%;
+    height: 680px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  .product-note {
+    font-size: 14px;
+    font-weight: 300;
+    color: #555;
+    line-height: 1.8;
+  }
+
+  .bottom-back {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 400;
+    color: #888;
+    text-decoration: none;
+    margin-top: 16px;
+    transition: color 0.2s;
+  }
+  .bottom-back:hover { color: #1a1a1a; }
+</style>
+</head>
+<body>
+  <div class="page">
+    <a class="back-link" href="index.html">&larr; 목록으로</a>
+
+    <h1>중심성 &amp; 다리</h1>
+    <div class="question">"어떤 논문이 갈래를 잇는 다리인가?"</div>
+
+    <!-- 왜 이 분석이 필요한가 -->
+    <h2>왜 이 분석이 필요한가</h2>
+    <p>
+      두 하위 분야가 따로 발전하고 있을 때, 그 사이를 실제로 잇는 논문이나 개념이 있다. 이 "다리"를 찾으면 왜 두 분야가 연결될 수 있는지의 근거가 생기고, 아직 안 이어진 곳(gap)의 후보도 드러난다.
+    </p>
+
+    <!-- 어떻게 계산하는가 -->
+    <h2>어떻게 계산하는가</h2>
+    <div class="card">
+      <p>
+        Betweenness centrality는 네트워크에서 한 노드가 다른 노드 쌍들 사이의 최단 경로에 얼마나 자주 등장하는지를 측정한다. 높은 betweenness = 다른 영역을 연결하는 핵심 위치. 계량서지학(scientometrics)에서는 이를 학제간성(interdisciplinarity) 지표로 사용한다.
+      </p>
+      <p>
+        Light House는 bridge score를 계산한다: betweenness를 기반으로 하되, cross-cluster 엣지에서의 기여도를 가중한다. 또한 최단 경로(shortest path)를 Dijkstra 알고리즘으로 찾아, 두 클러스터를 잇는 구체적인 논문 경로를 제시한다.
+      </p>
+      <div class="ref">
+        Leydesdorff (2007). <em>Betweenness centrality as an indicator of the interdisciplinarity of scientific journals.</em> JASIST.
+      </div>
+    </div>
+
+    <!-- 어떻게 보이는가 -->
+    <h2>어떻게 보이는가</h2>
+
+    <div class="viz-section">
+      <div class="viz-label">Ego Network / Star Plot</div>
+      <div class="viz-why">
+        bridge 노드를 중심에 두고 연결된 노드를 방사형으로 배치한다. 클러스터별 색상 아크로 "이 다리가 어떤 클러스터를 잇는가"가 한눈에 드러난다.
+      </div>
+      <iframe src="../viz-network-science/centrality-1-ego-network.html"></iframe>
+    </div>
+
+    <div class="viz-section">
+      <div class="viz-label">Betweenness 순위 + 네트워크 연동</div>
+      <div class="viz-why">
+        왼쪽 막대(순위)와 오른쪽 네트워크가 양방향으로 하이라이트된다. 정량적 순위 비교에 가장 강력한 기법이다.
+      </div>
+      <iframe src="../viz-network-science/centrality-2-betweenness-bar.html"></iframe>
+    </div>
+
+    <div class="viz-section">
+      <div class="viz-label">k-Path</div>
+      <div class="viz-why">
+        두 클러스터 간 Dijkstra 최단 경로를 레이어 다이어그램으로 펼친다. 경로상 노드가 bridge 후보다.
+      </div>
+      <iframe src="../viz-network-science/centrality-3-kpath.html"></iframe>
+    </div>
+
+    <!-- Light House에서의 용도 -->
+    <h2>Light House에서의 용도</h2>
+    <p class="product-note">
+      Light House의 "연결 경로 보기" 렌즈(v3)가 이 분석에 대응한다. bridge-flow 기본 표현으로 source→bridge→target 흐름을 보여주고, bridge score를 노드 강조에 반영한다.
+    </p>
+
+    <a class="bottom-back" href="index.html">&larr; 목록으로</a>
+  </div>
+</body>
+</html>

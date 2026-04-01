@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Alluvial / Sankey Community Flow</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<script src="https://d3js.org/d3.v7.min.js"></script>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    background: #fafaf8;
+    font-family: 'Noto Sans KR', sans-serif;
+    color: #2a2a2a;
+    padding: 40px 60px;
+  }
+  h1 {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 12px;
+    letter-spacing: -0.5px;
+  }
+  .question {
+    font-size: 15px;
+    font-weight: 400;
+    color: #666;
+    margin-bottom: 8px;
+  }
+  .rationale {
+    font-size: 13px;
+    font-weight: 300;
+    color: #888;
+    line-height: 1.7;
+    margin-bottom: 32px;
+    max-width: 720px;
+  }
+  #chart { position: relative; }
+  .tooltip {
+    position: absolute;
+    pointer-events: none;
+    background: rgba(255,255,255,0.97);
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px 14px;
+    font-size: 12px;
+    line-height: 1.6;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    opacity: 0;
+    transition: opacity 0.15s;
+    z-index: 10;
+  }
+  .legend {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 24px;
+  }
+  .legend-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #555;
+  }
+  .legend-swatch {
+    width: 14px;
+    height: 14px;
+    border-radius: 3px;
+  }
+</style>
+</head>
+<body>
+
+<h1>Alluvial / Sankey Community Flow</h1>
+<p class="question">이 시각화가 답하는 질문: 각 논문은 어떤 클러스터에 얼마나 강하게 소속되어 있으며, 다중 소속 경계 논문은 무엇인가?</p>
+<p class="rationale">
+Alluvial(Sankey) 다이어그램은 노드의 커뮤니티 소속을 흐름(flow)으로 표현하여 다중 소속과 경계 노드를 직관적으로 드러낸다.
+전통적 hard clustering과 달리, 실제 연구 논문은 여러 분야에 걸쳐 있는 경우가 많으므로 소속 강도를 리본 두께로 매핑하면
+fuzzy membership을 자연스럽게 시각화할 수 있다.
+이 기법은 overlapping community detection 결과를 표현하는 데 특히 적합하다.
+</p>
+
+<div class="legend" id="legend"></div>
+<div id="chart">
+  <div class="tooltip" id="tooltip"></div>
+</div>
+
+<script>
+// ── Data ──
+const clusters = [
+  { id: 'external-memory', label: '외부 메모리', color: '#7aaa7a', density: 0.82, quality: 0.74 },
+  { id: 'cognitive-arch',  label: '인지 아키텍처', color: '#7a7aaa', density: 0.76, quality: 0.81 },
+  { id: 'simulation',      label: '시뮬레이션', color: '#aa8a6a', density: 0.69, quality: 0.67 },
+  { id: 'rag',             label: 'RAG', color: '#8aaa8a', density: 0.88, quality: 0.79 },
+  { id: 'multimodal',      label: '멀티모달', color: '#aa7a8a', density: 0.71, quality: 0.72 }
+];
+
+const clusterMap = {};
+clusters.forEach(c => clusterMap[c.id] = c);
+
+const papers = [
+  { id: 'P01', label: 'MemGPT', cluster: 'external-memory' },
+  { id: 'P02', label: 'Reflexion', cluster: 'external-memory' },
+  { id: 'P03', label: 'Generative Agents', cluster: 'external-memory' },
+  { id: 'P04', label: 'MemWalker', cluster: 'external-memory' },
+  { id: 'P05', label: 'CoALA', cluster: 'cognitive-arch' },
+  { id: 'P06', label: 'Voyager', cluster: 'cognitive-arch' },
+  { id: 'P07', label: 'LATS', cluster: 'cognitive-arch' },
+  { id: 'P08', label: 'AutoGPT Survey', cluster: 'cognitive-arch' },
+  { id: 'P09', label: 'AgentSims', cluster: 'simulation' },
+  { id: 'P10', label: 'MetaGPT', cluster: 'simulation' },
+  { id: 'P11', label: 'ChatDev', cluster: 'simulation' },
+  { id: 'P12', label: 'CAMEL', cluster: 'simulation' },
+  { id: 'P13', label: 'Sotopia', cluster: 'simulation' },
+  { id: 'P14', label: 'Self-RAG', cluster: 'rag' },
+  { id: 'P15', label: 'RAPTOR', cluster: 'rag' },
+  { id: 'P16', label: 'CRAG', cluster: 'rag' },
+  { id: 'P17', label: 'HyDE', cluster: 'rag' },
+  { id: 'P18', label: 'LLaVA', cluster: 'multimodal' },
+  { id: 'P19', label: 'GPT-4V Survey', cluster: 'multimodal' },
+  { id: 'P20', label: 'CogAgent', cluster: 'multimodal' },
+  { id: 'P21', label: 'Fuyu', cluster: 'multimodal' },
+  { id: 'P22', label: 'Gemini Report', cluster: 'multimodal' }
+];
+
+// Inter-cluster connections define secondary memberships
+const interEdges = [
+  ['P01','cognitive-arch'],   // MemGPT -> 인지 아키텍처
+  ['P03','simulation'],       // Generative Agents -> 시뮬레이션
+  ['P02','rag'],              // Reflexion -> RAG
+  ['P06','simulation'],       // Voyager -> 시뮬레이션
+  ['P07','rag'],              // LATS -> RAG
+  ['P08','multimodal'],       // AutoGPT Survey -> 멀티모달
+  ['P11','rag'],              // ChatDev -> RAG
+  ['P13','multimodal'],       // Sotopia -> 멀티모달
+  ['P04','rag'],              // MemWalker -> RAG
+  ['P16','multimodal'],       // CRAG -> 멀티모달
+  ['P12','cognitive-arch']    // CAMEL -> 인지 아키텍처
+];
+
+// Build membership flows: each paper has primary (0.7-0.9) + secondary (0.1-0.3)
+const flows = [];
+papers.forEach(p => {
+  const secondaryTargets = interEdges.filter(e => e[0] === p.id);
+  if (secondaryTargets.length > 0) {
+    const secondaryWeight = 0.25;
+    const primaryWeight = 1.0 - secondaryWeight * secondaryTargets.length;
+    flows.push({ paper: p.id, cluster: p.cluster, weight: primaryWeight, primary: true });
+    secondaryTargets.forEach(st => {
+      flows.push({ paper: p.id, cluster: st[1], weight: secondaryWeight, primary: false });
+    });
+  } else {
+    flows.push({ paper: p.id, cluster: p.cluster, weight: 1.0, primary: true });
+  }
+});
+
+// ── Layout ──
+const margin = { top: 30, right: 200, bottom: 30, left: 180 };
+const width = 900;
+const height = 680;
+const innerWidth = width - margin.left - margin.right;
+const innerHeight = height - margin.top - margin.bottom;
+
+const svg = d3.select('#chart')
+  .append('svg')
+  .attr('width', width)
+  .attr('height', height);
+
+const g = svg.append('g')
+  .attr('transform', `translate(${margin.left},${margin.top})`);
+
+const tooltip = d3.select('#tooltip');
+
+// Legend
+const legendDiv = d3.select('#legend');
+clusters.forEach(c => {
+  const item = legendDiv.append('div').attr('class', 'legend-item');
+  item.append('div').attr('class', 'legend-swatch').style('background', c.color);
+  item.append('span').text(`${c.label} (d=${c.density}, q=${c.quality})`);
+});
+
+// Left column: papers
+const paperHeight = 22;
+const paperGap = 4;
+const totalPaperHeight = papers.length * (paperHeight + paperGap) - paperGap;
+const paperStartY = (innerHeight - totalPaperHeight) / 2;
+
+const paperPositions = {};
+papers.forEach((p, i) => {
+  const y = paperStartY + i * (paperHeight + paperGap);
+  paperPositions[p.id] = { y, height: paperHeight };
+});
+
+// Right column: clusters
+// Compute total flow weight per cluster
+const clusterWeights = {};
+clusters.forEach(c => clusterWeights[c.id] = 0);
+flows.forEach(f => clusterWeights[f.cluster] += f.weight);
+
+const clusterGap = 16;
+const totalClusterWeight = d3.sum(Object.values(clusterWeights));
+const availableClusterHeight = innerHeight - (clusters.length - 1) * clusterGap;
+const clusterScale = availableClusterHeight / totalClusterWeight;
+
+const clusterPositions = {};
+let clusterY = 0;
+clusters.forEach(c => {
+  const h = clusterWeights[c.id] * clusterScale;
+  clusterPositions[c.id] = { y: clusterY, height: h };
+  clusterY += h + clusterGap;
+});
+
+// Center clusters vertically
+const totalClusterH = clusterY - clusterGap;
+const clusterOffsetY = (innerHeight - totalClusterH) / 2;
+clusters.forEach(c => clusterPositions[c.id].y += clusterOffsetY);
+
+// Ribbon scale: weight to pixel height on cluster side
+const ribbonScale = d3.scaleLinear()
+  .domain([0, 1])
+  .range([0, paperHeight]);
+
+// Track current Y offsets for stacking ribbons on cluster side
+const clusterCurrentY = {};
+clusters.forEach(c => clusterCurrentY[c.id] = clusterPositions[c.id].y);
+
+// Sort flows: primaries first within each cluster, then by paper order
+flows.sort((a, b) => {
+  const ci = clusters.findIndex(c => c.id === a.cluster);
+  const cj = clusters.findIndex(c => c.id === b.cluster);
+  if (ci !== cj) return ci - cj;
+  if (a.primary !== b.primary) return a.primary ? -1 : 1;
+  return papers.findIndex(p => p.id === a.paper) - papers.findIndex(p => p.id === b.paper);
+});
+
+// Track paper-side Y offsets for stacking multiple ribbons from one paper
+const paperCurrentY = {};
+papers.forEach(p => paperCurrentY[p.id] = paperPositions[p.id].y);
+
+// Pre-compute ribbon positions
+const ribbonData = flows.map(f => {
+  const p = papers.find(pp => pp.id === f.paper);
+  const c = clusterMap[f.cluster];
+  const ribbonH_paper = f.weight * paperHeight;
+  const ribbonH_cluster = f.weight * clusterScale;
+
+  const sourceY = paperCurrentY[f.paper];
+  paperCurrentY[f.paper] += ribbonH_paper;
+
+  const targetY = clusterCurrentY[f.cluster];
+  clusterCurrentY[f.cluster] += ribbonH_cluster;
+
+  return {
+    ...f,
+    paperLabel: p.label,
+    clusterLabel: c.label,
+    clusterColor: c.color,
+    sourceY0: sourceY,
+    sourceY1: sourceY + ribbonH_paper,
+    targetY0: targetY,
+    targetY1: targetY + ribbonH_cluster
+  };
+});
+
+// Draw paper bars (left)
+papers.forEach(p => {
+  const pos = paperPositions[p.id];
+  const c = clusterMap[p.cluster];
+
+  g.append('rect')
+    .attr('x', -8)
+    .attr('y', pos.y)
+    .attr('width', 8)
+    .attr('height', pos.height)
+    .attr('rx', 2)
+    .attr('fill', c.color)
+    .attr('opacity', 0.85);
+
+  g.append('text')
+    .attr('x', -16)
+    .attr('y', pos.y + pos.height / 2)
+    .attr('dy', '0.35em')
+    .attr('text-anchor', 'end')
+    .attr('font-size', 11)
+    .attr('font-weight', 400)
+    .attr('fill', '#555')
+    .text(p.label);
+});
+
+// Draw cluster bars (right)
+clusters.forEach(c => {
+  const pos = clusterPositions[c.id];
+
+  g.append('rect')
+    .attr('x', innerWidth)
+    .attr('y', pos.y)
+    .attr('width', 12)
+    .attr('height', pos.height)
+    .attr('rx', 3)
+    .attr('fill', c.color)
+    .attr('opacity', 0.85);
+
+  g.append('text')
+    .attr('x', innerWidth + 20)
+    .attr('y', pos.y + pos.height / 2)
+    .attr('dy', '0.35em')
+    .attr('text-anchor', 'start')
+    .attr('font-size', 13)
+    .attr('font-weight', 500)
+    .attr('fill', c.color)
+    .text(c.label);
+
+  g.append('text')
+    .attr('x', innerWidth + 20)
+    .attr('y', pos.y + pos.height / 2 + 16)
+    .attr('dy', '0.35em')
+    .attr('text-anchor', 'start')
+    .attr('font-size', 10)
+    .attr('font-weight', 300)
+    .attr('fill', '#999')
+    .text(`d=${c.density}  q=${c.quality}`);
+});
+
+// Draw ribbons
+const ribbonGroup = g.append('g');
+
+ribbonData.forEach(r => {
+  const x0 = 0;
+  const x1 = innerWidth;
+  const xMid = innerWidth * 0.45;
+
+  const path = d3.path();
+  path.moveTo(x0, r.sourceY0);
+  path.bezierCurveTo(xMid, r.sourceY0, xMid, r.targetY0, x1, r.targetY0);
+  path.lineTo(x1, r.targetY1);
+  path.bezierCurveTo(xMid, r.targetY1, xMid, r.sourceY1, x0, r.sourceY1);
+  path.closePath();
+
+  ribbonGroup.append('path')
+    .attr('d', path.toString())
+    .attr('fill', r.clusterColor)
+    .attr('fill-opacity', r.primary ? 0.35 : 0.18)
+    .attr('stroke', r.clusterColor)
+    .attr('stroke-width', 0.5)
+    .attr('stroke-opacity', 0.3)
+    .on('mouseover', function(event) {
+      d3.select(this).attr('fill-opacity', r.primary ? 0.6 : 0.4).attr('stroke-opacity', 0.8);
+      const memberType = r.primary ? '주 소속 (primary)' : '부 소속 (secondary)';
+      const pct = Math.round(r.weight * 100);
+      tooltip.style('opacity', 1)
+        .html(`
+          <strong>${r.paperLabel}</strong> &rarr; <strong>${r.clusterLabel}</strong><br>
+          소속 강도: ${pct}% (${memberType})<br>
+          가중치: ${r.weight.toFixed(2)}
+        `)
+        .style('left', (event.offsetX + 16) + 'px')
+        .style('top', (event.offsetY - 10) + 'px');
+    })
+    .on('mousemove', function(event) {
+      tooltip.style('left', (event.offsetX + 16) + 'px')
+        .style('top', (event.offsetY - 10) + 'px');
+    })
+    .on('mouseout', function() {
+      d3.select(this).attr('fill-opacity', r.primary ? 0.35 : 0.18).attr('stroke-opacity', 0.3);
+      tooltip.style('opacity', 0);
+    });
+});
+
+// Column headers
+g.append('text')
+  .attr('x', -16)
+  .attr('y', paperStartY - 20)
+  .attr('text-anchor', 'end')
+  .attr('font-size', 12)
+  .attr('font-weight', 500)
+  .attr('fill', '#999')
+  .text('Papers');
+
+g.append('text')
+  .attr('x', innerWidth + 20)
+  .attr('y', clusterPositions[clusters[0].id].y - 20)
+  .attr('text-anchor', 'start')
+  .attr('font-size', 12)
+  .attr('font-weight', 500)
+  .attr('fill', '#999')
+  .text('Clusters');
+</script>
+</body>
+</html>

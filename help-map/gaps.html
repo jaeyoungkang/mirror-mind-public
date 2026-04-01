@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>구조적 공백 — Light House</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap');
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Noto Sans KR', sans-serif; background: #fafaf8; color: #1a1a1a; min-height: 100vh; line-height: 1.7; }
+
+  .page { max-width: 1100px; margin: 0 auto; padding: 8vh 24px 12vh; }
+
+  .back-link {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 400;
+    color: #888;
+    text-decoration: none;
+    margin-bottom: 32px;
+    transition: color 0.2s;
+  }
+  .back-link:hover { color: #1a1a1a; }
+
+  h1 { font-size: 28px; font-weight: 500; letter-spacing: -0.03em; margin-bottom: 8px; }
+  .question { font-size: 16px; font-weight: 500; color: #cc8844; margin-bottom: 40px; }
+
+  h2 { font-size: 18px; font-weight: 500; margin-top: 40px; margin-bottom: 12px; color: #1a1a1a; }
+
+  .card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 12px;
+  }
+  .card p {
+    font-size: 14px;
+    font-weight: 300;
+    color: #555;
+    line-height: 1.8;
+    margin-bottom: 8px;
+  }
+  .card p:last-child { margin-bottom: 0; }
+  .card ul {
+    font-size: 14px;
+    font-weight: 300;
+    color: #555;
+    line-height: 1.8;
+    margin: 8px 0;
+    padding-left: 20px;
+  }
+  .card li { margin-bottom: 4px; }
+
+  .ref {
+    font-size: 12px;
+    color: #aaa;
+    margin-top: 8px;
+    line-height: 1.6;
+  }
+
+  .viz-section { margin-bottom: 48px; }
+  .viz-label { font-size: 16px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 6px; }
+  .viz-why {
+    font-size: 14px;
+    font-weight: 300;
+    color: #555;
+    line-height: 1.8;
+    margin-bottom: 14px;
+  }
+
+  iframe {
+    width: 100%;
+    height: 680px;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    background: #fff;
+  }
+
+  .product-card {
+    background: #fff;
+    border: 1px solid #eee;
+    border-radius: 10px;
+    padding: 20px;
+  }
+  .product-card p {
+    font-size: 14px;
+    font-weight: 300;
+    color: #555;
+    line-height: 1.8;
+  }
+
+  .bottom-back {
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 400;
+    color: #888;
+    text-decoration: none;
+    margin-top: 32px;
+    transition: color 0.2s;
+  }
+  .bottom-back:hover { color: #1a1a1a; }
+</style>
+</head>
+<body>
+  <div class="page">
+    <a class="back-link" href="index.html">&larr; 목록으로</a>
+
+    <h1>구조적 공백</h1>
+    <div class="question">"네트워크 어디에 구멍이 있나?"</div>
+
+    <h2>왜 이 분석이 필요한가</h2>
+    <div class="card">
+      <p>연구의 가치 있는 방향은 종종 "아직 아무도 연결하지 않은 곳"에 있다. 두 갈래가 비슷한 문제를 다루는데 서로를 모른다면 &mdash; 그 사이가 구조적 공백이고, 메울 수 있는 사람이 정보 중개자가 된다.</p>
+    </div>
+
+    <h2>어떻게 계산하는가</h2>
+    <div class="card">
+      <p>구조적 공백(structural hole)은 Ronald Burt(1992)가 제안한 개념이다. Light House에서 gap은 "query-local gap candidate" &mdash; 현재 검색 결과 안에서 연결될 이유가 있어 보이는데(공통 과제, 데이터셋, 인용 맥락) 실제 연결은 약한 곳이다.</p>
+      <p>gap 점수는 여러 신호의 합산이다:</p>
+      <ul>
+        <li><strong>structuralScarcity</strong> &mdash; 클러스터 간 직접 연결의 희소성 (0~1)</li>
+        <li><strong>bridgeValue</strong> &mdash; 다리 논문/개념이 있는지</li>
+        <li><strong>recencyOpportunity</strong> &mdash; 최근 연결이 증가하고 있는지</li>
+        <li><strong>claimIsolation</strong> &mdash; 관련 주장이 고립되어 있는지</li>
+        <li><strong>qualificationDeficit</strong> &mdash; qualify/refute 대비 support의 불균형</li>
+        <li><strong>coverage</strong> &mdash; 검색 범위가 이 gap을 판단하기에 충분한지</li>
+        <li><strong>uncertainty</strong> &mdash; AI 추출의 불확실성</li>
+      </ul>
+      <p>이 모든 신호에 coverage와 uncertainty를 별도 축으로 두어 "이게 진짜 gap인가, 아니면 검색이 부족한 건가"를 구분한다. 진짜 기회인지는 연구자가 판단한다.</p>
+      <div class="ref">Burt, R. (1992). Structural Holes: The Social Structure of Competition.</div>
+    </div>
+
+    <h2>어떻게 보이는가</h2>
+
+    <div class="viz-section">
+      <div class="viz-label">Expected vs Observed Scatter</div>
+      <div class="viz-why">
+        x축은 예상 연결 강도, y축은 실제 연결 강도. 대각선 아래에 놓인 점이 gap 후보다.
+        대각선에서 멀수록 gap이 심각하다. 정량 비교에 가장 강력한 기법.
+      </div>
+      <iframe src="../viz-network-science/gap-1-scatter.html"></iframe>
+    </div>
+
+    <div class="viz-section">
+      <div class="viz-label">Burt 구조적 공백</div>
+      <div class="viz-why">
+        클러스터를 원형으로 배치하고, 실선은 실제 연결, 점선은 공백을 나타낸다.
+        Burt 1992의 원조 개념을 직접 시각화한 기법이다.
+      </div>
+      <iframe src="../viz-network-science/gap-2-structural-hole.html"></iframe>
+    </div>
+
+    <div class="viz-section">
+      <div class="viz-label">Gap Radar</div>
+      <div class="viz-why">
+        각 gap 후보를 6축(structuralScarcity, bridgeValue, recencyOpportunity, claimIsolation, qualificationDeficit, coverage)으로 프로파일링한다.
+        "이 gap의 성격은 무엇인가"를 다차원으로 보여준다.
+      </div>
+      <iframe src="../viz-network-science/gap-3-radar.html"></iframe>
+    </div>
+
+    <h2>Light House에서의 용도</h2>
+    <div class="product-card">
+      <p>Light House의 "약한 연결 찾기" 렌즈(v1)가 이 분석에 대응한다. gap-matrix 기본 표현에 structuralScarcity, bridgeValue, recencyOpportunity 등이 시각 채널로 매핑되어 있다.</p>
+    </div>
+
+    <a class="bottom-back" href="index.html">&larr; 목록으로</a>
+  </div>
+</body>
+</html>
