@@ -1,0 +1,1761 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>HTML5 시맨틱 요소 비교학습</title>
+  <style>
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+  <style>
+    body {
+      max-width: 760px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      line-height: 1.7;
+      color: #1a1a1a;
+      font-size: 16px;
+    }
+    h1 { font-size: 1.8rem; border-bottom: 2px solid #333; padding-bottom: 0.3em; }
+    h2 { font-size: 1.4rem; margin-top: 2.5rem; border-bottom: 1px solid #ddd; padding-bottom: 0.2em; }
+    h3 { font-size: 1.15rem; margin-top: 2rem; }
+    h4 { font-size: 1rem; margin-top: 1.5rem; }
+    table { border-collapse: collapse; width: 100%; margin: 1rem 0; font-size: 0.9rem; }
+    th, td { border: 1px solid #ccc; padding: 0.5em 0.75em; text-align: left; }
+    th { background: #f5f5f5; font-weight: 600; }
+    tr:nth-child(even) { background: #fafafa; }
+    blockquote { border-left: 3px solid #666; margin: 1rem 0; padding: 0.5rem 1rem; background: #f9f9f9; }
+    pre { background: #f4f4f4; padding: 1rem; border-radius: 4px; overflow-x: auto; font-size: 0.85rem; }
+    code { font-family: "SF Mono", Menlo, monospace; font-size: 0.88em; }
+    p code { background: #f0f0f0; padding: 0.15em 0.35em; border-radius: 3px; }
+    details { margin: 0.75rem 0; border: 1px solid #ddd; border-radius: 4px; }
+    details summary { cursor: pointer; padding: 0.6rem 1rem; background: #f7f7f7; font-weight: 500; }
+    details summary:hover { background: #eee; }
+    details[open] summary { border-bottom: 1px solid #ddd; }
+    details > :not(summary) { padding: 0 1rem; }
+    details table { margin: 0.5rem 0; }
+    hr { border: none; border-top: 1px solid #ddd; margin: 2rem 0; }
+    strong { font-weight: 600; }
+  </style>
+</head>
+<body>
+<h1 id="html5-시맨틱-요소-비교학습">HTML5 시맨틱 요소 비교학습</h1>
+<blockquote>
+<p>2026-03-31 세션112. HTML5가 선택한 요소들을 “혼동하기 쉬운 쌍” 단위로
+비교한다. 핵심 질문: “이것이 무엇인가”를 HTML이 스스로 말할 수 있는가.
+체크 기준: CSS 끄면 구조가 읽히는가.</p>
+<p><strong>학습 방법: 각 그룹마다 퀴즈를 먼저 풀고, 해설을 읽는다. 먼저
+틀려보고, 왜 틀렸는지 읽는 게 체화가 빠르다.</strong></p>
+</blockquote>
+<hr />
+<h2 id="배경-html의-변천사와-html5의-철학">배경: HTML의 변천사와 HTML5의
+철학</h2>
+<h3 id="왜-이-교재가-필요한가">왜 이 교재가 필요한가</h3>
+<p>이 교재에서 다루는 모든 비교 — <code>div</code> vs
+<code>section</code>, <code>strong</code> vs <code>b</code>,
+<code>a</code> vs <code>button</code> — 는 결국 하나의 질문으로
+수렴한다: <strong>“이 마크업이 무엇인가를 말하는가, 아니면 어떻게
+보이는가만 말하는가?”</strong> 이 질문이 HTML 30년 역사의 핵심
+긴장이었고, HTML5는 그 긴장에 대한 답이다.</p>
+<h3 id="단계-문서로-출발-19891995">1단계: 문서로 출발 (1989~1995)</h3>
+<p>팀 버너스리가 CERN에서 만든 최초의 HTML은 <strong>과학 문서를
+의미적으로 기술하는 언어</strong>였다. 제목(<code>h1</code>),
+문단(<code>p</code>), 링크(<code>a</code>), 목록(<code>ul/ol</code>) —
+전부 “이것이 무엇인가”를 말하는 요소들이다. “어떻게 보이는가”는
+브라우저가 알아서 했다.</p>
+<pre><code>[의미] h1 = &quot;이것은 1레벨 제목이다&quot;
+[표현] 브라우저가 크고 굵게 그린다 (하지만 그건 브라우저의 판단)</code></pre>
+<p>HTML 2.0 (1995, RFC 1866)이 이 구조를 공식화했다. 이때까지 HTML은
+순수한 <strong>의미 기술 언어</strong>였다.</p>
+<h3 id="단계-표현과-의미가-뒤섞임-19962003">2단계: 표현과 의미가 뒤섞임
+(1996~2003)</h3>
+<p>웹이 대중화되면서 사람들은 “문서를 기술”하는 게 아니라
+<strong>“화면을 꾸미고”</strong> 싶어했다. 브라우저 전쟁(넷스케이프 vs
+IE)이 터지면서:</p>
+<ul>
+<li><code>&lt;font color="red" size="5"&gt;</code> — 의미가 아니라
+생김새를 직접 지정</li>
+<li><code>&lt;table&gt;</code> 레이아웃 — 표가 아닌데 표로 화면을 짜는
+해킹</li>
+<li><code>&lt;b&gt;</code>, <code>&lt;i&gt;</code> — 원래 의미 없이
+“굵게”, “기울임”만 뜻함</li>
+<li><code>&lt;div&gt;</code> 남용 — 의미 없는 상자로 모든 걸 감쌈</li>
+<li>브라우저별 독자 태그 — <code>&lt;marquee&gt;</code>,
+<code>&lt;blink&gt;</code></li>
+</ul>
+<p><strong>결과:</strong> HTML이 “이것이 무엇인가”를 잃고 “이것이 어떻게
+보이는가”만 남았다. CSS가 꺼지면 아무것도 안 읽히는 페이지들이
+넘쳐났다.</p>
+<p>이 시기에 W3C는 XHTML 방향으로 갔다. “HTML을 XML처럼 엄격하게
+만들자.” 이론적으로는 깔끔했지만, 현실의 웹은 이미 깨진 마크업으로 가득
+차 있었고, XHTML 2.0은 기존 웹과의 호환성을 포기하려 했다.</p>
+<h3 id="단계-현실에서-의미를-되찾다-html5-2004현재">3단계: 현실에서
+의미를 되찾다 — HTML5 (2004~현재)</h3>
+<p>2004년, 브라우저 제작사들(Apple, Mozilla, Opera)이 WHATWG를 만들고
+선언했다: <strong>“현실의 웹에서 출발하자.”</strong></p>
+<p>WHATWG의 접근은 두 가지였다:</p>
+<p><strong>첫째, 깨진 마크업도 살려서 읽는다.</strong> XML처럼 “에러면
+중단”이 아니라 “가능한 한 복구해서 보여준다.” 이건 느슨함이 아니라, 웹이
+전문가만의 매체가 아닌 <strong>누구나 올리고 누구나 읽는 공공
+공간</strong>이기 때문에 생긴 선택이었다. HTML 표준은 파싱 에러 상황을
+수백 가지 세밀하게 정의한다 — “에러를 무시”가 아니라 “에러를 일관되게
+복구”하는 것이다.</p>
+<p><strong>둘째, 현실의 저작 관행을 관찰해서 의미를 다시
+제도화했다.</strong> 사람들이 이미
+<code>&lt;div class="header"&gt;</code>,
+<code>&lt;div class="nav"&gt;</code>,
+<code>&lt;div class="article"&gt;</code>를 쓰고 있었다. HTML5는 이
+패턴을 흡수해서 <strong>진짜 요소로 격상</strong>시켰다:</p>
+<table>
+<thead>
+<tr>
+<th>사람들이 이미 쓰던 패턴</th>
+<th>HTML5가 만든 요소</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;div class="header"&gt;</code></td>
+<td><code>&lt;header&gt;</code></td>
+</tr>
+<tr>
+<td><code>&lt;div class="nav"&gt;</code></td>
+<td><code>&lt;nav&gt;</code></td>
+</tr>
+<tr>
+<td><code>&lt;div class="article"&gt;</code></td>
+<td><code>&lt;article&gt;</code></td>
+</tr>
+<tr>
+<td><code>&lt;div class="section"&gt;</code></td>
+<td><code>&lt;section&gt;</code></td>
+</tr>
+<tr>
+<td><code>&lt;div class="footer"&gt;</code></td>
+<td><code>&lt;footer&gt;</code></td>
+</tr>
+<tr>
+<td><code>&lt;div class="main"&gt;</code></td>
+<td><code>&lt;main&gt;</code></td>
+</tr>
+<tr>
+<td><code>&lt;div class="sidebar"&gt;</code></td>
+<td><code>&lt;aside&gt;</code></td>
+</tr>
+</tbody>
+</table>
+<p>이게 이 교재 그룹 1의 모든 비교가 존재하는 이유다.
+<code>div.header</code>와 <code>&lt;header&gt;</code>는 화면에서 똑같이
+보인다. 하지만 <code>&lt;header&gt;</code>는 <strong>기계가 “이것은 머리
+영역이다”를 안다.</strong> 스크린리더가 건너뛸 수 있고, 검색 엔진이
+구조를 파악하고, CSS가 꺼져도 문서로 읽힌다.</p>
+<h3 id="html5가-동시에-고친-것들">HTML5가 동시에 고친 것들</h3>
+<p>HTML5는 문서 뼈대만 고친 게 아니다. 교재의 나머지 그룹들도 같은
+흐름의 산물이다:</p>
+<p><strong>그룹 2 (텍스트 의미) — <code>&lt;b&gt;</code>와
+<code>&lt;i&gt;</code>를 죽이지 않고 재정의했다.</strong> HTML 2단계에서
+<code>&lt;b&gt;</code>는 “굵게”, <code>&lt;i&gt;</code>는 “기울임”이었다
+— 순수 표현. HTML5는 이걸 버리지 않고 의미를 재부여했다:
+<code>&lt;b&gt;</code> = “시각적으로 구분되는 텍스트”,
+<code>&lt;i&gt;</code> = “다른 목소리/톤”. 동시에
+<code>&lt;strong&gt;</code> = “중요함”, <code>&lt;em&gt;</code> =
+“강세”를 명확히 분리했다. 표현이 같아도 의미가 다른 것을 구별할 수 있게
+된 것이다.</p>
+<p><strong>그룹 3 (인터랙션) — 브라우저 기본 동작을 복권했다.</strong>
+<code>&lt;details/summary&gt;</code>, <code>&lt;dialog&gt;</code> 같은
+요소는 JS 없이 접기/펼치기, 모달이 작동한다. 이건 HTML5의
+“<strong>점진적 향상(Progressive Enhancement)</strong>” 철학이다:
+HTML만으로 핵심 기능이 돌아가고, CSS가 꾸미고, JS가 확장한다. JS가
+실패해도 기본 동작은 남는다.</p>
+<p><strong>그룹 4 (미디어) — 플러그인 의존을 끊었다.</strong>
+<code>&lt;video&gt;</code>, <code>&lt;audio&gt;</code>가 Flash를
+대체했다. <code>&lt;figure/figcaption&gt;</code>이 이미지와 설명의
+관계를 선언하게 했다. 전부 “외부 도구 없이 브라우저가 직접 이해하고
+처리한다”는 원칙.</p>
+<p><strong>그룹 5 (폼) — 브라우저에 내장된 검증.</strong>
+<code>&lt;input type="email/url/tel/date"&gt;</code>는 JS 없이 키보드가
+바뀌고 형식이 검증된다. <code>&lt;label&gt;</code>과
+<code>&lt;fieldset/legend&gt;</code>는 폼의 의미를 기계가 읽을 수 있게
+한다. 이것도 점진적 향상 — JS 검증이 추가되더라도 HTML 수준의 검증이
+기본층으로 남는다.</p>
+<p><strong>그룹 6 (시간·데이터) — 사람과 기계의 이중 읽기.</strong>
+<code>&lt;time datetime="2017-06-12"&gt;어제&lt;/time&gt;</code> —
+사람은 “어제”를 읽고, 기계는 “2017-06-12”를 읽는다.
+<code>&lt;data value="187"&gt;cited 187&lt;/data&gt;</code> — 같은 원리.
+HTML5는 사람과 기계가 같은 문서에서 각자에게 맞는 정보를 읽을 수 있는
+구조를 만들었다.</p>
+<h3 id="html5의-핵심-철학-한-줄-요약">HTML5의 핵심 철학 — 한 줄
+요약</h3>
+<blockquote>
+<p><strong>의미를 포기하지 않되, 현실을 버리지 않는다.</strong></p>
+</blockquote>
+<ul>
+<li>순수한 이상(XHTML 2.0)은 현실을 무시했다 → 실패</li>
+<li>현실만 따라가면(div + CSS 남용) 의미를 잃는다 → 접근성, SEO, 복원력
+붕괴</li>
+<li>HTML5는 <strong>현실의 패턴을 관찰해서 의미를
+재제도화</strong>했다</li>
+</ul>
+<p>이 교재의 모든 “잘못된 예 → 올바른 예” 비교는 결국 이 한 줄의 구체적
+적용이다.</p>
+<h3 id="living-standard-끝나지-않는-진화">Living Standard — 끝나지 않는
+진화</h3>
+<p>HTML5는 고정된 판본이 아니다. WHATWG의 <strong>Living
+Standard</strong> 체계에서 HTML은 브라우저 구현과 함께 계속 갱신된다.
+<code>&lt;dialog&gt;</code>, <code>&lt;details&gt;</code>,
+<code>&lt;search&gt;</code>(최근 추가) 같은 요소들이 계속 늘어난다.
+“HTML 6”는 없다 — HTML은 이제 살아 있는 문서다.</p>
+<p>이게 중요한 이유: <strong>지금 div로 쓰고 있는 패턴이 내일 시맨틱
+요소가 될 수 있다.</strong> <code>&lt;div class="search"&gt;</code>를
+쓰고 있다면, 그건 이미 <code>&lt;search&gt;</code> 요소가 되어 있을 수
+있다.</p>
+<h3 id="교재-구조와-html-역사의-대응">교재 구조와 HTML 역사의 대응</h3>
+<table>
+<colgroup>
+<col style="width: 29%" />
+<col style="width: 38%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th>교재 그룹</th>
+<th>HTML5가 한 일</th>
+<th>역사적 맥락</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1. 문서 뼈대</td>
+<td><code>div</code> 패턴을 시맨틱 요소로 격상</td>
+<td>2단계에서 잃어버린 문서 구조를 되찾음</td>
+</tr>
+<tr>
+<td>2. 텍스트 의미</td>
+<td><code>b</code>/<code>i</code>를 죽이지 않고 의미 재부여</td>
+<td>표현과 의미의 분리를 완성</td>
+</tr>
+<tr>
+<td>3. 인터랙션</td>
+<td>브라우저 기본 동작 복권</td>
+<td>점진적 향상 — JS 없이도 핵심이 작동</td>
+</tr>
+<tr>
+<td>4. 미디어</td>
+<td>플러그인 없이 브라우저가 직접 처리</td>
+<td>Flash/Silverlight 의존 종식</td>
+</tr>
+<tr>
+<td>5. 폼</td>
+<td>브라우저 내장 검증 + 시맨틱 그룹</td>
+<td>점진적 향상의 폼 적용</td>
+</tr>
+<tr>
+<td>6. 시간·데이터</td>
+<td>사람/기계 이중 읽기 구조</td>
+<td>웹을 기계 판독 가능한 매체로</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="그룹-1-문서-뼈대-어디서-끊는가">그룹 1: 문서 뼈대 — 어디서
+끊는가</h2>
+<h3 id="퀴즈-1-먼저-풀어보라">퀴즈 1: 먼저 풀어보라</h3>
+<p><strong>Q1-1. 이 HTML의 문제를 모두 찾아라 (힌트: 7개)</strong></p>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;header&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;logo&quot;</span><span class="dt">&gt;</span>Light House<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;nav&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;/&quot;</span><span class="dt">&gt;</span>홈<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;/search&quot;</span><span class="dt">&gt;</span>검색<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;main&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;post&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;title&quot;</span><span class="dt">&gt;</span>Attention Is All You Need 리뷰<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;body&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;section-title&quot;</span><span class="dt">&gt;</span>배경<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;text&quot;</span><span class="dt">&gt;</span>기존 seq2seq 모델은 장거리 의존성에 취약했다.<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code></pre></div>
+<p><strong>Q1-2. section인가, article인가, div인가?</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>상황</th>
+<th>내 답</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>뉴스 사이트의 기사 하나</td>
+<td></td>
+</tr>
+<tr>
+<td>b</td>
+<td>블로그 글의 “방법론” 챕터</td>
+<td></td>
+</tr>
+<tr>
+<td>c</td>
+<td>2컬럼 레이아웃을 위한 감싸기</td>
+<td></td>
+</tr>
+<tr>
+<td>d</td>
+<td>블로그 댓글 하나</td>
+<td></td>
+</tr>
+<tr>
+<td>e</td>
+<td>대시보드의 “최근 활동” 위젯</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Q1-3. 링크 목록이 있다. 다음 중 <code>nav</code>로 감싸야
+하는 것은?</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>상황</th>
+<th>nav인가?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>사이트 상단 GNB (홈, 검색, 소개)</td>
+<td></td>
+</tr>
+<tr>
+<td>b</td>
+<td>논문 본문 안의 참고문헌 링크 목록</td>
+<td></td>
+</tr>
+<tr>
+<td>c</td>
+<td>페이지 하단 사이트맵 링크</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h3 id="해설-1-정답과-근거">해설 1: 정답과 근거</h3>
+<h4 id="q1-1-정답">Q1-1 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<table>
+<colgroup>
+<col style="width: 11%" />
+<col style="width: 23%" />
+<col style="width: 42%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>현재</th>
+<th>올바른 요소</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><code>div.header</code></td>
+<td><code>header</code></td>
+<td>사이트 머리 영역 → 랜드마크</td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>div.nav</code></td>
+<td><code>nav &gt; ul &gt; li &gt; a</code></td>
+<td>사이트 탐색 링크 → nav. 링크 나열은 목록</td>
+</tr>
+<tr>
+<td>3</td>
+<td><code>div.main</code></td>
+<td><code>main</code></td>
+<td>페이지 고유 콘텐츠 → “본문으로 건너뛰기” 랜드마크</td>
+</tr>
+<tr>
+<td>4</td>
+<td><code>div.post</code></td>
+<td><code>article</code></td>
+<td>떼어내도 혼자 의미 있는 글</td>
+</tr>
+<tr>
+<td>5</td>
+<td><code>div.title</code></td>
+<td><code>h1</code></td>
+<td>글의 제목. CSS 끄면 크기 위계가 안 보임</td>
+</tr>
+<tr>
+<td>6</td>
+<td><code>div.body</code></td>
+<td><code>section</code></td>
+<td>글의 챕터 → 더 큰 글의 파트</td>
+</tr>
+<tr>
+<td>7</td>
+<td><code>div.section-title</code></td>
+<td><code>h2</code></td>
+<td>챕터 제목</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h4 id="q1-2-정답">Q1-2 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 30%" />
+<col style="width: 25%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>상황</th>
+<th>답</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>뉴스 기사</td>
+<td><code>article</code></td>
+<td>RSS로 보내도 혼자 의미 있다</td>
+</tr>
+<tr>
+<td>b</td>
+<td>블로그 “방법론” 챕터</td>
+<td><code>section</code></td>
+<td>더 큰 글의 일부. 혼자 떼어내면 맥락 부족</td>
+</tr>
+<tr>
+<td>c</td>
+<td>2컬럼 레이아웃 감싸기</td>
+<td><code>div</code></td>
+<td>순수 레이아웃. 의미 없음</td>
+</tr>
+<tr>
+<td>d</td>
+<td>블로그 댓글 하나</td>
+<td><code>article</code></td>
+<td>댓글도 독립 콘텐츠. article 안에 article 중첩의 전형</td>
+</tr>
+<tr>
+<td>e</td>
+<td>대시보드 위젯</td>
+<td><code>section</code></td>
+<td>대시보드의 한 영역. 독립 콘텐츠라기보다 페이지 구성 파트</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h4 id="q1-3-정답">Q1-3 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>상황</th>
+<th>nav인가?</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>사이트 GNB</td>
+<td><strong>Yes</strong></td>
+<td>사이트 탐색 목적</td>
+</tr>
+<tr>
+<td>b</td>
+<td>참고문헌 링크</td>
+<td><strong>No</strong></td>
+<td>탐색이 아니라 참조</td>
+</tr>
+<tr>
+<td>c</td>
+<td>사이트맵</td>
+<td><strong>Yes</strong></td>
+<td>사이트 탐색 목적 (footer에 있어도 nav 가능)</td>
+</tr>
+</tbody>
+</table>
+</details>
+<hr />
+<h3 id="해설-1-상세-설명">해설 1: 상세 설명</h3>
+<h4 id="section-vs-article"><code>section</code> vs
+<code>article</code></h4>
+<p>둘 다 “콘텐츠 덩어리”. 차이는 <strong>독립성</strong>.</p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- 잘못: div로 구분 --&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;blog-post&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;title&quot;</span><span class="dt">&gt;</span>논문 리뷰: Attention Is All You Need<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;chapter&quot;</span><span class="dt">&gt;</span>배경<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;text&quot;</span><span class="dt">&gt;</span>기존 seq2seq 모델은...<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- 올바름 --&gt;</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">article</span><span class="dt">&gt;</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>논문 리뷰: Attention Is All You Need<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">section</span><span class="dt">&gt;</span></span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>배경<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>기존 seq2seq 모델은...<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">section</span><span class="dt">&gt;</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">article</span><span class="dt">&gt;</span></span></code></pre></div>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 37%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr>
+<th>질문</th>
+<th>article</th>
+<th>section</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>떼어내서 RSS/카드/다른 페이지에 놓아도 혼자 의미 있는가?</td>
+<td><strong>Yes</strong> — 블로그 글, 뉴스, 논문, 댓글</td>
+<td>No</td>
+</tr>
+<tr>
+<td>더 큰 글의 <strong>챕터/파트</strong>인가?</td>
+<td>No</td>
+<td><strong>Yes</strong> — 배경, 방법론, 결론</td>
+</tr>
+<tr>
+<td>중첩 가능?</td>
+<td>article 안에 article (댓글 등)</td>
+<td>section 안에 section (하위 챕터)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>판별법:</strong> “이걸 트위터에 공유하면 혼자 말이 되는가?” →
+Yes면 article, No면 section.</p>
+<h4 id="header-vs-h1h6"><code>header</code> vs
+<code>h1</code>~<code>h6</code></h4>
+<p><code>h1</code>~<code>h6</code>은 <strong>제목 텍스트</strong>,
+<code>header</code>는 <strong>제목을 포함하는 머리 영역</strong>.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- h1 = 제목 그 자체 --&gt;</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Light House<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- header = 제목 + 부가 정보를 묶는 영역 --&gt;</span></span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">header</span><span class="dt">&gt;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>Light House<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>AI 연구 동료<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">nav</span><span class="dt">&gt;</span>...<span class="dt">&lt;/</span><span class="kw">nav</span><span class="dt">&gt;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">header</span><span class="dt">&gt;</span></span></code></pre></div>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 45%" />
+<col style="width: 41%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th><code>h1</code>~<code>h6</code></th>
+<th><code>header</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>정체</td>
+<td>제목 텍스트</td>
+<td>영역(컨테이너)</td>
+</tr>
+<tr>
+<td>혼자 쓸 수 있나</td>
+<td>Yes</td>
+<td>안에 뭐가 있어야 의미 있음</td>
+</tr>
+<tr>
+<td>여러 개 가능?</td>
+<td>h1은 페이지당 1개 권장</td>
+<td>article마다, section마다 각각 가능</td>
+</tr>
+</tbody>
+</table>
+<p><strong>흔한 실수:</strong> header를 페이지 맨 위에만 쓰는 것.
+실제로는 article이나 section마다 자기 header를 가질 수 있다.</p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">article</span><span class="dt">&gt;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">header</span><span class="dt">&gt;</span></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">h2</span><span class="dt">&gt;</span>Attention Is All You Need<span class="dt">&lt;/</span><span class="kw">h2</span><span class="dt">&gt;</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">time</span><span class="ot"> datetime</span><span class="op">=</span><span class="st">&quot;2017-06-12&quot;</span><span class="dt">&gt;</span>2017<span class="dt">&lt;/</span><span class="kw">time</span><span class="dt">&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Vaswani et al.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">header</span><span class="dt">&gt;</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>본문...<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">article</span><span class="dt">&gt;</span></span></code></pre></div>
+<h4 id="main-vs-body"><code>main</code> vs <code>body</code></h4>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">header</span><span class="dt">&gt;</span>사이트 로고 + 네비게이션<span class="dt">&lt;/</span><span class="kw">header</span><span class="dt">&gt;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">aside</span><span class="dt">&gt;</span>사이드바<span class="dt">&lt;/</span><span class="kw">aside</span><span class="dt">&gt;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">main</span><span class="dt">&gt;</span></span>
+<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a>    <span class="co">&lt;!-- 이 페이지의 고유한 핵심 콘텐츠 --&gt;</span></span>
+<span id="cb6-6"><a href="#cb6-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">article</span><span class="dt">&gt;</span>...<span class="dt">&lt;/</span><span class="kw">article</span><span class="dt">&gt;</span></span>
+<span id="cb6-7"><a href="#cb6-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">main</span><span class="dt">&gt;</span></span>
+<span id="cb6-8"><a href="#cb6-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">footer</span><span class="dt">&gt;</span>저작권, 링크<span class="dt">&lt;/</span><span class="kw">footer</span><span class="dt">&gt;</span></span>
+<span id="cb6-9"><a href="#cb6-9" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">body</span><span class="dt">&gt;</span></span></code></pre></div>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 42%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th><code>body</code></th>
+<th><code>main</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>범위</td>
+<td>페이지 전체 (nav, footer 포함)</td>
+<td><strong>이 페이지만의 고유 콘텐츠</strong></td>
+</tr>
+<tr>
+<td>반복되는가</td>
+<td>매 페이지마다 있음</td>
+<td>안의 내용이 페이지마다 다름</td>
+</tr>
+<tr>
+<td>스크린리더</td>
+<td>—</td>
+<td>“본문으로 건너뛰기” 랜드마크</td>
+</tr>
+</tbody>
+</table>
+<p><strong>핵심:</strong> main = “모든 페이지에서 반복되는 것(nav,
+sidebar, footer)을 제외한 나머지”.</p>
+<h4 id="div-의미가-없을-때만"><code>div</code> — 의미가 없을 때만</h4>
+<table>
+<thead>
+<tr>
+<th>상황</th>
+<th>쓸 것</th>
+<th>div를 쓰면?</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>블로그 글 하나</td>
+<td><code>article</code></td>
+<td>기계가 “글”인 줄 모름</td>
+</tr>
+<tr>
+<td>글의 챕터</td>
+<td><code>section</code></td>
+<td>구조가 안 보임</td>
+</tr>
+<tr>
+<td>페이지 상단 영역</td>
+<td><code>header</code></td>
+<td>랜드마크 소실</td>
+</tr>
+<tr>
+<td>사이트 탐색 링크</td>
+<td><code>nav</code></td>
+<td>스크린리더가 건너뛰기 불가</td>
+</tr>
+<tr>
+<td>핵심 콘텐츠 영역</td>
+<td><code>main</code></td>
+<td>“본문으로 가기” 불가</td>
+</tr>
+<tr>
+<td><strong>순수 CSS 레이아웃 목적</strong></td>
+<td><strong><code>div</code></strong></td>
+<td>← 이때만 맞다</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="그룹-2-텍스트-의미-보이는-건-같은데-뜻이-다르다">그룹 2: 텍스트
+의미 — 보이는 건 같은데 뜻이 다르다</h2>
+<h3 id="퀴즈-2-먼저-풀어보라">퀴즈 2: 먼저 풀어보라</h3>
+<p><strong>Q2-1. strong vs b, em vs i — 어떤 요소를 쓸까?</strong></p>
+<table>
+<thead>
+<tr>
+<th>#</th>
+<th>문장</th>
+<th>내 답</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>“이 약물은 <strong>임산부에게 투여 금지</strong>이다.”</td>
+<td></td>
+</tr>
+<tr>
+<td>b</td>
+<td>레시피에서 “<strong>밀가루</strong> 200g, <strong>설탕</strong> 50g”
+재료명을 굵게</td>
+<td></td>
+</tr>
+<tr>
+<td>c</td>
+<td>“<em>그건 네가 한 게 아니잖아</em>” — 강세 위치가 의미를 바꿈</td>
+<td></td>
+</tr>
+<tr>
+<td>d</td>
+<td>논문에서 라틴어 학명 <em>Homo sapiens</em></td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Q2-2. del인가, s인가?</strong></p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 40%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>상황</th>
+<th>내 답</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>쇼핑몰 가격 변경: <del>50,000원</del> → 35,000원</td>
+<td></td>
+</tr>
+<tr>
+<td>b</td>
+<td>할인 이벤트 종료: <del>정가 50,000원</del> (이 가격은 더 이상
+유효하지 않음)</td>
+<td></td>
+</tr>
+<tr>
+<td>c</td>
+<td>위키피디아 편집 이력에서 삭제된 문장</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Q2-3. 검색 결과에서 사용자가 입력한 키워드를 노랗게 표시하고
+싶다. <code>&lt;span style="background:yellow"&gt;</code> vs
+<code>&lt;mark&gt;</code> — 어떤 걸 써야 하는가?</strong></p>
+<hr />
+<h3 id="해설-2-정답과-근거">해설 2: 정답과 근거</h3>
+<h4 id="q2-1-정답">Q2-1 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 30%" />
+<col style="width: 25%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>문장</th>
+<th>답</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>임산부 투여 금지</td>
+<td><code>strong</code></td>
+<td>빼면 의미가 달라지는 중요한 경고</td>
+</tr>
+<tr>
+<td>b</td>
+<td>밀가루/설탕 재료명</td>
+<td><code>b</code></td>
+<td>시각적 구분. 밀가루가 설탕보다 “중요”한 건 아니다</td>
+</tr>
+<tr>
+<td>c</td>
+<td>강세가 의미를 바꿈</td>
+<td><code>em</code></td>
+<td>“네가”에 두면 “다른 사람이 했다”, “한”에 두면 “하지 않았다”</td>
+</tr>
+<tr>
+<td>d</td>
+<td>라틴어 학명</td>
+<td><code>i</code></td>
+<td>다른 언어/전문 용어. 강세가 아니라 톤이 다름</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h4 id="q2-2-정답">Q2-2 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 30%" />
+<col style="width: 25%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>상황</th>
+<th>답</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>가격 변경</td>
+<td><code>del</code> + <code>ins</code></td>
+<td>문서 편집 이력 — 삭제된 가격과 새 가격</td>
+</tr>
+<tr>
+<td>b</td>
+<td>이벤트 종료</td>
+<td><code>s</code></td>
+<td>“더 이상 정확하지 않은” 정보. 편집 이력이 아니라 현재 시점의
+무효화</td>
+</tr>
+<tr>
+<td>c</td>
+<td>위키 편집 이력</td>
+<td><code>del</code></td>
+<td>말 그대로 문서에서 삭제된 내용</td>
+</tr>
+</tbody>
+</table>
+</details>
+<h4 id="q2-3-정답">Q2-3 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<p><code>mark</code>. “참조 맥락에서 관련 있는 부분”을 표시하는 게
+mark의 정확한 용도. 검색 결과 하이라이트가 가장 전형적인 사례. CSS
+배경색은 의미가 없다.</p>
+</details>
+<hr />
+<h3 id="해설-2-상세-설명">해설 2: 상세 설명</h3>
+<h4 id="strong-vs-b"><code>strong</code> vs <code>b</code></h4>
+<p>둘 다 화면에서 <strong>굵게</strong> 보인다. 차이는 의미.</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- strong = &quot;이 부분이 중요하다&quot; --&gt;</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>이 실험의 <span class="dt">&lt;</span><span class="kw">strong</span><span class="dt">&gt;</span>핵심 한계<span class="dt">&lt;/</span><span class="kw">strong</span><span class="dt">&gt;</span>는 샘플 크기다.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb7-4"><a href="#cb7-4" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- b = &quot;시각적으로 구분할 뿐, 중요도 차이 없음&quot; --&gt;</span></span>
+<span id="cb7-5"><a href="#cb7-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>검색 결과에서 <span class="dt">&lt;</span><span class="kw">b</span><span class="dt">&gt;</span>키워드<span class="dt">&lt;/</span><span class="kw">b</span><span class="dt">&gt;</span>를 강조 표시했습니다.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span></code></pre></div>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 55%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th><code>strong</code></th>
+<th><code>b</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>의미</td>
+<td><strong>중요하다</strong> (importance)</td>
+<td>시각적 구분 (stylistic offset)</td>
+</tr>
+<tr>
+<td>스크린리더</td>
+<td>강세를 넣어 읽는다</td>
+<td>차이 없이 읽는다</td>
+</tr>
+<tr>
+<td>쓸 때</td>
+<td>경고, 핵심 결론, 주의 사항</td>
+<td>키워드 하이라이트, 제품명, 리드 문장</td>
+</tr>
+</tbody>
+</table>
+<p><strong>판별법:</strong> “이걸 빼면 의미가 달라지는가?” → Yes면
+strong, No면 b.</p>
+<h4 id="em-vs-i"><code>em</code> vs <code>i</code></h4>
+<p>둘 다 화면에서 <em>기울임</em>으로 보인다.</p>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- em = &quot;강세를 준다&quot; — 읽는 톤이 달라짐 --&gt;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>그건 <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>내가<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span> 한 게 아니다.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span>   <span class="co">&lt;!-- &quot;내가&quot;에 힘 --&gt;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>그건 내가 <span class="dt">&lt;</span><span class="kw">em</span><span class="dt">&gt;</span>한<span class="dt">&lt;/</span><span class="kw">em</span><span class="dt">&gt;</span> 게 아니다.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span>    <span class="co">&lt;!-- &quot;한&quot;에 힘 — 의미가 바뀜 --&gt;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- i = &quot;다른 목소리, 다른 언어, 전문 용어&quot; --&gt;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>이 현상을 <span class="dt">&lt;</span><span class="kw">i</span><span class="ot"> lang</span><span class="op">=</span><span class="st">&quot;la&quot;</span><span class="dt">&gt;</span>in vitro<span class="dt">&lt;/</span><span class="kw">i</span><span class="dt">&gt;</span>에서 재현했다.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>그는 속으로 <span class="dt">&lt;</span><span class="kw">i</span><span class="dt">&gt;</span>이건 아닌데<span class="dt">&lt;/</span><span class="kw">i</span><span class="dt">&gt;</span>라고 생각했다.<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span></code></pre></div>
+<p><strong>핵심:</strong> em의 위치를 바꾸면 문장 의미가 바뀐다. i는
+바꿔도 의미가 안 바뀐다.</p>
+<h4 id="del-vs-s"><code>del</code> vs <code>s</code></h4>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- del = &quot;삭제된 내용&quot; (문서 편집 이력) --&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>가격: <span class="dt">&lt;</span><span class="kw">del</span><span class="dt">&gt;</span>50,000원<span class="dt">&lt;/</span><span class="kw">del</span><span class="dt">&gt;</span> <span class="dt">&lt;</span><span class="kw">ins</span><span class="dt">&gt;</span>35,000원<span class="dt">&lt;/</span><span class="kw">ins</span><span class="dt">&gt;&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- s = &quot;더 이상 정확하지 않은&quot; (현재 관점에서 무효) --&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;&lt;</span><span class="kw">s</span><span class="dt">&gt;</span>재고 있음<span class="dt">&lt;/</span><span class="kw">s</span><span class="dt">&gt;</span> 품절<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>del</code></th>
+<th><code>s</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>의미</td>
+<td>문서에서 <strong>삭제됨</strong></td>
+<td>더 이상 <strong>정확하지 않음</strong></td>
+</tr>
+<tr>
+<td>짝꿍</td>
+<td><code>ins</code> (삽입)과 쌍</td>
+<td>없음</td>
+</tr>
+<tr>
+<td>쓸 때</td>
+<td>가격 변경, 편집 이력, diff</td>
+<td>품절, 마감, 철회된 정보</td>
+</tr>
+</tbody>
+</table>
+<h4 id="mark-vs-css-배경색"><code>mark</code> vs CSS 배경색</h4>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- mark = &quot;참조 맥락에서 관련 있는 부분&quot; --&gt;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>검색 결과: &quot;이 연구는 <span class="dt">&lt;</span><span class="kw">mark</span><span class="dt">&gt;</span>장기 기억 통합<span class="dt">&lt;/</span><span class="kw">mark</span><span class="dt">&gt;</span>에 초점을 맞춘다&quot;<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- CSS 배경색 = 순수 시각 강조 --&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>검색 결과: &quot;이 연구는 <span class="dt">&lt;</span><span class="kw">span</span><span class="ot"> style</span><span class="op">=</span><span class="st">&quot;background:#ff0&quot;</span><span class="dt">&gt;</span>장기 기억 통합<span class="dt">&lt;/</span><span class="kw">span</span><span class="dt">&gt;</span>에 초점을 맞춘다&quot;<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span></code></pre></div>
+<hr />
+<h2 id="그룹-3-인터랙션-링크인가-버튼인가">그룹 3: 인터랙션 — 링크인가,
+버튼인가</h2>
+<h3 id="퀴즈-3-먼저-풀어보라">퀴즈 3: 먼저 풀어보라</h3>
+<p><strong>Q3-1. <code>a</code>인가, <code>button</code>인가, 둘 다
+아닌가?</strong></p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 40%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>상황</th>
+<th>내 답</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>“다크 모드 전환”을 클릭. URL은 안 바뀜</td>
+<td></td>
+</tr>
+<tr>
+<td>b</td>
+<td>“검색 페이지로” 클릭. /search로 이동</td>
+<td></td>
+</tr>
+<tr>
+<td>c</td>
+<td><code>&lt;div class="btn" onclick="save()"&gt;저장&lt;/div&gt;</code>
+— 이건 괜찮은가?</td>
+<td></td>
+</tr>
+<tr>
+<td>d</td>
+<td><code>&lt;a href="#" onclick="doSomething()"&gt;저장&lt;/a&gt;</code>
+— 이건?</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p><strong>Q3-2. FAQ 접기/펼치기를 만들고 싶다. 복잡한 애니메이션은 필요
+없다. JS로 구현해야 하는가?</strong></p>
+<p><strong>Q3-3. 확인/취소 모달을 만든다.
+<code>&lt;div class="modal"&gt;</code>로 만들면 빠지는 기능
+3가지는?</strong></p>
+<hr />
+<h3 id="해설-3-정답과-근거">해설 3: 정답과 근거</h3>
+<h4 id="q3-1-정답">Q3-1 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<table>
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 30%" />
+<col style="width: 25%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>상황</th>
+<th>답</th>
+<th>이유</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>a</td>
+<td>다크 모드 전환</td>
+<td><code>button</code></td>
+<td>행동(상태 변경)이지 탐색이 아니다</td>
+</tr>
+<tr>
+<td>b</td>
+<td>검색 페이지 이동</td>
+<td><code>a</code></td>
+<td>URL이 바뀌는 탐색</td>
+</tr>
+<tr>
+<td>c</td>
+<td>div onclick</td>
+<td><strong>잘못</strong></td>
+<td>키보드 접근 불가, 스크린리더 인식 못함. <code>button</code>이어야
+함</td>
+</tr>
+<tr>
+<td>d</td>
+<td>a href=“#” onclick</td>
+<td><strong>잘못</strong></td>
+<td>어디로도 안 가는데 href=“#”? 탐색이 아니라 행동이면
+<code>button</code></td>
+</tr>
+</tbody>
+</table>
+</details>
+<h4 id="q3-2-정답">Q3-2 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<p><strong>No.</strong> <code>&lt;details&gt;/&lt;summary&gt;</code>를
+쓰면 JS 없이 브라우저 기본 동작으로 접기/펼치기가 된다.
+접근성(aria-expanded)도 자동.</p>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">details</span><span class="dt">&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">summary</span><span class="dt">&gt;</span>자주 묻는 질문 1<span class="dt">&lt;/</span><span class="kw">summary</span><span class="dt">&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>답변 내용...<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">details</span><span class="dt">&gt;</span></span></code></pre></div>
+</details>
+<h4 id="q3-3-정답">Q3-3 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<p><code>&lt;dialog&gt;</code> 대신 div 모달을 쓰면 빠지는 것: 1.
+<strong>ESC로 닫기</strong> — 직접 구현해야 함 2. <strong>포커스
+트랩</strong> — 모달 밖으로 탭 못 가게 직접 구현 3. <strong>스크린리더
+인식</strong> — role=“dialog”를 직접 추가해야 함</p>
+<p><code>&lt;dialog&gt;</code>는 이 셋이 공짜다.</p>
+</details>
+<hr />
+<h3 id="해설-3-상세-설명">해설 3: 상세 설명</h3>
+<h4 id="a-vs-button"><code>a</code> vs <code>button</code></h4>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- a = &quot;누르면 어딘가로 간다&quot; (탐색) --&gt;</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;/search&quot;</span><span class="dt">&gt;</span>검색 페이지로<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- button = &quot;누르면 무언가를 실행한다&quot; (행동) --&gt;</span></span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">button</span><span class="ot"> onclick</span><span class="op">=</span><span class="st">&quot;submitForm()&quot;</span><span class="dt">&gt;</span>제출<span class="dt">&lt;/</span><span class="kw">button</span><span class="dt">&gt;</span></span></code></pre></div>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>a</code></th>
+<th><code>button</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>본질</td>
+<td><strong>탐색</strong> — URL이 바뀐다</td>
+<td><strong>행동</strong> — 상태가 바뀐다</td>
+</tr>
+<tr>
+<td>href 필수?</td>
+<td>Yes. href 없는 a는 의미 없음</td>
+<td>href 없음</td>
+</tr>
+<tr>
+<td>키보드</td>
+<td>Enter로 작동</td>
+<td>Enter + Space로 작동</td>
+</tr>
+<tr>
+<td>스크린리더</td>
+<td>“링크”라고 읽음</td>
+<td>“버튼”이라고 읽음</td>
+</tr>
+</tbody>
+</table>
+<p><strong>판별법:</strong> “누르면 URL이 바뀌는가?” → Yes면
+<code>a</code>, No면 <code>button</code>. <code>div</code>는 답이
+아니다.</p>
+<h4 id="detailssummary-vs-js-아코디언"><code>details/summary</code> vs
+JS 아코디언</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>details/summary</code></th>
+<th>JS 아코디언</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>JS 필요?</td>
+<td><strong>No</strong> — 브라우저 기본 동작</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>접근성</td>
+<td>기본 제공 (aria-expanded 자동)</td>
+<td>직접 구현해야 함</td>
+</tr>
+<tr>
+<td>한계</td>
+<td>애니메이션이 제한적</td>
+<td>자유로움</td>
+</tr>
+</tbody>
+</table>
+<h4 id="dialog-vs-모달-div"><code>dialog</code> vs 모달 div</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>dialog</code></th>
+<th>div 모달</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>ESC로 닫기</td>
+<td>자동</td>
+<td>직접 구현</td>
+</tr>
+<tr>
+<td>배경 클릭 차단</td>
+<td><code>::backdrop</code> 자동</td>
+<td>직접 구현</td>
+</tr>
+<tr>
+<td>포커스 트랩</td>
+<td>자동 (모달 밖으로 탭 못 감)</td>
+<td>직접 구현</td>
+</tr>
+<tr>
+<td>스크린리더</td>
+<td>“대화상자”로 인식</td>
+<td>role=“dialog” 직접 추가</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="그룹-4-미디어와-캡션">그룹 4: 미디어와 캡션</h2>
+<h3 id="퀴즈-4-먼저-풀어보라">퀴즈 4: 먼저 풀어보라</h3>
+<p><strong>Q4-1. 이미지 아래에 “Figure 1. 트랜스포머 아키텍처” 캡션을
+달고 싶다. 어떻게 마크업하는가?</strong></p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- A안 --&gt;</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">img</span><span class="ot"> src</span><span class="op">=</span><span class="st">&quot;arch.png&quot;</span><span class="ot"> alt</span><span class="op">=</span><span class="st">&quot;트랜스포머&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>Figure 1. 트랜스포머 아키텍처<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- B안 --&gt;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">figure</span><span class="dt">&gt;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">img</span><span class="ot"> src</span><span class="op">=</span><span class="st">&quot;arch.png&quot;</span><span class="ot"> alt</span><span class="op">=</span><span class="st">&quot;트랜스포머&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">figcaption</span><span class="dt">&gt;</span>Figure 1. 트랜스포머 아키텍처<span class="dt">&lt;/</span><span class="kw">figcaption</span><span class="dt">&gt;</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">figure</span><span class="dt">&gt;</span></span></code></pre></div>
+<p><strong>Q4-2. <code>figure</code>는 이미지 전용
+요소인가?</strong></p>
+<p><strong>Q4-3. 모바일에서는 작은 이미지, 데스크톱에서는 큰 이미지를
+보여주고 싶다. <code>&lt;img&gt;</code>만으로 충분한가?</strong></p>
+<hr />
+<h3 id="해설-4-정답과-근거">해설 4: 정답과 근거</h3>
+<h4 id="q4-1-정답">Q4-1 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<p><strong>B안.</strong> A안은 이미지와 캡션이 “우연히 옆에 있을 뿐”
+연결이 없다. figure로 감싸면 “이 설명은 이 이미지에 속한다”는 관계가
+선언된다. figure를 사이드바로 옮겨도 의미가 유지된다.</p>
+</details>
+<h4 id="q4-2-정답">Q4-2 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<p><strong>아니다.</strong> figure는 “본문에서 참조하는 독립 콘텐츠”면
+다 쓴다. 코드 블록, 표, 인용문도 가능:</p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">figure</span><span class="dt">&gt;</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">pre</span><span class="dt">&gt;&lt;</span><span class="kw">code</span><span class="dt">&gt;</span>const x = 42;<span class="dt">&lt;/</span><span class="kw">code</span><span class="dt">&gt;&lt;/</span><span class="kw">pre</span><span class="dt">&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">figcaption</span><span class="dt">&gt;</span>변수 초기화 예시<span class="dt">&lt;/</span><span class="kw">figcaption</span><span class="dt">&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">figure</span><span class="dt">&gt;</span></span></code></pre></div>
+</details>
+<h4 id="q4-3-정답">Q4-3 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<p><strong>아니다.</strong> <code>&lt;picture&gt;</code> 요소로 조건별
+다른 이미지를 제공:</p>
+<div class="sourceCode" id="cb15"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb15-1"><a href="#cb15-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">picture</span><span class="dt">&gt;</span></span>
+<span id="cb15-2"><a href="#cb15-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">source</span><span class="ot"> media</span><span class="op">=</span><span class="st">&quot;(max-width: 600px)&quot;</span><span class="ot"> srcset</span><span class="op">=</span><span class="st">&quot;hero-mobile.webp&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb15-3"><a href="#cb15-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">source</span><span class="ot"> media</span><span class="op">=</span><span class="st">&quot;(min-width: 601px)&quot;</span><span class="ot"> srcset</span><span class="op">=</span><span class="st">&quot;hero-desktop.webp&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb15-4"><a href="#cb15-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">img</span><span class="ot"> src</span><span class="op">=</span><span class="st">&quot;hero.jpg&quot;</span><span class="ot"> alt</span><span class="op">=</span><span class="st">&quot;히어로 이미지&quot;</span><span class="dt">&gt;</span>  <span class="co">&lt;!-- fallback --&gt;</span></span>
+<span id="cb15-5"><a href="#cb15-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">picture</span><span class="dt">&gt;</span></span></code></pre></div>
+</details>
+<hr />
+<h3 id="해설-4-상세-설명">해설 4: 상세 설명</h3>
+<h4 id="figurefigcaption-vs-img-p"><code>figure/figcaption</code> vs
+<code>img</code> + <code>p</code></h4>
+<table>
+<colgroup>
+<col style="width: 7%" />
+<col style="width: 60%" />
+<col style="width: 32%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th><code>figure</code> + <code>figcaption</code></th>
+<th><code>img</code> + <code>p</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>관계</td>
+<td><strong>이 설명은 이 이미지에 속한다</strong></td>
+<td>연결 없음</td>
+</tr>
+<tr>
+<td>위치 이동</td>
+<td>figure를 사이드바로 옮겨도 의미 유지</td>
+<td>p를 옮기면 연결 끊김</td>
+</tr>
+</tbody>
+</table>
+<h4 id="picture-vs-img"><code>picture</code> vs <code>img</code></h4>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 33%" />
+<col style="width: 52%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th><code>img</code></th>
+<th><code>picture</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>이미지 수</td>
+<td>1개</td>
+<td>조건별 여러 개</td>
+</tr>
+<tr>
+<td>쓸 때</td>
+<td>대부분의 경우</td>
+<td>모바일/데스크톱 다른 이미지, WebP/AVIF 포맷 분기</td>
+</tr>
+</tbody>
+</table>
+<h4 id="videoaudio-플러그인을-죽인-요소"><code>video/audio</code> —
+플러그인을 죽인 요소</h4>
+<p>HTML5 이전에는 Flash, Silverlight 같은 플러그인이 필요했다.
+<code>&lt;video&gt;</code>와 <code>&lt;audio&gt;</code>가 이걸
+대체했다.</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">video</span><span class="ot"> controls width</span><span class="op">=</span><span class="st">&quot;640&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">source</span><span class="ot"> src</span><span class="op">=</span><span class="st">&quot;demo.mp4&quot;</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;video/mp4&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">source</span><span class="ot"> src</span><span class="op">=</span><span class="st">&quot;demo.webm&quot;</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;video/webm&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>브라우저가 비디오를 지원하지 않습니다. <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;demo.mp4&quot;</span><span class="dt">&gt;</span>다운로드<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">video</span><span class="dt">&gt;</span></span></code></pre></div>
+<hr />
+<h2 id="그룹-5-폼-의미가-접근성이다">그룹 5: 폼 — 의미가 접근성이다</h2>
+<h3 id="퀴즈-5-먼저-풀어보라">퀴즈 5: 먼저 풀어보라</h3>
+<p><strong>Q5-1. 이 입력칸의 문제는?</strong></p>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;email&quot;</span><span class="ot"> placeholder</span><span class="op">=</span><span class="st">&quot;이메일 주소&quot;</span><span class="dt">&gt;</span></span></code></pre></div>
+<p><strong>Q5-2. 라디오 버튼 3개를 “결제 방법”이라는 그룹으로 묶으려
+한다. <code>&lt;div&gt;</code> +
+<code>&lt;p&gt;결제 방법&lt;/p&gt;</code>로 감쌌다. 스크린리더
+사용자에게 무슨 문제가 생기는가?</strong></p>
+<p><strong>Q5-3. 이메일 입력칸에
+<code>&lt;input type="text"&gt;</code>를 쓰고 있다.
+<code>type="email"</code>로 바꾸면 뭐가 달라지는가?</strong></p>
+<hr />
+<h3 id="해설-5-정답과-근거">해설 5: 정답과 근거</h3>
+<h4 id="q5-1-정답">Q5-1 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<p><strong>label이 없다.</strong> placeholder는 힌트이지 레이블이
+아니다. 입력을 시작하면 사라지고, 스크린리더는 이 칸의 목적을
+모른다.</p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- 올바름 --&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">label</span><span class="ot"> for</span><span class="op">=</span><span class="st">&quot;email&quot;</span><span class="dt">&gt;</span>이메일 주소<span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;email&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;email&quot;</span><span class="ot"> placeholder</span><span class="op">=</span><span class="st">&quot;example@mail.com&quot;</span><span class="dt">&gt;</span></span></code></pre></div>
+</details>
+<h4 id="q5-2-정답">Q5-2 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<p>스크린리더가 <strong>그룹을 인식하지 못한다.</strong> “결제
+방법”이라는 텍스트와 라디오 버튼들 사이에 의미적 연결이 없다.
+<code>fieldset/legend</code>를 써야 한다:</p>
+<div class="sourceCode" id="cb19"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb19-1"><a href="#cb19-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">fieldset</span><span class="dt">&gt;</span></span>
+<span id="cb19-2"><a href="#cb19-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">legend</span><span class="dt">&gt;</span>결제 방법<span class="dt">&lt;/</span><span class="kw">legend</span><span class="dt">&gt;</span></span>
+<span id="cb19-3"><a href="#cb19-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;radio&quot;</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;pay&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;card&quot;</span><span class="dt">&gt;</span> <span class="dt">&lt;</span><span class="kw">label</span><span class="ot"> for</span><span class="op">=</span><span class="st">&quot;card&quot;</span><span class="dt">&gt;</span>카드<span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;</span></span>
+<span id="cb19-4"><a href="#cb19-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">input</span><span class="ot"> type</span><span class="op">=</span><span class="st">&quot;radio&quot;</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;pay&quot;</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;bank&quot;</span><span class="dt">&gt;</span> <span class="dt">&lt;</span><span class="kw">label</span><span class="ot"> for</span><span class="op">=</span><span class="st">&quot;bank&quot;</span><span class="dt">&gt;</span>계좌이체<span class="dt">&lt;/</span><span class="kw">label</span><span class="dt">&gt;</span></span>
+<span id="cb19-5"><a href="#cb19-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">fieldset</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>스크린리더: “결제 방법 그룹, 라디오 버튼 2개”</p>
+</details>
+<h4 id="q5-3-정답">Q5-3 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<p>두 가지가 달라진다: 1. <strong>모바일 키보드</strong>가 @ 포함
+키보드로 바뀐다 2. <strong>브라우저가 JS 없이</strong> 이메일 형식을
+자동 검증한다</p>
+</details>
+<hr />
+<h3 id="해설-5-상세-설명">해설 5: 상세 설명</h3>
+<h4 id="label-input-vs-placeholder만"><code>label</code> +
+<code>input</code> vs placeholder만</h4>
+<table>
+<thead>
+<tr>
+<th></th>
+<th><code>label</code> + <code>input</code></th>
+<th>placeholder만</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>스크린리더</td>
+<td>“이메일 주소, 입력칸”</td>
+<td>목적을 모름</td>
+</tr>
+<tr>
+<td>클릭 영역</td>
+<td>label 클릭해도 focus</td>
+<td>input만</td>
+</tr>
+<tr>
+<td>입력 중</td>
+<td>label은 계속 보임</td>
+<td>placeholder 사라짐</td>
+</tr>
+</tbody>
+</table>
+<h4 id="input-type-별-차이">input type 별 차이</h4>
+<table>
+<thead>
+<tr>
+<th>type</th>
+<th>모바일 키보드</th>
+<th>브라우저 검증</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>text</code></td>
+<td>일반</td>
+<td>없음</td>
+</tr>
+<tr>
+<td><code>email</code></td>
+<td>@ 포함 키보드</td>
+<td>이메일 형식 자동 체크</td>
+</tr>
+<tr>
+<td><code>url</code></td>
+<td>/ . 포함 키보드</td>
+<td>URL 형식 자동 체크</td>
+</tr>
+<tr>
+<td><code>tel</code></td>
+<td>숫자 키패드</td>
+<td>없음 (나라마다 형식 다름)</td>
+</tr>
+<tr>
+<td><code>number</code></td>
+<td>숫자 키패드</td>
+<td>범위 체크 (min/max)</td>
+</tr>
+<tr>
+<td><code>date</code></td>
+<td>날짜 선택기</td>
+<td>날짜 형식 체크</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="그룹-6-시간과-데이터-기계가-읽을-수-있는가">그룹 6: 시간과
+데이터 — 기계가 읽을 수 있는가</h2>
+<h3 id="퀴즈-6-먼저-풀어보라">퀴즈 6: 먼저 풀어보라</h3>
+<p><strong>Q6-1. <code>&lt;p&gt;발표일: 2017년 6월 12일&lt;/p&gt;</code>
+— 기계(검색 엔진, 캘린더)가 이 날짜를 자동으로 인식할 수 있는가? 없다면
+어떻게 고치는가?</strong></p>
+<p><strong>Q6-2. 논문 카드에 “cited 187”이라고 표시한다. 사람은 “187회
+인용”을 읽지만, 기계가 187이라는 숫자를 파싱하게 하려면?</strong></p>
+<p><strong>Q6-3. 계산기 앱에서 합계를 <code>&lt;span&gt;</code>으로 표시
+중이다. 스크린리더 사용자가 값이 바뀔 때 알림을 못 받는다. 어떤 요소로
+바꿔야 하는가?</strong></p>
+<hr />
+<h3 id="해설-6-정답과-근거">해설 6: 정답과 근거</h3>
+<h4 id="q6-1-정답">Q6-1 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<p><strong>인식할 수 없다.</strong> <code>time</code> 요소를 써야
+한다:</p>
+<div class="sourceCode" id="cb20"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb20-1"><a href="#cb20-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>발표일: <span class="dt">&lt;</span><span class="kw">time</span><span class="ot"> datetime</span><span class="op">=</span><span class="st">&quot;2017-06-12&quot;</span><span class="dt">&gt;</span>2017년 6월 12일<span class="dt">&lt;/</span><span class="kw">time</span><span class="dt">&gt;&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>사람은 “2017년 6월 12일”을, 기계는
+<code>datetime="2017-06-12"</code>를 읽는다. “어제”, “지난주” 같은 상대
+표현도 datetime으로 정확한 값을 줄 수 있다:</p>
+<div class="sourceCode" id="cb21"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb21-1"><a href="#cb21-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">time</span><span class="ot"> datetime</span><span class="op">=</span><span class="st">&quot;2026-03-31&quot;</span><span class="dt">&gt;</span>오늘<span class="dt">&lt;/</span><span class="kw">time</span><span class="dt">&gt;</span></span>
+<span id="cb21-2"><a href="#cb21-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">time</span><span class="ot"> datetime</span><span class="op">=</span><span class="st">&quot;PT2H30M&quot;</span><span class="dt">&gt;</span>2시간 30분<span class="dt">&lt;/</span><span class="kw">time</span><span class="dt">&gt;</span>  <span class="co">&lt;!-- 기간 --&gt;</span></span></code></pre></div>
+</details>
+<h4 id="q6-2-정답">Q6-2 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<p><code>data</code> 요소:</p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">data</span><span class="ot"> value</span><span class="op">=</span><span class="st">&quot;187&quot;</span><span class="dt">&gt;</span>cited 187<span class="dt">&lt;/</span><span class="kw">data</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>사람은 “cited 187”을, 기계는 <code>value="187"</code>을 읽는다.</p>
+</details>
+<h4 id="q6-3-정답">Q6-3 정답</h4>
+<details>
+<summary>
+정답 보기
+</summary>
+<p><code>output</code> 요소:</p>
+<div class="sourceCode" id="cb23"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb23-1"><a href="#cb23-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">output</span><span class="ot"> name</span><span class="op">=</span><span class="st">&quot;total&quot;</span><span class="ot"> for</span><span class="op">=</span><span class="st">&quot;a b&quot;</span><span class="dt">&gt;</span>35000<span class="dt">&lt;/</span><span class="kw">output</span><span class="dt">&gt;</span></span></code></pre></div>
+<ul>
+<li><code>output</code>은 스크린리더에게 <strong>live region</strong> —
+값이 바뀌면 자동으로 알린다</li>
+<li><code>for</code> 속성으로 어떤 입력에서 나온 결과인지 연결할 수
+있다</li>
+<li><code>span</code>은 값이 바뀌어도 스크린리더가 알림을 주지
+않는다</li>
+</ul>
+</details>
+<hr />
+<h2 id="종합-실전-퀴즈">종합 실전 퀴즈</h2>
+<p>배경 + 6개 그룹을 모두 학습한 뒤 푸는 종합 문제.</p>
+<h3 id="q-종합.-lighthouse-랜딩-페이지-리팩토링">Q-종합. lighthouse 랜딩
+페이지 리팩토링</h3>
+<p>아래는 g-combined.html의 CTA 영역이다. 시맨틱 요소로 고쳐라.</p>
+<div class="sourceCode" id="cb24"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb24-1"><a href="#cb24-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;cta&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb24-2"><a href="#cb24-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;#&quot;</span><span class="dt">&gt;</span>시작하기<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
+<span id="cb24-3"><a href="#cb24-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;note&quot;</span><span class="dt">&gt;</span>이메일 하나면 됩니다<span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb24-4"><a href="#cb24-4" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span></code></pre></div>
+<details>
+<summary>
+정답 보기
+</summary>
+<div class="sourceCode" id="cb25"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb25-1"><a href="#cb25-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">section</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;cta&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb25-2"><a href="#cb25-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">a</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;/signup&quot;</span><span class="dt">&gt;</span>시작하기<span class="dt">&lt;/</span><span class="kw">a</span><span class="dt">&gt;</span></span>
+<span id="cb25-3"><a href="#cb25-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">p</span><span class="ot"> class</span><span class="op">=</span><span class="st">&quot;note&quot;</span><span class="dt">&gt;</span>이메일 하나면 됩니다<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb25-4"><a href="#cb25-4" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">section</span><span class="dt">&gt;</span></span></code></pre></div>
+<p><strong>3가지 변경:</strong> 1. <code>div.cta</code> →
+<code>section</code> — 의미 있는 콘텐츠 덩어리 (그룹 1) 2.
+<code>div.note</code> → <code>p</code> — 설명 문장은 문단 (그룹 1) 3.
+<code>href="#"</code> → 실제 URL — href=“#”는 “어디로도 안 감”. 실제
+목적지가 있어야 <code>a</code>가 의미 있다 (그룹 3)</p>
+</details>
+<hr />
+<h2 id="체크리스트-css-끄기-테스트">체크리스트: CSS 끄기 테스트</h2>
+<p>모든 그룹의 요소를 제대로 썼으면, CSS를 전부 꺼도:</p>
+<ul class="task-list">
+<li><label><input type="checkbox" />제목의 크기 위계가 보인다 (h1 &gt;
+h2 &gt; h3)</label></li>
+<li><label><input type="checkbox" />글의 덩어리가 구분된다 (article 사이
+간격)</label></li>
+<li><label><input type="checkbox" />순서 목록은 번호가 붙는다 (ol &gt;
+li)</label></li>
+<li><label><input type="checkbox" />링크는 파란 밑줄로
+보인다</label></li>
+<li><label><input type="checkbox" />버튼은 클릭 가능한 버튼으로
+보인다</label></li>
+<li><label><input type="checkbox" />폼 입력칸에 레이블이
+보인다</label></li>
+<li><label><input type="checkbox" />취소선은 del/s에 자동
+적용</label></li>
+<li><label><input type="checkbox" />details는 접기/펼치기가
+작동한다</label></li>
+<li><label><input type="checkbox" />이미지 아래에 캡션이 붙어
+있다</label></li>
+</ul>
+<p>div만으로 쌓은 페이지에서는 위의 어느 것도 자동으로 작동하지
+않는다.</p>
+<hr />
+<h2 id="부록-a-react-next.js는-html5-철학을-준수하는가">부록 A: React /
+Next.js는 HTML5 철학을 준수하는가</h2>
+<p>프레임워크 자체는 금지하지도 강제하지도 않는다. 문제는 사용 문화와
+기본 구조에 있다.</p>
+<h3 id="react-철학과의-긴장">React — 철학과의 긴장</h3>
+<p><strong>맞는 곳:</strong> JSX에서 <code>&lt;article&gt;</code>,
+<code>&lt;section&gt;</code>, <code>&lt;nav&gt;</code> 전부 쓸 수 있다.
+개발자가 원하면 완벽한 시맨틱 HTML을 출력할 수 있다.</p>
+<p><strong>어긋나는 곳 3가지:</strong></p>
+<p><strong>1. 점진적 향상의 근본적 위반 (가장 큰 문제)</strong></p>
+<pre><code>HTML5 철학: HTML → CSS → JS (각 층이 실패해도 아래 층은 남는다)
+React SPA:  JS → HTML (JS가 실패하면 빈 페이지)</code></pre>
+<div class="sourceCode" id="cb27"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb27-1"><a href="#cb27-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- React SPA의 실제 HTML 소스 --&gt;</span></span>
+<span id="cb27-2"><a href="#cb27-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb27-3"><a href="#cb27-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">div</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;root&quot;</span><span class="dt">&gt;&lt;/</span><span class="kw">div</span><span class="dt">&gt;</span></span>
+<span id="cb27-4"><a href="#cb27-4" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">script</span><span class="ot"> src</span><span class="op">=</span><span class="st">&quot;bundle.js&quot;</span><span class="dt">&gt;&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span>
+<span id="cb27-5"><a href="#cb27-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">body</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>JS 로드 전에 검색 엔진, 스크린리더, 느린 네트워크 사용자가 보는 것:
+<strong>빈 페이지</strong>.</p>
+<p><strong>2. div soup 문화</strong></p>
+<p>React가 div를 강제하지는 않지만 생태계가 기울어져 있다:</p>
+<div class="sourceCode" id="cb28"><pre
+class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb28-1"><a href="#cb28-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 흔한 코드</span></span>
+<span id="cb28-2"><a href="#cb28-2" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;div</span> <span class="ot">className</span><span class="op">=</span><span class="st">&quot;header&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb28-3"><a href="#cb28-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;div</span> <span class="ot">className</span><span class="op">=</span><span class="st">&quot;nav&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb28-4"><a href="#cb28-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;div</span> <span class="ot">className</span><span class="op">=</span><span class="st">&quot;nav-item&quot;</span> <span class="ot">onClick</span><span class="op">=</span><span class="va">{</span>() <span class="kw">=&gt;</span> <span class="fu">navigate</span>(<span class="st">&#39;/&#39;</span>)<span class="va">}</span><span class="kw">&gt;</span>홈<span class="kw">&lt;/div&gt;</span></span>
+<span id="cb28-5"><a href="#cb28-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb28-6"><a href="#cb28-6" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/div&gt;</span></span>
+<span id="cb28-7"><a href="#cb28-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb28-8"><a href="#cb28-8" aria-hidden="true" tabindex="-1"></a><span class="co">// HTML5 철학에 맞는 코드 (가능하지만 덜 흔함)</span></span>
+<span id="cb28-9"><a href="#cb28-9" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;header&gt;</span></span>
+<span id="cb28-10"><a href="#cb28-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;nav&gt;</span></span>
+<span id="cb28-11"><a href="#cb28-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;ul&gt;&lt;li&gt;&lt;a</span> <span class="ot">href</span><span class="op">=</span><span class="st">&quot;/&quot;</span><span class="kw">&gt;</span>홈<span class="kw">&lt;/a&gt;&lt;/li&gt;&lt;/ul&gt;</span></span>
+<span id="cb28-12"><a href="#cb28-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/nav&gt;</span></span>
+<span id="cb28-13"><a href="#cb28-13" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/header&gt;</span></span></code></pre></div>
+<p>원인: 컴포넌트 추상화가 시맨틱을 가림 (<code>&lt;Card /&gt;</code>가
+div인지 article인지 모름), UI 라이브러리 내부 div 남용,
+<code>&lt;div onClick&gt;</code> 패턴 만연.</p>
+<p><strong>3. 브라우저 기본 동작을 JS로 재구현</strong></p>
+<table>
+<thead>
+<tr>
+<th>브라우저가 공짜로 주는 것</th>
+<th>React 생태계가 하는 것</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;details/summary&gt;</code></td>
+<td>Accordion 컴포넌트 (JS)</td>
+</tr>
+<tr>
+<td><code>&lt;dialog&gt;</code></td>
+<td>Modal 컴포넌트 (JS)</td>
+</tr>
+<tr>
+<td><code>&lt;input type="date"&gt;</code></td>
+<td>DatePicker 라이브러리 (JS)</td>
+</tr>
+<tr>
+<td><code>&lt;a href&gt;</code> 네비게이션</td>
+<td>React Router + onClick</td>
+</tr>
+<tr>
+<td><code>&lt;form&gt;</code> submit</td>
+<td>e.preventDefault() + 커스텀 핸들러</td>
+</tr>
+</tbody>
+</table>
+<h3 id="next.js-긴장을-상당히-해소한다">Next.js — 긴장을 상당히
+해소한다</h3>
+<p>React의 가장 큰 문제(빈 페이지)를 고친다:</p>
+<pre><code>React SPA:  JS → HTML (서버에서 빈 div만 내려옴)
+Next.js:    HTML → JS (서버에서 완성된 HTML이 먼저 내려옴)</code></pre>
+<table>
+<colgroup>
+<col style="width: 41%" />
+<col style="width: 58%" />
+</colgroup>
+<thead>
+<tr>
+<th>Next.js 기능</th>
+<th>HTML5 철학과의 관계</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>SSR/SSG</td>
+<td>서버에서 HTML 렌더링 → JS 로드 전에도 콘텐츠 보임</td>
+</tr>
+<tr>
+<td>Server Components</td>
+<td>JS를 클라이언트에 안 보내는 컴포넌트 → HTML-first</td>
+</tr>
+<tr>
+<td>Streaming</td>
+<td>HTML을 점진적으로 보냄 → 부분적으로라도 먼저 보임</td>
+</tr>
+<tr>
+<td><code>&lt;Link&gt;</code></td>
+<td>내부적으로 <code>&lt;a&gt;</code> 렌더링 → 시맨틱 유지</td>
+</tr>
+<tr>
+<td><code>&lt;Image&gt;</code></td>
+<td>내부적으로 <code>&lt;img&gt;</code> + 최적화 → 시맨틱 유지</td>
+</tr>
+</tbody>
+</table>
+<p><strong>그래도 남는 문제:</strong> 개발자가 div를 쓰면 div가 나온다
+(자동 변환 없음), hydration 전까지 “보이는데 안 눌리는” 순간 존재, UI
+라이브러리 시맨틱 수준에 의존.</p>
+<h3 id="스펙트럼">스펙트럼</h3>
+<pre><code>HTML5 철학에 가까움 ←────────────────────→ 멀어짐
+
+정적 HTML    Next.js       Next.js      React SPA
+(순수)       Server        Client       (CSR only)
+             Components    Components
+             + SSG/SSR     + Hydration</code></pre>
+<p><strong>결론:</strong> 프레임워크가 시맨틱을 대신해주지 않는다. 이
+교재에서 배운 판단 기준은 React/Next.js에서도 그대로 적용해야 한다.</p>
+</body>
+</html>
