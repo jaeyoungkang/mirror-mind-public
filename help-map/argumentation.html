@@ -1,171 +1,256 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>논증 구조 — Light House</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap');
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Noto Sans KR', sans-serif; background: #fafaf8; color: #1a1a1a; min-height: 100vh; line-height: 1.7; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>논증 구조 — Light House</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap");
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Noto Sans KR", sans-serif;
+        background: #fafaf8;
+        color: #1a1a1a;
+        min-height: 100vh;
+        line-height: 1.7;
+      }
 
-  .page { max-width: 1100px; margin: 0 auto; padding: 8vh 24px 12vh; }
+      .page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 8vh 24px 12vh;
+      }
 
-  .back-link {
-    display: inline-block;
-    font-size: 14px;
-    font-weight: 400;
-    color: #888;
-    text-decoration: none;
-    margin-bottom: 32px;
-    transition: color 0.2s;
-  }
-  .back-link:hover { color: #1a1a1a; }
+      .back-link {
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 400;
+        color: #888;
+        text-decoration: none;
+        margin-bottom: 32px;
+        transition: color 0.2s;
+      }
+      .back-link:hover {
+        color: #1a1a1a;
+      }
 
-  h1 { font-size: 28px; font-weight: 500; letter-spacing: -0.03em; margin-bottom: 8px; }
-  .question { font-size: 16px; font-weight: 500; color: #cc8844; margin-bottom: 40px; }
+      h1 {
+        font-size: 28px;
+        font-weight: 500;
+        letter-spacing: -0.03em;
+        margin-bottom: 8px;
+      }
+      .question {
+        font-size: 16px;
+        font-weight: 500;
+        color: #cc8844;
+        margin-bottom: 40px;
+      }
 
-  h2 { font-size: 18px; font-weight: 500; margin-top: 40px; margin-bottom: 12px; color: #1a1a1a; }
+      h2 {
+        font-size: 18px;
+        font-weight: 500;
+        margin-top: 40px;
+        margin-bottom: 12px;
+        color: #1a1a1a;
+      }
 
-  .card {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 12px;
-  }
-  .card p {
-    font-size: 14px;
-    font-weight: 300;
-    color: #555;
-    line-height: 1.8;
-    margin-bottom: 8px;
-  }
-  .card p:last-child { margin-bottom: 0; }
-  .card ul {
-    font-size: 14px;
-    font-weight: 300;
-    color: #555;
-    line-height: 1.8;
-    margin: 8px 0;
-    padding-left: 20px;
-  }
-  .card li { margin-bottom: 4px; }
+      .card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 12px;
+      }
+      .card p {
+        font-size: 14px;
+        font-weight: 300;
+        color: #555;
+        line-height: 1.8;
+        margin-bottom: 8px;
+      }
+      .card p:last-child {
+        margin-bottom: 0;
+      }
+      .card ul {
+        font-size: 14px;
+        font-weight: 300;
+        color: #555;
+        line-height: 1.8;
+        margin: 8px 0;
+        padding-left: 20px;
+      }
+      .card li {
+        margin-bottom: 4px;
+      }
 
-  .ref {
-    font-size: 12px;
-    color: #aaa;
-    margin-top: 8px;
-    line-height: 1.6;
-  }
+      .ref {
+        font-size: 12px;
+        color: #aaa;
+        margin-top: 8px;
+        line-height: 1.6;
+      }
 
-  .viz-section { margin-bottom: 48px; }
-  .viz-label { font-size: 16px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 6px; }
-  .viz-why {
-    font-size: 14px;
-    font-weight: 300;
-    color: #555;
-    line-height: 1.8;
-    margin-bottom: 14px;
-  }
+      .viz-section {
+        margin-bottom: 48px;
+      }
+      .viz-label {
+        font-size: 16px;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        margin-bottom: 6px;
+      }
+      .viz-why {
+        font-size: 14px;
+        font-weight: 300;
+        color: #555;
+        line-height: 1.8;
+        margin-bottom: 14px;
+      }
 
-  iframe {
-    width: 100%;
-    height: 680px;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    background: #fff;
-  }
+      iframe {
+        width: 100%;
+        height: 680px;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        background: #fff;
+      }
 
-  .product-card {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    padding: 20px;
-  }
-  .product-card p {
-    font-size: 14px;
-    font-weight: 300;
-    color: #555;
-    line-height: 1.8;
-  }
+      .product-card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 20px;
+      }
+      .product-card p {
+        font-size: 14px;
+        font-weight: 300;
+        color: #555;
+        line-height: 1.8;
+      }
 
-  .bottom-back {
-    display: inline-block;
-    font-size: 14px;
-    font-weight: 400;
-    color: #888;
-    text-decoration: none;
-    margin-top: 32px;
-    transition: color 0.2s;
-  }
-  .bottom-back:hover { color: #1a1a1a; }
-</style>
-</head>
-<body>
-  <div class="page">
-    <a class="back-link" href="index.html">&larr; 목록으로</a>
+      .bottom-back {
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 400;
+        color: #888;
+        text-decoration: none;
+        margin-top: 32px;
+        transition: color 0.2s;
+      }
+      .bottom-back:hover {
+        color: #1a1a1a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <a class="back-link" href="index.html">&larr; 목록으로</a>
 
-    <h1>논증 구조</h1>
-    <div class="question">"어디서 의견이 갈리는가?"</div>
+      <h1>논증 구조</h1>
+      <div class="question">"어디서 의견이 갈리는가?"</div>
 
-    <h2>왜 이 분석이 필요한가</h2>
-    <div class="card">
-      <p>논문은 단순한 정보가 아니라 주장(claim)의 모음이다. 어떤 주장이 지지되고 있는지, 어디서 반박이 나오는지, 아직 조건 정리(qualify)가 안 된 논쟁은 어디인지를 알면 &mdash; 연구자는 "어디에 기여할 여지가 있는지"를 판단할 수 있다.</p>
-    </div>
-
-    <h2>어떻게 계산하는가</h2>
-    <div class="card">
-      <p>AI가 논문 간 주장 관계를 4가지로 분류한다:</p>
-      <ul>
-        <li><strong>support</strong> &mdash; A의 주장이 B를 뒷받침</li>
-        <li><strong>extend</strong> &mdash; A를 기반으로 B가 확장</li>
-        <li><strong>qualify</strong> &mdash; B가 A의 주장에 조건을 붙임 ("단, 이 경우에만")</li>
-        <li><strong>refute</strong> &mdash; B가 A를 반박</li>
-      </ul>
-      <p>이 관계들이 네트워크를 이루면 claim zone(주장 영역)이 형성된다. 각 zone에 unresolvedScore(미해결 정도), qualificationDeficit(qualify 부족), lineageSignal(확장 체인 길이)이 계산된다.</p>
-      <p>이론적 기반은 Toulmin(1958)의 논증 모델(Claim-Evidence-Warrant)과 Dung(1995)의 추상 논증 프레임워크(Abstract Argumentation Framework)다.</p>
-      <div class="ref">
-        Toulmin, S. (1958). The Uses of Argument.<br>
-        Dung, P.M. (1995). On the acceptability of arguments. Artificial Intelligence.
+      <h2>왜 이 분석이 필요한가</h2>
+      <div class="card">
+        <p>
+          논문은 단순한 정보가 아니라 주장(claim)의 모음이다. 어떤 주장이 지지되고 있는지, 어디서
+          반박이 나오는지, 아직 조건 정리(qualify)가 안 된 논쟁은 어디인지를 알면 &mdash; 연구자는
+          "어디에 기여할 여지가 있는지"를 판단할 수 있다.
+        </p>
       </div>
-    </div>
 
-    <h2>어떻게 보이는가</h2>
-
-    <div class="viz-section">
-      <div class="viz-label">Argumentation Map</div>
-      <div class="viz-why">
-        claim zone을 노드로, 관계를 방향 엣지로 표현한다. Dung AAF 기반.
-        엣지 색은 관계 유형, 두께는 빈도, 노드 테두리는 unresolvedScore를 나타낸다. 전체 논증 구조를 조망한다.
+      <h2>어떻게 계산하는가</h2>
+      <div class="card">
+        <p>AI가 논문 간 주장 관계를 4가지로 분류한다:</p>
+        <ul>
+          <li><strong>support</strong> &mdash; A의 주장이 B를 뒷받침</li>
+          <li><strong>extend</strong> &mdash; A를 기반으로 B가 확장</li>
+          <li><strong>qualify</strong> &mdash; B가 A의 주장에 조건을 붙임 ("단, 이 경우에만")</li>
+          <li><strong>refute</strong> &mdash; B가 A를 반박</li>
+        </ul>
+        <p>
+          이 관계들이 네트워크를 이루면 claim zone(주장 영역)이 형성된다. 각 zone에
+          unresolvedScore(미해결 정도), qualificationDeficit(qualify 부족), lineageSignal(확장 체인
+          길이)이 계산된다.
+        </p>
+        <p>
+          현재 제품은 abstract 중심 추출에 title-aware fallback을 더한 상태다. 더 강한 section-aware
+          claim extraction은 아직 후속 과제다.
+        </p>
+        <p>
+          이론적 기반은 Toulmin(1958)의 논증 모델(Claim-Evidence-Warrant)과 Dung(1995)의 추상 논증
+          프레임워크(Abstract Argumentation Framework)다.
+        </p>
+        <div class="ref">
+          Toulmin, S. (1958). The Uses of Argument.<br />
+          Dung, P.M. (1995). On the acceptability of arguments. Artificial Intelligence.
+        </div>
       </div>
-      <iframe src="../viz-network-science/argument-1-directed-graph.html"></iframe>
-    </div>
 
-    <div class="viz-section">
-      <div class="viz-label">Qualification Deficit Matrix</div>
-      <div class="viz-why">
-        zone 쌍 단위로 4색 미니바(support/extend/qualify/refute)를 표시한다.
-        qualify가 부족한 행이 "미정리 논쟁"이다. Toulmin의 qualifier 개념을 시각화한 기법.
+      <h2>어떻게 보이는가</h2>
+
+      <div class="viz-section">
+        <div class="viz-label">Argumentation Map</div>
+        <div class="viz-why">
+          claim zone을 노드로, 관계를 방향 엣지로 표현한다. Dung AAF 기반. 엣지 색은 관계 유형,
+          두께는 빈도, 노드 테두리는 unresolvedScore를 나타낸다. 전체 논증 구조를 조망한다.
+        </div>
+        <iframe src="../viz-network-science/argument-1-directed-graph.html"></iframe>
       </div>
-      <iframe src="../viz-network-science/argument-2-qualification-matrix.html"></iframe>
-    </div>
 
-    <div class="viz-section">
-      <div class="viz-label">Claim Lineage Tree</div>
-      <div class="viz-why">
-        extend 관계를 트리로 펼친다. 가지 끝은 현재 프런티어(확장 가능 지점),
-        가지가 끊긴 곳은 확장 가능 공백이다.
+      <div class="viz-section">
+        <div class="viz-label">Qualification Deficit Matrix</div>
+        <div class="viz-why">
+          zone 쌍 단위로 4색 미니바(support/extend/qualify/refute)를 표시한다. qualify가 부족한 행이
+          "미정리 논쟁"이다. Toulmin의 qualifier 개념을 시각화한 기법.
+        </div>
+        <iframe src="../viz-network-science/argument-2-qualification-matrix.html"></iframe>
       </div>
-      <iframe src="../viz-network-science/argument-3-lineage-tree.html"></iframe>
-    </div>
 
-    <h2>Light House에서의 용도</h2>
-    <div class="product-card">
-      <p>Light House의 "논쟁 구조" 렌즈(v4b)가 이 분석에 대응한다. debate-bars 기본 표현에 unresolvedScore, qualificationDeficit, lineageSignal이 게이지와 마커로 반영된다.</p>
-    </div>
+      <div class="viz-section">
+        <div class="viz-label">Claim Lineage Tree</div>
+        <div class="viz-why">
+          extend 관계를 트리로 펼친다. 가지 끝은 현재 프런티어(확장 가능 지점), 가지가 끊긴 곳은
+          확장 가능 공백이다.
+        </div>
+        <iframe src="../viz-network-science/argument-3-lineage-tree.html"></iframe>
+      </div>
 
-    <a class="bottom-back" href="index.html">&larr; 목록으로</a>
-  </div>
-</body>
+      <h2>Light House에서의 용도</h2>
+      <div class="product-card">
+        <p>
+          Light House의 "논쟁 구조" 맵이 이 분석에 대응한다. argument-map 기본 표현으로 zone 사이의
+          support·extend·qualify·refute 방향을 먼저 보고, qualification-matrix와 debate-bars, force
+          탐색으로 압력과 계보를 더 본다.
+        </p>
+      </div>
+
+      <h2>현재 구현 내역</h2>
+      <div class="card">
+        <p>
+          현재 제품은 claim mention, relation, zone을 정본 snapshot으로 저장하고, zone row에는
+          <strong>section mix</strong>, <strong>pressure score</strong>,
+          <strong>descendant count</strong>, <strong>lineage trail</strong>을 붙인다.
+        </p>
+        <p>
+          계산은 <code>app/server/services/claim-graph-service.ts</code>, claim artifact 정리는
+          <code>app/components/documents/graph/graph-map-analytics.claims.ts</code>, 기본 표현은
+          <code>GraphArgumentMapRenderer.tsx</code>, 보조 표현은
+          <code>GraphQualificationMatrixRenderer.tsx</code>,
+          <code>GraphDebateBarsRenderer.tsx</code>, <code>GraphLineageTreeRenderer.tsx</code>가
+          담당한다.
+        </p>
+        <p>
+          현재 입력은 search result와 abstract만 사용한다. 따라서 section-aware full-text claim
+          extraction은 아직 아니고, abstract heuristic을 강화한 단계다.
+        </p>
+      </div>
+
+      <a class="bottom-back" href="index.html">&larr; 목록으로</a>
+    </div>
+  </body>
 </html>

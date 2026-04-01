@@ -1,324 +1,398 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Adjacency Matrix with Community Blocks</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #fafaf8;
-    font-family: 'Noto Sans KR', sans-serif;
-    color: #2a2a2a;
-    padding: 40px 60px;
-  }
-  h1 {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    letter-spacing: -0.5px;
-  }
-  .question {
-    font-size: 15px;
-    font-weight: 400;
-    color: #666;
-    margin-bottom: 8px;
-  }
-  .rationale {
-    font-size: 13px;
-    font-weight: 300;
-    color: #888;
-    line-height: 1.7;
-    margin-bottom: 32px;
-    max-width: 720px;
-  }
-  #chart { position: relative; }
-  .tooltip {
-    position: absolute;
-    pointer-events: none;
-    background: rgba(255,255,255,0.97);
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 10px 14px;
-    font-size: 12px;
-    line-height: 1.6;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-    opacity: 0;
-    transition: opacity 0.15s;
-    z-index: 10;
-  }
-  .legend {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: #555;
-  }
-  .legend-swatch {
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
-  }
-</style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Adjacency Matrix with Community Blocks</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #fafaf8;
+        font-family: "Noto Sans KR", sans-serif;
+        color: #2a2a2a;
+        padding: 40px 60px;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        letter-spacing: -0.5px;
+      }
+      .question {
+        font-size: 15px;
+        font-weight: 400;
+        color: #666;
+        margin-bottom: 8px;
+      }
+      .rationale {
+        font-size: 13px;
+        font-weight: 300;
+        color: #888;
+        line-height: 1.7;
+        margin-bottom: 32px;
+        max-width: 720px;
+      }
+      #chart {
+        position: relative;
+      }
+      .tooltip {
+        position: absolute;
+        pointer-events: none;
+        background: rgba(255, 255, 255, 0.97);
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-size: 12px;
+        line-height: 1.6;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        opacity: 0;
+        transition: opacity 0.15s;
+        z-index: 10;
+      }
+      .legend {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #555;
+      }
+      .legend-swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Adjacency Matrix with Community Blocks</h1>
+    <p class="question">
+      이 시각화가 답하는 질문: 어떤 클러스터가 내부적으로 밀집해 있고, 클러스터 간 연결은 어디에
+      존재하는가?
+    </p>
+    <p class="rationale">
+      인접 행렬(adjacency matrix)은 네트워크 과학에서 modularity를 시각적으로 검증하는 고전
+      기법이다. 노드를 커뮤니티 순서로 정렬하면 대각선 블록에 내부 연결이 밀집하고, 블록 밖의 점은
+      cross-cluster 브릿지를 드러낸다. 행렬 표현은 노드 수가 수십~수백일 때 force layout보다 패턴을
+      정확히 읽을 수 있어, 구조적 분석에 적합하다.
+    </p>
 
-<h1>Adjacency Matrix with Community Blocks</h1>
-<p class="question">이 시각화가 답하는 질문: 어떤 클러스터가 내부적으로 밀집해 있고, 클러스터 간 연결은 어디에 존재하는가?</p>
-<p class="rationale">
-인접 행렬(adjacency matrix)은 네트워크 과학에서 modularity를 시각적으로 검증하는 고전 기법이다.
-노드를 커뮤니티 순서로 정렬하면 대각선 블록에 내부 연결이 밀집하고, 블록 밖의 점은 cross-cluster 브릿지를 드러낸다.
-행렬 표현은 노드 수가 수십~수백일 때 force layout보다 패턴을 정확히 읽을 수 있어, 구조적 분석에 적합하다.
-</p>
+    <div class="legend" id="legend"></div>
+    <div id="chart">
+      <div class="tooltip" id="tooltip"></div>
+    </div>
 
-<div class="legend" id="legend"></div>
-<div id="chart">
-  <div class="tooltip" id="tooltip"></div>
-</div>
+    <script>
+      // ── Data ──
+      const clusters = [
+        {
+          id: "external-memory",
+          label: "외부 메모리",
+          color: "#7aaa7a",
+          density: 0.82,
+          quality: 0.74,
+        },
+        {
+          id: "cognitive-arch",
+          label: "인지 아키텍처",
+          color: "#7a7aaa",
+          density: 0.76,
+          quality: 0.81,
+        },
+        { id: "simulation", label: "시뮬레이션", color: "#aa8a6a", density: 0.69, quality: 0.67 },
+        { id: "rag", label: "RAG", color: "#8aaa8a", density: 0.88, quality: 0.79 },
+        { id: "multimodal", label: "멀티모달", color: "#aa7a8a", density: 0.71, quality: 0.72 },
+      ];
 
-<script>
-// ── Data ──
-const clusters = [
-  { id: 'external-memory', label: '외부 메모리', color: '#7aaa7a', density: 0.82, quality: 0.74 },
-  { id: 'cognitive-arch',  label: '인지 아키텍처', color: '#7a7aaa', density: 0.76, quality: 0.81 },
-  { id: 'simulation',      label: '시뮬레이션', color: '#aa8a6a', density: 0.69, quality: 0.67 },
-  { id: 'rag',             label: 'RAG', color: '#8aaa8a', density: 0.88, quality: 0.79 },
-  { id: 'multimodal',      label: '멀티모달', color: '#aa7a8a', density: 0.71, quality: 0.72 }
-];
+      const papers = [
+        { id: "P01", label: "MemGPT", cluster: "external-memory" },
+        { id: "P02", label: "Reflexion", cluster: "external-memory" },
+        { id: "P03", label: "Generative Agents", cluster: "external-memory" },
+        { id: "P04", label: "MemWalker", cluster: "external-memory" },
+        { id: "P05", label: "CoALA", cluster: "cognitive-arch" },
+        { id: "P06", label: "Voyager", cluster: "cognitive-arch" },
+        { id: "P07", label: "LATS", cluster: "cognitive-arch" },
+        { id: "P08", label: "AutoGPT Survey", cluster: "cognitive-arch" },
+        { id: "P09", label: "AgentSims", cluster: "simulation" },
+        { id: "P10", label: "MetaGPT", cluster: "simulation" },
+        { id: "P11", label: "ChatDev", cluster: "simulation" },
+        { id: "P12", label: "CAMEL", cluster: "simulation" },
+        { id: "P13", label: "Sotopia", cluster: "simulation" },
+        { id: "P14", label: "Self-RAG", cluster: "rag" },
+        { id: "P15", label: "RAPTOR", cluster: "rag" },
+        { id: "P16", label: "CRAG", cluster: "rag" },
+        { id: "P17", label: "HyDE", cluster: "rag" },
+        { id: "P18", label: "LLaVA", cluster: "multimodal" },
+        { id: "P19", label: "GPT-4V Survey", cluster: "multimodal" },
+        { id: "P20", label: "CogAgent", cluster: "multimodal" },
+        { id: "P21", label: "Fuyu", cluster: "multimodal" },
+        { id: "P22", label: "Gemini Report", cluster: "multimodal" },
+      ];
 
-const papers = [
-  { id: 'P01', label: 'MemGPT', cluster: 'external-memory' },
-  { id: 'P02', label: 'Reflexion', cluster: 'external-memory' },
-  { id: 'P03', label: 'Generative Agents', cluster: 'external-memory' },
-  { id: 'P04', label: 'MemWalker', cluster: 'external-memory' },
-  { id: 'P05', label: 'CoALA', cluster: 'cognitive-arch' },
-  { id: 'P06', label: 'Voyager', cluster: 'cognitive-arch' },
-  { id: 'P07', label: 'LATS', cluster: 'cognitive-arch' },
-  { id: 'P08', label: 'AutoGPT Survey', cluster: 'cognitive-arch' },
-  { id: 'P09', label: 'AgentSims', cluster: 'simulation' },
-  { id: 'P10', label: 'MetaGPT', cluster: 'simulation' },
-  { id: 'P11', label: 'ChatDev', cluster: 'simulation' },
-  { id: 'P12', label: 'CAMEL', cluster: 'simulation' },
-  { id: 'P13', label: 'Sotopia', cluster: 'simulation' },
-  { id: 'P14', label: 'Self-RAG', cluster: 'rag' },
-  { id: 'P15', label: 'RAPTOR', cluster: 'rag' },
-  { id: 'P16', label: 'CRAG', cluster: 'rag' },
-  { id: 'P17', label: 'HyDE', cluster: 'rag' },
-  { id: 'P18', label: 'LLaVA', cluster: 'multimodal' },
-  { id: 'P19', label: 'GPT-4V Survey', cluster: 'multimodal' },
-  { id: 'P20', label: 'CogAgent', cluster: 'multimodal' },
-  { id: 'P21', label: 'Fuyu', cluster: 'multimodal' },
-  { id: 'P22', label: 'Gemini Report', cluster: 'multimodal' }
-];
+      // Intra-cluster edges (strong)
+      const intraEdges = [
+        ["P01", "P02"],
+        ["P01", "P03"],
+        ["P02", "P03"],
+        ["P01", "P04"],
+        ["P03", "P04"],
+        ["P05", "P06"],
+        ["P05", "P07"],
+        ["P06", "P07"],
+        ["P05", "P08"],
+        ["P07", "P08"],
+        ["P09", "P10"],
+        ["P09", "P11"],
+        ["P10", "P11"],
+        ["P09", "P12"],
+        ["P11", "P13"],
+        ["P12", "P13"],
+        ["P14", "P15"],
+        ["P14", "P16"],
+        ["P15", "P16"],
+        ["P14", "P17"],
+        ["P16", "P17"],
+        ["P18", "P19"],
+        ["P18", "P20"],
+        ["P19", "P20"],
+        ["P18", "P21"],
+        ["P20", "P22"],
+        ["P21", "P22"],
+      ];
 
-// Intra-cluster edges (strong)
-const intraEdges = [
-  ['P01','P02'],['P01','P03'],['P02','P03'],['P01','P04'],['P03','P04'],
-  ['P05','P06'],['P05','P07'],['P06','P07'],['P05','P08'],['P07','P08'],
-  ['P09','P10'],['P09','P11'],['P10','P11'],['P09','P12'],['P11','P13'],['P12','P13'],
-  ['P14','P15'],['P14','P16'],['P15','P16'],['P14','P17'],['P16','P17'],
-  ['P18','P19'],['P18','P20'],['P19','P20'],['P18','P21'],['P20','P22'],['P21','P22']
-];
+      // Inter-cluster edges (weak)
+      const interEdges = [
+        ["P01", "P05"],
+        ["P03", "P09"],
+        ["P02", "P14"],
+        ["P06", "P10"],
+        ["P07", "P14"],
+        ["P08", "P18"],
+        ["P11", "P15"],
+        ["P13", "P19"],
+        ["P04", "P17"],
+        ["P16", "P20"],
+        ["P12", "P06"],
+      ];
 
-// Inter-cluster edges (weak)
-const interEdges = [
-  ['P01','P05'],['P03','P09'],['P02','P14'],['P06','P10'],
-  ['P07','P14'],['P08','P18'],['P11','P15'],['P13','P19'],
-  ['P04','P17'],['P16','P20'],['P12','P06']
-];
+      const allEdges = [
+        ...intraEdges.map((e) => ({ source: e[0], target: e[1], type: "intra" })),
+        ...interEdges.map((e) => ({ source: e[0], target: e[1], type: "inter" })),
+      ];
 
-const allEdges = [
-  ...intraEdges.map(e => ({ source: e[0], target: e[1], type: 'intra' })),
-  ...interEdges.map(e => ({ source: e[0], target: e[1], type: 'inter' }))
-];
+      const clusterMap = {};
+      clusters.forEach((c) => (clusterMap[c.id] = c));
+      const paperMap = {};
+      papers.forEach((p) => (paperMap[p.id] = p));
 
-const clusterMap = {};
-clusters.forEach(c => clusterMap[c.id] = c);
-const paperMap = {};
-papers.forEach(p => paperMap[p.id] = p);
+      // Sort nodes by cluster order
+      const sortedPapers = [...papers];
 
-// Sort nodes by cluster order
-const sortedPapers = [...papers];
+      // Build adjacency
+      const adjSet = new Set();
+      allEdges.forEach((e) => {
+        adjSet.add(e.source + "|" + e.target);
+        adjSet.add(e.target + "|" + e.source);
+      });
 
-// Build adjacency
-const adjSet = new Set();
-allEdges.forEach(e => {
-  adjSet.add(e.source + '|' + e.target);
-  adjSet.add(e.target + '|' + e.source);
-});
+      function getEdge(a, b) {
+        const key1 = a + "|" + b;
+        const key2 = b + "|" + a;
+        return allEdges.find(
+          (e) => (e.source === a && e.target === b) || (e.source === b && e.target === a),
+        );
+      }
 
-function getEdge(a, b) {
-  const key1 = a + '|' + b;
-  const key2 = b + '|' + a;
-  return allEdges.find(e =>
-    (e.source === a && e.target === b) || (e.source === b && e.target === a)
-  );
-}
+      // ── Render ──
+      const n = sortedPapers.length;
+      const cellSize = 30;
+      const labelWidth = 110;
+      const margin = { top: labelWidth + 20, left: labelWidth + 20, right: 40, bottom: 40 };
+      const width = margin.left + n * cellSize + margin.right;
+      const height = margin.top + n * cellSize + margin.bottom;
 
-// ── Render ──
-const n = sortedPapers.length;
-const cellSize = 30;
-const labelWidth = 110;
-const margin = { top: labelWidth + 20, left: labelWidth + 20, right: 40, bottom: 40 };
-const width = margin.left + n * cellSize + margin.right;
-const height = margin.top + n * cellSize + margin.bottom;
+      const svg = d3.select("#chart").append("svg").attr("width", width).attr("height", height);
 
-const svg = d3.select('#chart')
-  .append('svg')
-  .attr('width', width)
-  .attr('height', height);
+      const tooltip = d3.select("#tooltip");
 
-const tooltip = d3.select('#tooltip');
+      // Legend
+      const legendDiv = d3.select("#legend");
+      clusters.forEach((c) => {
+        const item = legendDiv.append("div").attr("class", "legend-item");
+        item.append("div").attr("class", "legend-swatch").style("background", c.color);
+        item.append("span").text(`${c.label} (d=${c.density}, q=${c.quality})`);
+      });
 
-// Legend
-const legendDiv = d3.select('#legend');
-clusters.forEach(c => {
-  const item = legendDiv.append('div').attr('class', 'legend-item');
-  item.append('div').attr('class', 'legend-swatch').style('background', c.color);
-  item.append('span').text(`${c.label} (d=${c.density}, q=${c.quality})`);
-});
+      // Cluster block backgrounds
+      const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
-// Cluster block backgrounds
-const g = svg.append('g').attr('transform', `translate(${margin.left},${margin.top})`);
+      let offset = 0;
+      clusters.forEach((c) => {
+        const count = sortedPapers.filter((p) => p.cluster === c.id).length;
+        g.append("rect")
+          .attr("x", offset * cellSize)
+          .attr("y", offset * cellSize)
+          .attr("width", count * cellSize)
+          .attr("height", count * cellSize)
+          .attr("fill", c.color)
+          .attr("opacity", 0.1)
+          .attr("stroke", c.color)
+          .attr("stroke-width", 1.5)
+          .attr("stroke-opacity", 0.3);
+        offset += count;
+      });
 
-let offset = 0;
-clusters.forEach(c => {
-  const count = sortedPapers.filter(p => p.cluster === c.id).length;
-  g.append('rect')
-    .attr('x', offset * cellSize)
-    .attr('y', offset * cellSize)
-    .attr('width', count * cellSize)
-    .attr('height', count * cellSize)
-    .attr('fill', c.color)
-    .attr('opacity', 0.10)
-    .attr('stroke', c.color)
-    .attr('stroke-width', 1.5)
-    .attr('stroke-opacity', 0.3);
-  offset += count;
-});
+      // Grid lines
+      for (let i = 0; i <= n; i++) {
+        g.append("line")
+          .attr("x1", 0)
+          .attr("y1", i * cellSize)
+          .attr("x2", n * cellSize)
+          .attr("y2", i * cellSize)
+          .attr("stroke", "#e8e8e6")
+          .attr("stroke-width", 0.5);
+        g.append("line")
+          .attr("x1", i * cellSize)
+          .attr("y1", 0)
+          .attr("x2", i * cellSize)
+          .attr("y2", n * cellSize)
+          .attr("stroke", "#e8e8e6")
+          .attr("stroke-width", 0.5);
+      }
 
-// Grid lines
-for (let i = 0; i <= n; i++) {
-  g.append('line')
-    .attr('x1', 0).attr('y1', i * cellSize)
-    .attr('x2', n * cellSize).attr('y2', i * cellSize)
-    .attr('stroke', '#e8e8e6').attr('stroke-width', 0.5);
-  g.append('line')
-    .attr('x1', i * cellSize).attr('y1', 0)
-    .attr('x2', i * cellSize).attr('y2', n * cellSize)
-    .attr('stroke', '#e8e8e6').attr('stroke-width', 0.5);
-}
+      // Cells
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+          if (i === j) continue;
+          const edge = getEdge(sortedPapers[i].id, sortedPapers[j].id);
+          if (!edge) continue;
+          const ci = clusterMap[sortedPapers[i].cluster];
+          const cj = clusterMap[sortedPapers[j].cluster];
+          const isIntra = edge.type === "intra";
+          const color = isIntra ? ci.color : "#999";
+          const opacity = isIntra ? 0.75 : 0.35;
 
-// Cells
-for (let i = 0; i < n; i++) {
-  for (let j = 0; j < n; j++) {
-    if (i === j) continue;
-    const edge = getEdge(sortedPapers[i].id, sortedPapers[j].id);
-    if (!edge) continue;
-    const ci = clusterMap[sortedPapers[i].cluster];
-    const cj = clusterMap[sortedPapers[j].cluster];
-    const isIntra = edge.type === 'intra';
-    const color = isIntra ? ci.color : '#999';
-    const opacity = isIntra ? 0.75 : 0.35;
-
-    g.append('rect')
-      .attr('x', j * cellSize + 2)
-      .attr('y', i * cellSize + 2)
-      .attr('width', cellSize - 4)
-      .attr('height', cellSize - 4)
-      .attr('rx', 3)
-      .attr('fill', color)
-      .attr('opacity', opacity)
-      .attr('class', 'cell')
-      .on('mouseover', function(event) {
-        d3.select(this).attr('opacity', 1).attr('stroke', '#333').attr('stroke-width', 1.5);
-        const pI = sortedPapers[i];
-        const pJ = sortedPapers[j];
-        tooltip.style('opacity', 1)
-          .html(`
+          g.append("rect")
+            .attr("x", j * cellSize + 2)
+            .attr("y", i * cellSize + 2)
+            .attr("width", cellSize - 4)
+            .attr("height", cellSize - 4)
+            .attr("rx", 3)
+            .attr("fill", color)
+            .attr("opacity", opacity)
+            .attr("class", "cell")
+            .on("mouseover", function (event) {
+              d3.select(this).attr("opacity", 1).attr("stroke", "#333").attr("stroke-width", 1.5);
+              const pI = sortedPapers[i];
+              const pJ = sortedPapers[j];
+              tooltip
+                .style("opacity", 1)
+                .html(
+                  `
             <strong>${pI.label}</strong> &harr; <strong>${pJ.label}</strong><br>
-            연결 유형: ${isIntra ? '클러스터 내부 (강한)' : '클러스터 간 (약한)'}<br>
+            연결 유형: ${isIntra ? "클러스터 내부 (강한)" : "클러스터 간 (약한)"}<br>
             ${pI.label}: ${clusterMap[pI.cluster].label}<br>
             ${pJ.label}: ${clusterMap[pJ.cluster].label}
-          `)
-          .style('left', (event.offsetX + 16) + 'px')
-          .style('top', (event.offsetY - 10) + 'px');
-      })
-      .on('mousemove', function(event) {
-        tooltip.style('left', (event.offsetX + 16) + 'px')
-          .style('top', (event.offsetY - 10) + 'px');
-      })
-      .on('mouseout', function() {
-        d3.select(this).attr('opacity', opacity).attr('stroke', 'none');
-        tooltip.style('opacity', 0);
+          `,
+                )
+                .style("left", event.offsetX + 16 + "px")
+                .style("top", event.offsetY - 10 + "px");
+            })
+            .on("mousemove", function (event) {
+              tooltip
+                .style("left", event.offsetX + 16 + "px")
+                .style("top", event.offsetY - 10 + "px");
+            })
+            .on("mouseout", function () {
+              d3.select(this).attr("opacity", opacity).attr("stroke", "none");
+              tooltip.style("opacity", 0);
+            });
+        }
+      }
+
+      // Diagonal (self)
+      for (let i = 0; i < n; i++) {
+        const c = clusterMap[sortedPapers[i].cluster];
+        g.append("rect")
+          .attr("x", i * cellSize + 2)
+          .attr("y", i * cellSize + 2)
+          .attr("width", cellSize - 4)
+          .attr("height", cellSize - 4)
+          .attr("rx", 3)
+          .attr("fill", c.color)
+          .attr("opacity", 0.25);
+      }
+
+      // Row labels
+      for (let i = 0; i < n; i++) {
+        const p = sortedPapers[i];
+        const c = clusterMap[p.cluster];
+        svg
+          .append("text")
+          .attr("x", margin.left - 8)
+          .attr("y", margin.top + i * cellSize + cellSize / 2 + 4)
+          .attr("text-anchor", "end")
+          .attr("font-size", 10)
+          .attr("font-weight", 400)
+          .attr("fill", c.color)
+          .text(p.label);
+      }
+
+      // Column labels
+      for (let j = 0; j < n; j++) {
+        const p = sortedPapers[j];
+        const c = clusterMap[p.cluster];
+        svg
+          .append("text")
+          .attr(
+            "transform",
+            `translate(${margin.left + j * cellSize + cellSize / 2 + 4}, ${margin.top - 8}) rotate(-45)`,
+          )
+          .attr("text-anchor", "start")
+          .attr("font-size", 10)
+          .attr("font-weight", 400)
+          .attr("fill", c.color)
+          .text(p.label);
+      }
+
+      // Cluster separator lines
+      let sep = 0;
+      clusters.forEach((c, idx) => {
+        const count = sortedPapers.filter((p) => p.cluster === c.id).length;
+        sep += count;
+        if (idx < clusters.length - 1) {
+          g.append("line")
+            .attr("x1", 0)
+            .attr("y1", sep * cellSize)
+            .attr("x2", n * cellSize)
+            .attr("y2", sep * cellSize)
+            .attr("stroke", "#bbb")
+            .attr("stroke-width", 1.5)
+            .attr("stroke-dasharray", "4,3");
+          g.append("line")
+            .attr("x1", sep * cellSize)
+            .attr("y1", 0)
+            .attr("x2", sep * cellSize)
+            .attr("y2", n * cellSize)
+            .attr("stroke", "#bbb")
+            .attr("stroke-width", 1.5)
+            .attr("stroke-dasharray", "4,3");
+        }
       });
-  }
-}
-
-// Diagonal (self)
-for (let i = 0; i < n; i++) {
-  const c = clusterMap[sortedPapers[i].cluster];
-  g.append('rect')
-    .attr('x', i * cellSize + 2)
-    .attr('y', i * cellSize + 2)
-    .attr('width', cellSize - 4)
-    .attr('height', cellSize - 4)
-    .attr('rx', 3)
-    .attr('fill', c.color)
-    .attr('opacity', 0.25);
-}
-
-// Row labels
-for (let i = 0; i < n; i++) {
-  const p = sortedPapers[i];
-  const c = clusterMap[p.cluster];
-  svg.append('text')
-    .attr('x', margin.left - 8)
-    .attr('y', margin.top + i * cellSize + cellSize / 2 + 4)
-    .attr('text-anchor', 'end')
-    .attr('font-size', 10)
-    .attr('font-weight', 400)
-    .attr('fill', c.color)
-    .text(p.label);
-}
-
-// Column labels
-for (let j = 0; j < n; j++) {
-  const p = sortedPapers[j];
-  const c = clusterMap[p.cluster];
-  svg.append('text')
-    .attr('transform', `translate(${margin.left + j * cellSize + cellSize / 2 + 4}, ${margin.top - 8}) rotate(-45)`)
-    .attr('text-anchor', 'start')
-    .attr('font-size', 10)
-    .attr('font-weight', 400)
-    .attr('fill', c.color)
-    .text(p.label);
-}
-
-// Cluster separator lines
-let sep = 0;
-clusters.forEach((c, idx) => {
-  const count = sortedPapers.filter(p => p.cluster === c.id).length;
-  sep += count;
-  if (idx < clusters.length - 1) {
-    g.append('line')
-      .attr('x1', 0).attr('y1', sep * cellSize)
-      .attr('x2', n * cellSize).attr('y2', sep * cellSize)
-      .attr('stroke', '#bbb').attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3');
-    g.append('line')
-      .attr('x1', sep * cellSize).attr('y1', 0)
-      .attr('x2', sep * cellSize).attr('y2', n * cellSize)
-      .attr('stroke', '#bbb').attr('stroke-width', 1.5).attr('stroke-dasharray', '4,3');
-  }
-});
-</script>
-</body>
+    </script>
+  </body>
 </html>

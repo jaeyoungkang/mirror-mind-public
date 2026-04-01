@@ -1,353 +1,573 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Claim Lineage Tree</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #fafaf8;
-    font-family: 'Noto Sans KR', sans-serif;
-    color: #2a2a2a;
-    padding: 40px;
-  }
-  h1 {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: #1a1a1a;
-  }
-  .question {
-    font-size: 16px;
-    font-weight: 400;
-    color: #666;
-    margin-bottom: 12px;
-  }
-  .rationale {
-    font-size: 14px;
-    font-weight: 300;
-    color: #888;
-    line-height: 1.7;
-    margin-bottom: 32px;
-    max-width: 800px;
-  }
-  #chart {
-    width: 100%;
-    max-width: 1100px;
-    height: 700px;
-    border: 1px solid #e0e0dc;
-    border-radius: 8px;
-    background: #fff;
-    overflow: auto;
-  }
-  .legend {
-    display: flex;
-    gap: 24px;
-    margin-top: 16px;
-    font-size: 13px;
-    color: #555;
-    flex-wrap: wrap;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .legend-swatch {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-  }
-  .tooltip {
-    position: absolute;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 10px 14px;
-    font-size: 13px;
-    line-height: 1.6;
-    pointer-events: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    max-width: 280px;
-  }
-  .frontier-badge {
-    font-size: 10px;
-    fill: #ba5a5a;
-    font-weight: 700;
-  }
-</style>
-</head>
-<body>
-
-<h1>Claim Lineage Tree</h1>
-<p class="question">이 시각화가 답하는 질문: 확장 체인의 끝은 어디이고, 어디서 끊기는가?</p>
-<p class="rationale">
-  논증 이론에서 주장의 "확장(extend)"은 기존 논거를 정교화하거나 새로운 맥락에 적용하는 행위이다. 이 확장 관계를 트리(tree)로 펼치면, 네트워크 과학의 계보(lineage) 분석과 같은 시각을 제공한다.
-  트리의 리프 노드(프런티어)는 더 이상 확장되지 않은 주장으로, 연구의 "열린 끝(open frontier)"을 나타낸다.
-  가지가 끊긴 지점은 확장 가능하지만 아직 시도되지 않은 공백이며, 이는 연구 기회를 식별하는 데 유용하다.
-</p>
-
-<div id="chart"></div>
-
-<div class="legend">
-  <div class="legend-item"><div class="legend-swatch" style="background:#6b8e6b"></div>외부 메모리 vs 내부 상태</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:#8b6b8e"></div>망각 곡선 유효성</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:#5a7faa"></div>RAG vs 에이전트 기억</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:#aa7f5a"></div>계획-행동 루프 구조</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:#7aaa9a"></div>시뮬레이션 일반화</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:#aa5a7f"></div>멀티모달 기억 통합</div>
-  <div class="legend-item" style="margin-left: 24px;">
-    <div style="width:14px;height:14px;border:2px dashed #ba5a5a;border-radius:50%"></div>
-    프런티어 (확장 가능 공백)
-  </div>
-</div>
-
-<div class="tooltip" id="tooltip" style="display:none"></div>
-
-<script>
-// ── Data ──
-const zoneNames = [
-  "외부 메모리 vs 내부 상태",
-  "망각 곡선 유효성",
-  "RAG vs 에이전트 기억",
-  "계획-행동 루프 구조",
-  "시뮬레이션 일반화",
-  "멀티모달 기억 통합"
-];
-
-const zoneColors = ["#6b8e6b", "#8b6b8e", "#5a7faa", "#aa7f5a", "#7aaa9a", "#aa5a7f"];
-
-const zones = [
-  { id: 0, name: zoneNames[0], support: 12, extend: 5, qualify: 3, refute: 4, unresolvedScore: 0.72, qualificationDeficit: 0.6, claimIsolation: 0.15, lineageSignal: 0.8, avgConfidence: 0.65 },
-  { id: 1, name: zoneNames[1], support: 8, extend: 3, qualify: 6, refute: 2, unresolvedScore: 0.35, qualificationDeficit: 0.2, claimIsolation: 0.3, lineageSignal: 0.55, avgConfidence: 0.78 },
-  { id: 2, name: zoneNames[2], support: 15, extend: 7, qualify: 2, refute: 6, unresolvedScore: 0.81, qualificationDeficit: 0.75, claimIsolation: 0.1, lineageSignal: 0.9, avgConfidence: 0.58 },
-  { id: 3, name: zoneNames[3], support: 10, extend: 8, qualify: 4, refute: 3, unresolvedScore: 0.45, qualificationDeficit: 0.35, claimIsolation: 0.2, lineageSignal: 0.7, avgConfidence: 0.72 },
-  { id: 4, name: zoneNames[4], support: 6, extend: 4, qualify: 5, refute: 7, unresolvedScore: 0.68, qualificationDeficit: 0.45, claimIsolation: 0.45, lineageSignal: 0.4, avgConfidence: 0.52 },
-  { id: 5, name: zoneNames[5], support: 9, extend: 6, qualify: 1, refute: 2, unresolvedScore: 0.55, qualificationDeficit: 0.8, claimIsolation: 0.35, lineageSignal: 0.65, avgConfidence: 0.69 }
-];
-
-// Extend relations (used for tree construction)
-const extendRelations = [
-  { source: 0, target: 3, count: 2 },
-  { source: 1, target: 3, count: 4 },
-  { source: 2, target: 5, count: 4 },
-  { source: 4, target: 5, count: 3 }
-];
-
-// Build tree hierarchy from extend relations
-// Roots: zones that are NOT targets of any extend relation
-const targetIds = new Set(extendRelations.map(r => r.target));
-const sourceIds = new Set(extendRelations.map(r => r.source));
-const rootIds = [];
-for (let i = 0; i < zones.length; i++) {
-  if (!targetIds.has(i)) rootIds.push(i);
-}
-
-// Build hierarchical tree data
-// Each node has sub-claims (fictional but plausible) to create richer tree depth
-function buildTree() {
-  const root = {
-    name: "논증 계보",
-    zone: -1,
-    children: []
-  };
-
-  // Zone 0: 외부 메모리 vs 내부 상태 (root)
-  root.children.push({
-    name: "외부 메모리 vs 내부 상태",
-    zone: 0, support: 12, depth: 0, isFrontier: false,
-    children: [
-      {
-        name: "메모리 아키텍처 비교",
-        zone: 0, support: 4, depth: 1, isFrontier: false,
-        children: [
-          { name: "계획-행동 루프 구조 (확장)", zone: 3, support: 10, depth: 2, isFrontier: false,
-            children: [
-              { name: "루프 수렴 조건", zone: 3, support: 3, depth: 3, isFrontier: true, children: [] },
-              { name: "멀티스텝 플래닝", zone: 3, support: 5, depth: 3, isFrontier: true, children: [] }
-            ]
-          }
-        ]
-      },
-      {
-        name: "컨텍스트 윈도우 한계",
-        zone: 0, support: 5, depth: 1, isFrontier: true, children: []
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Claim Lineage Tree</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
-    ]
-  });
-
-  // Zone 1: 망각 곡선 유효성 (root)
-  root.children.push({
-    name: "망각 곡선 유효성",
-    zone: 1, support: 8, depth: 0, isFrontier: false,
-    children: [
-      {
-        name: "Ebbinghaus 재검증",
-        zone: 1, support: 3, depth: 1, isFrontier: false,
-        children: [
-          { name: "계획-행동 루프 구조 (확장)", zone: 3, support: 10, depth: 2, isFrontier: false,
-            children: [
-              { name: "망각 기반 재계획", zone: 3, support: 4, depth: 3, isFrontier: true, children: [] }
-            ]
-          }
-        ]
-      },
-      {
-        name: "LLM 토큰 감쇠 모델",
-        zone: 1, support: 2, depth: 1, isFrontier: true, children: []
+      body {
+        background: #fafaf8;
+        font-family: "Noto Sans KR", sans-serif;
+        color: #2a2a2a;
+        padding: 40px;
       }
-    ]
-  });
-
-  // Zone 2: RAG vs 에이전트 기억 (root)
-  root.children.push({
-    name: "RAG vs 에이전트 기억",
-    zone: 2, support: 15, depth: 0, isFrontier: false,
-    children: [
-      {
-        name: "검색 정확도 vs 생성 품질",
-        zone: 2, support: 7, depth: 1, isFrontier: false,
-        children: [
-          { name: "멀티모달 기억 통합 (확장)", zone: 5, support: 9, depth: 2, isFrontier: false,
-            children: [
-              { name: "이미지-텍스트 기억 정렬", zone: 5, support: 3, depth: 3, isFrontier: true, children: [] },
-              { name: "음성 기억 인코딩", zone: 5, support: 2, depth: 3, isFrontier: true, children: [] }
-            ]
-          }
-        ]
-      },
-      {
-        name: "하이브리드 아키텍처",
-        zone: 2, support: 5, depth: 1, isFrontier: true, children: []
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #1a1a1a;
       }
-    ]
-  });
-
-  // Zone 4: 시뮬레이션 일반화 (root)
-  root.children.push({
-    name: "시뮬레이션 일반화",
-    zone: 4, support: 6, depth: 0, isFrontier: false,
-    children: [
-      {
-        name: "도메인 전이 실험",
-        zone: 4, support: 3, depth: 1, isFrontier: false,
-        children: [
-          { name: "멀티모달 기억 통합 (확장)", zone: 5, support: 9, depth: 2, isFrontier: false,
-            children: [
-              { name: "시뮬레이션-실제 간극", zone: 5, support: 4, depth: 3, isFrontier: true, children: [] }
-            ]
-          }
-        ]
-      },
-      {
-        name: "환경 복잡도 스케일링",
-        zone: 4, support: 2, depth: 1, isFrontier: true, children: []
+      .question {
+        font-size: 16px;
+        font-weight: 400;
+        color: #666;
+        margin-bottom: 12px;
       }
-    ]
-  });
+      .rationale {
+        font-size: 14px;
+        font-weight: 300;
+        color: #888;
+        line-height: 1.7;
+        margin-bottom: 32px;
+        max-width: 800px;
+      }
+      #chart {
+        width: 100%;
+        max-width: 1100px;
+        height: 700px;
+        border: 1px solid #e0e0dc;
+        border-radius: 8px;
+        background: #fff;
+        overflow: auto;
+      }
+      .legend {
+        display: flex;
+        gap: 24px;
+        margin-top: 16px;
+        font-size: 13px;
+        color: #555;
+        flex-wrap: wrap;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .legend-swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+      }
+      .tooltip {
+        position: absolute;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        pointer-events: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        max-width: 280px;
+      }
+      .frontier-badge {
+        font-size: 10px;
+        fill: #ba5a5a;
+        font-weight: 700;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Claim Lineage Tree</h1>
+    <p class="question">이 시각화가 답하는 질문: 확장 체인의 끝은 어디이고, 어디서 끊기는가?</p>
+    <p class="rationale">
+      논증 이론에서 주장의 "확장(extend)"은 기존 논거를 정교화하거나 새로운 맥락에 적용하는
+      행위이다. 이 확장 관계를 트리(tree)로 펼치면, 네트워크 과학의 계보(lineage) 분석과 같은 시각을
+      제공한다. 트리의 리프 노드(프런티어)는 더 이상 확장되지 않은 주장으로, 연구의 "열린 끝(open
+      frontier)"을 나타낸다. 가지가 끊긴 지점은 확장 가능하지만 아직 시도되지 않은 공백이며, 이는
+      연구 기회를 식별하는 데 유용하다.
+    </p>
 
-  return root;
-}
+    <div id="chart"></div>
 
-const treeData = buildTree();
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: #6b8e6b"></div>
+        외부 메모리 vs 내부 상태
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: #8b6b8e"></div>
+        망각 곡선 유효성
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: #5a7faa"></div>
+        RAG vs 에이전트 기억
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: #aa7f5a"></div>
+        계획-행동 루프 구조
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: #7aaa9a"></div>
+        시뮬레이션 일반화
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: #aa5a7f"></div>
+        멀티모달 기억 통합
+      </div>
+      <div class="legend-item" style="margin-left: 24px">
+        <div
+          style="width: 14px; height: 14px; border: 2px dashed #ba5a5a; border-radius: 50%"
+        ></div>
+        프런티어 (확장 가능 공백)
+      </div>
+    </div>
 
-// ── Layout ──
-const container = document.getElementById("chart");
-const width = 1080;
-const height = 680;
-const margin = { top: 30, right: 180, bottom: 30, left: 60 };
+    <div class="tooltip" id="tooltip" style="display: none"></div>
 
-const svg = d3.select("#chart").append("svg")
-  .attr("width", width)
-  .attr("height", height);
+    <script>
+      // ── Data ──
+      const zoneNames = [
+        "외부 메모리 vs 내부 상태",
+        "망각 곡선 유효성",
+        "RAG vs 에이전트 기억",
+        "계획-행동 루프 구조",
+        "시뮬레이션 일반화",
+        "멀티모달 기억 통합",
+      ];
 
-const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+      const zoneColors = ["#6b8e6b", "#8b6b8e", "#5a7faa", "#aa7f5a", "#7aaa9a", "#aa5a7f"];
 
-const treeLayout = d3.tree().size([height - margin.top - margin.bottom, width - margin.left - margin.right - 100]);
-const root = d3.hierarchy(treeData);
-treeLayout(root);
+      const zones = [
+        {
+          id: 0,
+          name: zoneNames[0],
+          support: 12,
+          extend: 5,
+          qualify: 3,
+          refute: 4,
+          unresolvedScore: 0.72,
+          qualificationDeficit: 0.6,
+          claimIsolation: 0.15,
+          lineageSignal: 0.8,
+          avgConfidence: 0.65,
+        },
+        {
+          id: 1,
+          name: zoneNames[1],
+          support: 8,
+          extend: 3,
+          qualify: 6,
+          refute: 2,
+          unresolvedScore: 0.35,
+          qualificationDeficit: 0.2,
+          claimIsolation: 0.3,
+          lineageSignal: 0.55,
+          avgConfidence: 0.78,
+        },
+        {
+          id: 2,
+          name: zoneNames[2],
+          support: 15,
+          extend: 7,
+          qualify: 2,
+          refute: 6,
+          unresolvedScore: 0.81,
+          qualificationDeficit: 0.75,
+          claimIsolation: 0.1,
+          lineageSignal: 0.9,
+          avgConfidence: 0.58,
+        },
+        {
+          id: 3,
+          name: zoneNames[3],
+          support: 10,
+          extend: 8,
+          qualify: 4,
+          refute: 3,
+          unresolvedScore: 0.45,
+          qualificationDeficit: 0.35,
+          claimIsolation: 0.2,
+          lineageSignal: 0.7,
+          avgConfidence: 0.72,
+        },
+        {
+          id: 4,
+          name: zoneNames[4],
+          support: 6,
+          extend: 4,
+          qualify: 5,
+          refute: 7,
+          unresolvedScore: 0.68,
+          qualificationDeficit: 0.45,
+          claimIsolation: 0.45,
+          lineageSignal: 0.4,
+          avgConfidence: 0.52,
+        },
+        {
+          id: 5,
+          name: zoneNames[5],
+          support: 9,
+          extend: 6,
+          qualify: 1,
+          refute: 2,
+          unresolvedScore: 0.55,
+          qualificationDeficit: 0.8,
+          claimIsolation: 0.35,
+          lineageSignal: 0.65,
+          avgConfidence: 0.69,
+        },
+      ];
 
-const tooltip = d3.select("#tooltip");
-const supportScale = d3.scaleSqrt().domain([0, 15]).range([6, 22]);
+      // Extend relations (used for tree construction)
+      const extendRelations = [
+        { source: 0, target: 3, count: 2 },
+        { source: 1, target: 3, count: 4 },
+        { source: 2, target: 5, count: 4 },
+        { source: 4, target: 5, count: 3 },
+      ];
 
-// ── Links ──
-g.selectAll(".link")
-  .data(root.links().filter(d => d.source.data.zone !== -1))
-  .join("path")
-  .attr("class", "link")
-  .attr("d", d3.linkHorizontal().x(d => d.y).y(d => d.x))
-  .attr("fill", "none")
-  .attr("stroke", d => {
-    const targetZone = d.target.data.zone;
-    return targetZone >= 0 ? zoneColors[targetZone] : "#ccc";
-  })
-  .attr("stroke-width", 2)
-  .attr("stroke-opacity", 0.5);
+      // Build tree hierarchy from extend relations
+      // Roots: zones that are NOT targets of any extend relation
+      const targetIds = new Set(extendRelations.map((r) => r.target));
+      const sourceIds = new Set(extendRelations.map((r) => r.source));
+      const rootIds = [];
+      for (let i = 0; i < zones.length; i++) {
+        if (!targetIds.has(i)) rootIds.push(i);
+      }
 
-// ── Nodes ──
-const nodes = g.selectAll(".node")
-  .data(root.descendants().filter(d => d.data.zone !== -1))
-  .join("g")
-  .attr("class", "node")
-  .attr("transform", d => `translate(${d.y},${d.x})`);
+      // Build hierarchical tree data
+      // Each node has sub-claims (fictional but plausible) to create richer tree depth
+      function buildTree() {
+        const root = {
+          name: "논증 계보",
+          zone: -1,
+          children: [],
+        };
 
-// Node circles
-nodes.append("circle")
-  .attr("r", d => supportScale(d.data.support || 3))
-  .attr("fill", d => {
-    const z = d.data.zone;
-    return z >= 0 ? zoneColors[z] : "#ccc";
-  })
-  .attr("fill-opacity", d => d.data.isFrontier ? 0.2 : 0.75)
-  .attr("stroke", d => {
-    if (d.data.isFrontier) return "#ba5a5a";
-    const z = d.data.zone;
-    return z >= 0 ? d3.color(zoneColors[z]).darker(0.5) : "#999";
-  })
-  .attr("stroke-width", d => d.data.isFrontier ? 2.5 : 1.5)
-  .attr("stroke-dasharray", d => d.data.isFrontier ? "4,3" : "none");
+        // Zone 0: 외부 메모리 vs 내부 상태 (root)
+        root.children.push({
+          name: "외부 메모리 vs 내부 상태",
+          zone: 0,
+          support: 12,
+          depth: 0,
+          isFrontier: false,
+          children: [
+            {
+              name: "메모리 아키텍처 비교",
+              zone: 0,
+              support: 4,
+              depth: 1,
+              isFrontier: false,
+              children: [
+                {
+                  name: "계획-행동 루프 구조 (확장)",
+                  zone: 3,
+                  support: 10,
+                  depth: 2,
+                  isFrontier: false,
+                  children: [
+                    {
+                      name: "루프 수렴 조건",
+                      zone: 3,
+                      support: 3,
+                      depth: 3,
+                      isFrontier: true,
+                      children: [],
+                    },
+                    {
+                      name: "멀티스텝 플래닝",
+                      zone: 3,
+                      support: 5,
+                      depth: 3,
+                      isFrontier: true,
+                      children: [],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: "컨텍스트 윈도우 한계",
+              zone: 0,
+              support: 5,
+              depth: 1,
+              isFrontier: true,
+              children: [],
+            },
+          ],
+        });
 
-// Frontier badge
-nodes.filter(d => d.data.isFrontier)
-  .append("text")
-  .attr("class", "frontier-badge")
-  .attr("x", d => supportScale(d.data.support || 3) + 4)
-  .attr("y", -6)
-  .text("F");
+        // Zone 1: 망각 곡선 유효성 (root)
+        root.children.push({
+          name: "망각 곡선 유효성",
+          zone: 1,
+          support: 8,
+          depth: 0,
+          isFrontier: false,
+          children: [
+            {
+              name: "Ebbinghaus 재검증",
+              zone: 1,
+              support: 3,
+              depth: 1,
+              isFrontier: false,
+              children: [
+                {
+                  name: "계획-행동 루프 구조 (확장)",
+                  zone: 3,
+                  support: 10,
+                  depth: 2,
+                  isFrontier: false,
+                  children: [
+                    {
+                      name: "망각 기반 재계획",
+                      zone: 3,
+                      support: 4,
+                      depth: 3,
+                      isFrontier: true,
+                      children: [],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: "LLM 토큰 감쇠 모델",
+              zone: 1,
+              support: 2,
+              depth: 1,
+              isFrontier: true,
+              children: [],
+            },
+          ],
+        });
 
-// Labels
-nodes.append("text")
-  .attr("x", d => d.children ? -(supportScale(d.data.support || 3) + 8) : (supportScale(d.data.support || 3) + 8))
-  .attr("dy", "0.35em")
-  .attr("text-anchor", d => d.children ? "end" : "start")
-  .attr("font-size", d => d.depth === 0 ? "12px" : "11px")
-  .attr("font-weight", d => d.depth === 0 ? "600" : "400")
-  .attr("fill", "#2a2a2a")
-  .text(d => {
-    const name = d.data.name;
-    return name.length > 16 ? name.slice(0, 16) + "..." : name;
-  });
+        // Zone 2: RAG vs 에이전트 기억 (root)
+        root.children.push({
+          name: "RAG vs 에이전트 기억",
+          zone: 2,
+          support: 15,
+          depth: 0,
+          isFrontier: false,
+          children: [
+            {
+              name: "검색 정확도 vs 생성 품질",
+              zone: 2,
+              support: 7,
+              depth: 1,
+              isFrontier: false,
+              children: [
+                {
+                  name: "멀티모달 기억 통합 (확장)",
+                  zone: 5,
+                  support: 9,
+                  depth: 2,
+                  isFrontier: false,
+                  children: [
+                    {
+                      name: "이미지-텍스트 기억 정렬",
+                      zone: 5,
+                      support: 3,
+                      depth: 3,
+                      isFrontier: true,
+                      children: [],
+                    },
+                    {
+                      name: "음성 기억 인코딩",
+                      zone: 5,
+                      support: 2,
+                      depth: 3,
+                      isFrontier: true,
+                      children: [],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: "하이브리드 아키텍처",
+              zone: 2,
+              support: 5,
+              depth: 1,
+              isFrontier: true,
+              children: [],
+            },
+          ],
+        });
 
-// ── Tooltip ──
-nodes.on("mouseover", (e, d) => {
-  const data = d.data;
-  const zoneName = data.zone >= 0 ? zoneNames[data.zone] : "N/A";
-  tooltip.style("display", "block").html(`
+        // Zone 4: 시뮬레이션 일반화 (root)
+        root.children.push({
+          name: "시뮬레이션 일반화",
+          zone: 4,
+          support: 6,
+          depth: 0,
+          isFrontier: false,
+          children: [
+            {
+              name: "도메인 전이 실험",
+              zone: 4,
+              support: 3,
+              depth: 1,
+              isFrontier: false,
+              children: [
+                {
+                  name: "멀티모달 기억 통합 (확장)",
+                  zone: 5,
+                  support: 9,
+                  depth: 2,
+                  isFrontier: false,
+                  children: [
+                    {
+                      name: "시뮬레이션-실제 간극",
+                      zone: 5,
+                      support: 4,
+                      depth: 3,
+                      isFrontier: true,
+                      children: [],
+                    },
+                  ],
+                },
+              ],
+            },
+            {
+              name: "환경 복잡도 스케일링",
+              zone: 4,
+              support: 2,
+              depth: 1,
+              isFrontier: true,
+              children: [],
+            },
+          ],
+        });
+
+        return root;
+      }
+
+      const treeData = buildTree();
+
+      // ── Layout ──
+      const container = document.getElementById("chart");
+      const width = 1080;
+      const height = 680;
+      const margin = { top: 30, right: 180, bottom: 30, left: 60 };
+
+      const svg = d3.select("#chart").append("svg").attr("width", width).attr("height", height);
+
+      const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+
+      const treeLayout = d3
+        .tree()
+        .size([height - margin.top - margin.bottom, width - margin.left - margin.right - 100]);
+      const root = d3.hierarchy(treeData);
+      treeLayout(root);
+
+      const tooltip = d3.select("#tooltip");
+      const supportScale = d3.scaleSqrt().domain([0, 15]).range([6, 22]);
+
+      // ── Links ──
+      g.selectAll(".link")
+        .data(root.links().filter((d) => d.source.data.zone !== -1))
+        .join("path")
+        .attr("class", "link")
+        .attr(
+          "d",
+          d3
+            .linkHorizontal()
+            .x((d) => d.y)
+            .y((d) => d.x),
+        )
+        .attr("fill", "none")
+        .attr("stroke", (d) => {
+          const targetZone = d.target.data.zone;
+          return targetZone >= 0 ? zoneColors[targetZone] : "#ccc";
+        })
+        .attr("stroke-width", 2)
+        .attr("stroke-opacity", 0.5);
+
+      // ── Nodes ──
+      const nodes = g
+        .selectAll(".node")
+        .data(root.descendants().filter((d) => d.data.zone !== -1))
+        .join("g")
+        .attr("class", "node")
+        .attr("transform", (d) => `translate(${d.y},${d.x})`);
+
+      // Node circles
+      nodes
+        .append("circle")
+        .attr("r", (d) => supportScale(d.data.support || 3))
+        .attr("fill", (d) => {
+          const z = d.data.zone;
+          return z >= 0 ? zoneColors[z] : "#ccc";
+        })
+        .attr("fill-opacity", (d) => (d.data.isFrontier ? 0.2 : 0.75))
+        .attr("stroke", (d) => {
+          if (d.data.isFrontier) return "#ba5a5a";
+          const z = d.data.zone;
+          return z >= 0 ? d3.color(zoneColors[z]).darker(0.5) : "#999";
+        })
+        .attr("stroke-width", (d) => (d.data.isFrontier ? 2.5 : 1.5))
+        .attr("stroke-dasharray", (d) => (d.data.isFrontier ? "4,3" : "none"));
+
+      // Frontier badge
+      nodes
+        .filter((d) => d.data.isFrontier)
+        .append("text")
+        .attr("class", "frontier-badge")
+        .attr("x", (d) => supportScale(d.data.support || 3) + 4)
+        .attr("y", -6)
+        .text("F");
+
+      // Labels
+      nodes
+        .append("text")
+        .attr("x", (d) =>
+          d.children
+            ? -(supportScale(d.data.support || 3) + 8)
+            : supportScale(d.data.support || 3) + 8,
+        )
+        .attr("dy", "0.35em")
+        .attr("text-anchor", (d) => (d.children ? "end" : "start"))
+        .attr("font-size", (d) => (d.depth === 0 ? "12px" : "11px"))
+        .attr("font-weight", (d) => (d.depth === 0 ? "600" : "400"))
+        .attr("fill", "#2a2a2a")
+        .text((d) => {
+          const name = d.data.name;
+          return name.length > 16 ? name.slice(0, 16) + "..." : name;
+        });
+
+      // ── Tooltip ──
+      nodes
+        .on("mouseover", (e, d) => {
+          const data = d.data;
+          const zoneName = data.zone >= 0 ? zoneNames[data.zone] : "N/A";
+          tooltip.style("display", "block").html(`
     <strong>${data.name}</strong><br/>
     소속 zone: ${zoneName}<br/>
     support 수: ${data.support || "N/A"}<br/>
     깊이: ${d.depth}<br/>
-    ${data.isFrontier
-      ? '<span style="color:#ba5a5a;font-weight:600">프런티어 -- 확장 가능 공백</span>'
-      : `하위 가지: ${d.children ? d.children.length : 0}`
+    ${
+      data.isFrontier
+        ? '<span style="color:#ba5a5a;font-weight:600">프런티어 -- 확장 가능 공백</span>'
+        : `하위 가지: ${d.children ? d.children.length : 0}`
     }
   `);
-}).on("mousemove", (e) => {
-  tooltip.style("left", (e.pageX + 14) + "px").style("top", (e.pageY - 10) + "px");
-}).on("mouseout", () => tooltip.style("display", "none"));
-</script>
-</body>
+        })
+        .on("mousemove", (e) => {
+          tooltip.style("left", e.pageX + 14 + "px").style("top", e.pageY - 10 + "px");
+        })
+        .on("mouseout", () => tooltip.style("display", "none"));
+    </script>
+  </body>
 </html>

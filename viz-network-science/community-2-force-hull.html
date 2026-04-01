@@ -1,304 +1,381 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Force-directed with Modularity Coloring + Hull</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #fafaf8;
-    font-family: 'Noto Sans KR', sans-serif;
-    color: #2a2a2a;
-    padding: 40px 60px;
-  }
-  h1 {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 12px;
-    letter-spacing: -0.5px;
-  }
-  .question {
-    font-size: 15px;
-    font-weight: 400;
-    color: #666;
-    margin-bottom: 8px;
-  }
-  .rationale {
-    font-size: 13px;
-    font-weight: 300;
-    color: #888;
-    line-height: 1.7;
-    margin-bottom: 32px;
-    max-width: 720px;
-  }
-  #chart { position: relative; }
-  .tooltip {
-    position: absolute;
-    pointer-events: none;
-    background: rgba(255,255,255,0.97);
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 10px 14px;
-    font-size: 12px;
-    line-height: 1.6;
-    box-shadow: 0 4px 16px rgba(0,0,0,0.08);
-    opacity: 0;
-    transition: opacity 0.15s;
-    z-index: 10;
-  }
-  .legend {
-    display: flex;
-    gap: 16px;
-    flex-wrap: wrap;
-    margin-bottom: 24px;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: #555;
-  }
-  .legend-swatch {
-    width: 14px;
-    height: 14px;
-    border-radius: 50%;
-  }
-</style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Force-directed with Modularity Coloring + Hull</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #fafaf8;
+        font-family: "Noto Sans KR", sans-serif;
+        color: #2a2a2a;
+        padding: 40px 60px;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 12px;
+        letter-spacing: -0.5px;
+      }
+      .question {
+        font-size: 15px;
+        font-weight: 400;
+        color: #666;
+        margin-bottom: 8px;
+      }
+      .rationale {
+        font-size: 13px;
+        font-weight: 300;
+        color: #888;
+        line-height: 1.7;
+        margin-bottom: 32px;
+        max-width: 720px;
+      }
+      #chart {
+        position: relative;
+      }
+      .tooltip {
+        position: absolute;
+        pointer-events: none;
+        background: rgba(255, 255, 255, 0.97);
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-size: 12px;
+        line-height: 1.6;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+        opacity: 0;
+        transition: opacity 0.15s;
+        z-index: 10;
+      }
+      .legend {
+        display: flex;
+        gap: 16px;
+        flex-wrap: wrap;
+        margin-bottom: 24px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #555;
+      }
+      .legend-swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Force-directed with Modularity Coloring + Hull</h1>
+    <p class="question">
+      이 시각화가 답하는 질문: 클러스터의 공간적 분포와 경계 브릿지 노드는 어디에 위치하는가?
+    </p>
+    <p class="rationale">
+      Force-directed layout은 네트워크의 위상적 거리감을 2D 공간에 자연스럽게 매핑한다. 커뮤니티별
+      색상 코딩에 convex hull 경계를 더하면 클러스터의 물리적 영역과 중첩 정도를 직관적으로 파악할
+      수 있다. Hull 투명도를 density(응집도)에 비례시켜 밀집된 커뮤니티와 느슨한 커뮤니티의 차이를
+      시각적으로 구분하며, 경계에 걸친 노드가 bridge 후보임을 쉽게 식별할 수 있다.
+    </p>
 
-<h1>Force-directed with Modularity Coloring + Hull</h1>
-<p class="question">이 시각화가 답하는 질문: 클러스터의 공간적 분포와 경계 브릿지 노드는 어디에 위치하는가?</p>
-<p class="rationale">
-Force-directed layout은 네트워크의 위상적 거리감을 2D 공간에 자연스럽게 매핑한다.
-커뮤니티별 색상 코딩에 convex hull 경계를 더하면 클러스터의 물리적 영역과 중첩 정도를 직관적으로 파악할 수 있다.
-Hull 투명도를 density(응집도)에 비례시켜 밀집된 커뮤니티와 느슨한 커뮤니티의 차이를 시각적으로 구분하며,
-경계에 걸친 노드가 bridge 후보임을 쉽게 식별할 수 있다.
-</p>
+    <div class="legend" id="legend"></div>
+    <div id="chart">
+      <div class="tooltip" id="tooltip"></div>
+    </div>
 
-<div class="legend" id="legend"></div>
-<div id="chart">
-  <div class="tooltip" id="tooltip"></div>
-</div>
+    <script>
+      // ── Data ──
+      const clusters = [
+        {
+          id: "external-memory",
+          label: "외부 메모리",
+          color: "#7aaa7a",
+          density: 0.82,
+          quality: 0.74,
+        },
+        {
+          id: "cognitive-arch",
+          label: "인지 아키텍처",
+          color: "#7a7aaa",
+          density: 0.76,
+          quality: 0.81,
+        },
+        { id: "simulation", label: "시뮬레이션", color: "#aa8a6a", density: 0.69, quality: 0.67 },
+        { id: "rag", label: "RAG", color: "#8aaa8a", density: 0.88, quality: 0.79 },
+        { id: "multimodal", label: "멀티모달", color: "#aa7a8a", density: 0.71, quality: 0.72 },
+      ];
 
-<script>
-// ── Data ──
-const clusters = [
-  { id: 'external-memory', label: '외부 메모리', color: '#7aaa7a', density: 0.82, quality: 0.74 },
-  { id: 'cognitive-arch',  label: '인지 아키텍처', color: '#7a7aaa', density: 0.76, quality: 0.81 },
-  { id: 'simulation',      label: '시뮬레이션', color: '#aa8a6a', density: 0.69, quality: 0.67 },
-  { id: 'rag',             label: 'RAG', color: '#8aaa8a', density: 0.88, quality: 0.79 },
-  { id: 'multimodal',      label: '멀티모달', color: '#aa7a8a', density: 0.71, quality: 0.72 }
-];
+      const clusterMap = {};
+      clusters.forEach((c) => (clusterMap[c.id] = c));
 
-const clusterMap = {};
-clusters.forEach(c => clusterMap[c.id] = c);
+      const nodes = [
+        { id: "P01", label: "MemGPT", cluster: "external-memory" },
+        { id: "P02", label: "Reflexion", cluster: "external-memory" },
+        { id: "P03", label: "Generative Agents", cluster: "external-memory" },
+        { id: "P04", label: "MemWalker", cluster: "external-memory" },
+        { id: "P05", label: "CoALA", cluster: "cognitive-arch" },
+        { id: "P06", label: "Voyager", cluster: "cognitive-arch" },
+        { id: "P07", label: "LATS", cluster: "cognitive-arch" },
+        { id: "P08", label: "AutoGPT Survey", cluster: "cognitive-arch" },
+        { id: "P09", label: "AgentSims", cluster: "simulation" },
+        { id: "P10", label: "MetaGPT", cluster: "simulation" },
+        { id: "P11", label: "ChatDev", cluster: "simulation" },
+        { id: "P12", label: "CAMEL", cluster: "simulation" },
+        { id: "P13", label: "Sotopia", cluster: "simulation" },
+        { id: "P14", label: "Self-RAG", cluster: "rag" },
+        { id: "P15", label: "RAPTOR", cluster: "rag" },
+        { id: "P16", label: "CRAG", cluster: "rag" },
+        { id: "P17", label: "HyDE", cluster: "rag" },
+        { id: "P18", label: "LLaVA", cluster: "multimodal" },
+        { id: "P19", label: "GPT-4V Survey", cluster: "multimodal" },
+        { id: "P20", label: "CogAgent", cluster: "multimodal" },
+        { id: "P21", label: "Fuyu", cluster: "multimodal" },
+        { id: "P22", label: "Gemini Report", cluster: "multimodal" },
+      ];
 
-const nodes = [
-  { id: 'P01', label: 'MemGPT', cluster: 'external-memory' },
-  { id: 'P02', label: 'Reflexion', cluster: 'external-memory' },
-  { id: 'P03', label: 'Generative Agents', cluster: 'external-memory' },
-  { id: 'P04', label: 'MemWalker', cluster: 'external-memory' },
-  { id: 'P05', label: 'CoALA', cluster: 'cognitive-arch' },
-  { id: 'P06', label: 'Voyager', cluster: 'cognitive-arch' },
-  { id: 'P07', label: 'LATS', cluster: 'cognitive-arch' },
-  { id: 'P08', label: 'AutoGPT Survey', cluster: 'cognitive-arch' },
-  { id: 'P09', label: 'AgentSims', cluster: 'simulation' },
-  { id: 'P10', label: 'MetaGPT', cluster: 'simulation' },
-  { id: 'P11', label: 'ChatDev', cluster: 'simulation' },
-  { id: 'P12', label: 'CAMEL', cluster: 'simulation' },
-  { id: 'P13', label: 'Sotopia', cluster: 'simulation' },
-  { id: 'P14', label: 'Self-RAG', cluster: 'rag' },
-  { id: 'P15', label: 'RAPTOR', cluster: 'rag' },
-  { id: 'P16', label: 'CRAG', cluster: 'rag' },
-  { id: 'P17', label: 'HyDE', cluster: 'rag' },
-  { id: 'P18', label: 'LLaVA', cluster: 'multimodal' },
-  { id: 'P19', label: 'GPT-4V Survey', cluster: 'multimodal' },
-  { id: 'P20', label: 'CogAgent', cluster: 'multimodal' },
-  { id: 'P21', label: 'Fuyu', cluster: 'multimodal' },
-  { id: 'P22', label: 'Gemini Report', cluster: 'multimodal' }
-];
+      const intraEdges = [
+        ["P01", "P02"],
+        ["P01", "P03"],
+        ["P02", "P03"],
+        ["P01", "P04"],
+        ["P03", "P04"],
+        ["P05", "P06"],
+        ["P05", "P07"],
+        ["P06", "P07"],
+        ["P05", "P08"],
+        ["P07", "P08"],
+        ["P09", "P10"],
+        ["P09", "P11"],
+        ["P10", "P11"],
+        ["P09", "P12"],
+        ["P11", "P13"],
+        ["P12", "P13"],
+        ["P14", "P15"],
+        ["P14", "P16"],
+        ["P15", "P16"],
+        ["P14", "P17"],
+        ["P16", "P17"],
+        ["P18", "P19"],
+        ["P18", "P20"],
+        ["P19", "P20"],
+        ["P18", "P21"],
+        ["P20", "P22"],
+        ["P21", "P22"],
+      ];
 
-const intraEdges = [
-  ['P01','P02'],['P01','P03'],['P02','P03'],['P01','P04'],['P03','P04'],
-  ['P05','P06'],['P05','P07'],['P06','P07'],['P05','P08'],['P07','P08'],
-  ['P09','P10'],['P09','P11'],['P10','P11'],['P09','P12'],['P11','P13'],['P12','P13'],
-  ['P14','P15'],['P14','P16'],['P15','P16'],['P14','P17'],['P16','P17'],
-  ['P18','P19'],['P18','P20'],['P19','P20'],['P18','P21'],['P20','P22'],['P21','P22']
-];
+      const interEdges = [
+        ["P01", "P05"],
+        ["P03", "P09"],
+        ["P02", "P14"],
+        ["P06", "P10"],
+        ["P07", "P14"],
+        ["P08", "P18"],
+        ["P11", "P15"],
+        ["P13", "P19"],
+        ["P04", "P17"],
+        ["P16", "P20"],
+        ["P12", "P06"],
+      ];
 
-const interEdges = [
-  ['P01','P05'],['P03','P09'],['P02','P14'],['P06','P10'],
-  ['P07','P14'],['P08','P18'],['P11','P15'],['P13','P19'],
-  ['P04','P17'],['P16','P20'],['P12','P06']
-];
+      const links = [
+        ...intraEdges.map((e) => ({ source: e[0], target: e[1], type: "intra" })),
+        ...interEdges.map((e) => ({ source: e[0], target: e[1], type: "inter" })),
+      ];
 
-const links = [
-  ...intraEdges.map(e => ({ source: e[0], target: e[1], type: 'intra' })),
-  ...interEdges.map(e => ({ source: e[0], target: e[1], type: 'inter' }))
-];
+      // Compute degree
+      const degreeMap = {};
+      nodes.forEach((n) => (degreeMap[n.id] = 0));
+      links.forEach((l) => {
+        degreeMap[l.source]++;
+        degreeMap[l.target]++;
+      });
+      nodes.forEach((n) => (n.degree = degreeMap[n.id]));
 
-// Compute degree
-const degreeMap = {};
-nodes.forEach(n => degreeMap[n.id] = 0);
-links.forEach(l => { degreeMap[l.source]++; degreeMap[l.target]++; });
-nodes.forEach(n => n.degree = degreeMap[n.id]);
+      // ── Render ──
+      const width = 860;
+      const height = 620;
 
-// ── Render ──
-const width = 860;
-const height = 620;
+      const svg = d3.select("#chart").append("svg").attr("width", width).attr("height", height);
 
-const svg = d3.select('#chart')
-  .append('svg')
-  .attr('width', width)
-  .attr('height', height);
+      const tooltip = d3.select("#tooltip");
 
-const tooltip = d3.select('#tooltip');
+      // Legend
+      const legendDiv = d3.select("#legend");
+      clusters.forEach((c) => {
+        const item = legendDiv.append("div").attr("class", "legend-item");
+        item.append("div").attr("class", "legend-swatch").style("background", c.color);
+        item.append("span").text(`${c.label} (d=${c.density}, q=${c.quality})`);
+      });
 
-// Legend
-const legendDiv = d3.select('#legend');
-clusters.forEach(c => {
-  const item = legendDiv.append('div').attr('class', 'legend-item');
-  item.append('div').attr('class', 'legend-swatch').style('background', c.color);
-  item.append('span').text(`${c.label} (d=${c.density}, q=${c.quality})`);
-});
+      // Hulls group (rendered behind everything)
+      const hullGroup = svg.append("g").attr("class", "hulls");
+      const linkGroup = svg.append("g").attr("class", "links");
+      const nodeGroup = svg.append("g").attr("class", "nodes");
+      const labelGroup = svg.append("g").attr("class", "labels");
 
-// Hulls group (rendered behind everything)
-const hullGroup = svg.append('g').attr('class', 'hulls');
-const linkGroup = svg.append('g').attr('class', 'links');
-const nodeGroup = svg.append('g').attr('class', 'nodes');
-const labelGroup = svg.append('g').attr('class', 'labels');
+      // Simulation
+      const simulation = d3
+        .forceSimulation(nodes)
+        .force(
+          "link",
+          d3
+            .forceLink(links)
+            .id((d) => d.id)
+            .distance((d) => (d.type === "intra" ? 50 : 140))
+            .strength((d) => (d.type === "intra" ? 0.7 : 0.08)),
+        )
+        .force("charge", d3.forceManyBody().strength(-180))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force(
+          "collision",
+          d3.forceCollide().radius((d) => radiusScale(d.degree) + 4),
+        );
 
-// Simulation
-const simulation = d3.forceSimulation(nodes)
-  .force('link', d3.forceLink(links).id(d => d.id)
-    .distance(d => d.type === 'intra' ? 50 : 140)
-    .strength(d => d.type === 'intra' ? 0.7 : 0.08))
-  .force('charge', d3.forceManyBody().strength(-180))
-  .force('center', d3.forceCenter(width / 2, height / 2))
-  .force('collision', d3.forceCollide().radius(d => radiusScale(d.degree) + 4));
+      const radiusScale = d3
+        .scaleLinear()
+        .domain([d3.min(nodes, (d) => d.degree), d3.max(nodes, (d) => d.degree)])
+        .range([6, 16]);
 
-const radiusScale = d3.scaleLinear()
-  .domain([d3.min(nodes, d => d.degree), d3.max(nodes, d => d.degree)])
-  .range([6, 16]);
+      // Links
+      const link = linkGroup
+        .selectAll("line")
+        .data(links)
+        .join("line")
+        .attr("stroke", (d) => (d.type === "intra" ? "#bbb" : "#ddd"))
+        .attr("stroke-width", (d) => (d.type === "intra" ? 1.5 : 0.8))
+        .attr("stroke-dasharray", (d) => (d.type === "inter" ? "4,3" : "none"))
+        .attr("stroke-opacity", (d) => (d.type === "intra" ? 0.6 : 0.35));
 
-// Links
-const link = linkGroup.selectAll('line')
-  .data(links)
-  .join('line')
-  .attr('stroke', d => d.type === 'intra' ? '#bbb' : '#ddd')
-  .attr('stroke-width', d => d.type === 'intra' ? 1.5 : 0.8)
-  .attr('stroke-dasharray', d => d.type === 'inter' ? '4,3' : 'none')
-  .attr('stroke-opacity', d => d.type === 'intra' ? 0.6 : 0.35);
-
-// Nodes
-const node = nodeGroup.selectAll('circle')
-  .data(nodes)
-  .join('circle')
-  .attr('r', d => radiusScale(d.degree))
-  .attr('fill', d => clusterMap[d.cluster].color)
-  .attr('stroke', '#fff')
-  .attr('stroke-width', 1.5)
-  .attr('cursor', 'grab')
-  .on('mouseover', function(event, d) {
-    d3.select(this).attr('stroke', '#333').attr('stroke-width', 2.5);
-    const c = clusterMap[d.cluster];
-    tooltip.style('opacity', 1)
-      .html(`
+      // Nodes
+      const node = nodeGroup
+        .selectAll("circle")
+        .data(nodes)
+        .join("circle")
+        .attr("r", (d) => radiusScale(d.degree))
+        .attr("fill", (d) => clusterMap[d.cluster].color)
+        .attr("stroke", "#fff")
+        .attr("stroke-width", 1.5)
+        .attr("cursor", "grab")
+        .on("mouseover", function (event, d) {
+          d3.select(this).attr("stroke", "#333").attr("stroke-width", 2.5);
+          const c = clusterMap[d.cluster];
+          tooltip
+            .style("opacity", 1)
+            .html(
+              `
         <strong>${d.label}</strong><br>
         클러스터: ${c.label}<br>
         Degree centrality: ${d.degree}<br>
         응집도: ${c.density} | 품질: ${c.quality}
-      `)
-      .style('left', (event.offsetX + 16) + 'px')
-      .style('top', (event.offsetY - 10) + 'px');
-  })
-  .on('mousemove', function(event) {
-    tooltip.style('left', (event.offsetX + 16) + 'px')
-      .style('top', (event.offsetY - 10) + 'px');
-  })
-  .on('mouseout', function() {
-    d3.select(this).attr('stroke', '#fff').attr('stroke-width', 1.5);
-    tooltip.style('opacity', 0);
-  })
-  .call(d3.drag()
-    .on('start', (event, d) => {
-      if (!event.active) simulation.alphaTarget(0.3).restart();
-      d.fx = d.x; d.fy = d.y;
-    })
-    .on('drag', (event, d) => { d.fx = event.x; d.fy = event.y; })
-    .on('end', (event, d) => {
-      if (!event.active) simulation.alphaTarget(0);
-      d.fx = null; d.fy = null;
-    })
-  );
+      `,
+            )
+            .style("left", event.offsetX + 16 + "px")
+            .style("top", event.offsetY - 10 + "px");
+        })
+        .on("mousemove", function (event) {
+          tooltip.style("left", event.offsetX + 16 + "px").style("top", event.offsetY - 10 + "px");
+        })
+        .on("mouseout", function () {
+          d3.select(this).attr("stroke", "#fff").attr("stroke-width", 1.5);
+          tooltip.style("opacity", 0);
+        })
+        .call(
+          d3
+            .drag()
+            .on("start", (event, d) => {
+              if (!event.active) simulation.alphaTarget(0.3).restart();
+              d.fx = d.x;
+              d.fy = d.y;
+            })
+            .on("drag", (event, d) => {
+              d.fx = event.x;
+              d.fy = event.y;
+            })
+            .on("end", (event, d) => {
+              if (!event.active) simulation.alphaTarget(0);
+              d.fx = null;
+              d.fy = null;
+            }),
+        );
 
-// Labels
-const label = labelGroup.selectAll('text')
-  .data(nodes)
-  .join('text')
-  .attr('font-size', 10)
-  .attr('font-weight', 400)
-  .attr('fill', '#444')
-  .attr('text-anchor', 'middle')
-  .attr('dy', d => -radiusScale(d.degree) - 5)
-  .text(d => d.label);
+      // Labels
+      const label = labelGroup
+        .selectAll("text")
+        .data(nodes)
+        .join("text")
+        .attr("font-size", 10)
+        .attr("font-weight", 400)
+        .attr("fill", "#444")
+        .attr("text-anchor", "middle")
+        .attr("dy", (d) => -radiusScale(d.degree) - 5)
+        .text((d) => d.label);
 
-// Convex hull helper with padding
-function paddedHull(points, padding) {
-  if (points.length < 3) {
-    // For 1-2 points, create a small circle/ellipse
-    const cx = d3.mean(points, p => p[0]);
-    const cy = d3.mean(points, p => p[1]);
-    const r = padding + 20;
-    const n = 16;
-    return d3.range(n).map(i => {
-      const angle = (2 * Math.PI * i) / n;
-      return [cx + r * Math.cos(angle), cy + r * Math.sin(angle)];
-    });
-  }
-  // Add extra points around each point for padding
-  const expanded = [];
-  const n = 8;
-  points.forEach(([x, y]) => {
-    for (let i = 0; i < n; i++) {
-      const angle = (2 * Math.PI * i) / n;
-      expanded.push([x + padding * Math.cos(angle), y + padding * Math.sin(angle)]);
-    }
-  });
-  return d3.polygonHull(expanded);
-}
+      // Convex hull helper with padding
+      function paddedHull(points, padding) {
+        if (points.length < 3) {
+          // For 1-2 points, create a small circle/ellipse
+          const cx = d3.mean(points, (p) => p[0]);
+          const cy = d3.mean(points, (p) => p[1]);
+          const r = padding + 20;
+          const n = 16;
+          return d3.range(n).map((i) => {
+            const angle = (2 * Math.PI * i) / n;
+            return [cx + r * Math.cos(angle), cy + r * Math.sin(angle)];
+          });
+        }
+        // Add extra points around each point for padding
+        const expanded = [];
+        const n = 8;
+        points.forEach(([x, y]) => {
+          for (let i = 0; i < n; i++) {
+            const angle = (2 * Math.PI * i) / n;
+            expanded.push([x + padding * Math.cos(angle), y + padding * Math.sin(angle)]);
+          }
+        });
+        return d3.polygonHull(expanded);
+      }
 
-simulation.on('tick', () => {
-  link
-    .attr('x1', d => d.source.x).attr('y1', d => d.source.y)
-    .attr('x2', d => d.target.x).attr('y2', d => d.target.y);
+      simulation.on("tick", () => {
+        link
+          .attr("x1", (d) => d.source.x)
+          .attr("y1", (d) => d.source.y)
+          .attr("x2", (d) => d.target.x)
+          .attr("y2", (d) => d.target.y);
 
-  node.attr('cx', d => d.x).attr('cy', d => d.y);
-  label.attr('x', d => d.x).attr('y', d => d.y);
+        node.attr("cx", (d) => d.x).attr("cy", (d) => d.y);
+        label.attr("x", (d) => d.x).attr("y", (d) => d.y);
 
-  // Update hulls
-  hullGroup.selectAll('path').remove();
-  clusters.forEach(c => {
-    const clusterNodes = nodes.filter(n => n.cluster === c.id);
-    const points = clusterNodes.map(n => [n.x, n.y]);
-    const hull = paddedHull(points, 28);
-    if (hull) {
-      hullGroup.append('path')
-        .attr('d', 'M' + hull.map(p => p.join(',')).join('L') + 'Z')
-        .attr('fill', c.color)
-        .attr('fill-opacity', c.density * 0.2)
-        .attr('stroke', c.color)
-        .attr('stroke-width', 1.5)
-        .attr('stroke-opacity', 0.35)
-        .attr('stroke-linejoin', 'round');
-    }
-  });
-});
-</script>
-</body>
+        // Update hulls
+        hullGroup.selectAll("path").remove();
+        clusters.forEach((c) => {
+          const clusterNodes = nodes.filter((n) => n.cluster === c.id);
+          const points = clusterNodes.map((n) => [n.x, n.y]);
+          const hull = paddedHull(points, 28);
+          if (hull) {
+            hullGroup
+              .append("path")
+              .attr("d", "M" + hull.map((p) => p.join(",")).join("L") + "Z")
+              .attr("fill", c.color)
+              .attr("fill-opacity", c.density * 0.2)
+              .attr("stroke", c.color)
+              .attr("stroke-width", 1.5)
+              .attr("stroke-opacity", 0.35)
+              .attr("stroke-linejoin", "round");
+          }
+        });
+      });
+    </script>
+  </body>
 </html>

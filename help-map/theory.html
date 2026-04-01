@@ -1,1235 +1,1584 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>이론적 배경 — Light House 지식맵</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap');
-
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-
-  body {
-    font-family: 'Noto Sans KR', sans-serif;
-    background: #fafaf8;
-    color: #1a1a1a;
-    min-height: 100vh;
-    line-height: 1.7;
-  }
-
-  .back {
-    position: fixed;
-    top: 28px;
-    left: 28px;
-    font-size: 13px;
-    color: #999;
-    text-decoration: none;
-    z-index: 10;
-  }
-
-  .back:hover { color: #1a1a1a; }
-
-  /* ── Header ── */
-  .header {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 12vh 24px 6vh;
-  }
-
-  .header h1 {
-    font-size: 28px;
-    font-weight: 500;
-    letter-spacing: -0.03em;
-    line-height: 1.4;
-    margin-bottom: 12px;
-  }
-
-  .header .lead {
-    font-size: 15px;
-    font-weight: 300;
-    color: #777;
-    line-height: 1.8;
-  }
-
-  /* ── Steps ── */
-  .steps {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 0 24px 12vh;
-  }
-
-  .step {
-    padding: 40px 0;
-    border-top: 1px solid #eee;
-  }
-
-  .step-header {
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  .step-num {
-    font-size: 12px;
-    font-weight: 600;
-    color: #ccc;
-    letter-spacing: 0.04em;
-    flex-shrink: 0;
-  }
-
-  .step-title {
-    font-size: 18px;
-    font-weight: 500;
-    letter-spacing: -0.02em;
-  }
-
-  .step-body {
-    font-size: 14px;
-    font-weight: 300;
-    color: #555;
-    line-height: 1.8;
-    margin-bottom: 20px;
-    padding-left: 36px;
-  }
-
-  /* Visual diagrams */
-  .diagram {
-    margin-left: 36px;
-    padding: 20px;
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 10px;
-  }
-
-  /* Step 1: Search */
-  .search-demo {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    padding: 10px 14px;
-    background: #f5f5f3;
-    border-radius: 8px;
-    font-size: 13px;
-    color: #999;
-    margin-bottom: 12px;
-  }
-
-  .search-demo .q { color: #1a1a1a; font-weight: 400; }
-
-  .papers-list {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .paper-row {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    font-size: 12px;
-    padding: 6px 8px;
-    background: #f8f8f6;
-    border-radius: 6px;
-  }
-
-  .paper-row .dot-paper {
-    width: 8px; height: 8px;
-    border-radius: 50%;
-    background: #ddd;
-    flex-shrink: 0;
-  }
-
-  .paper-row .name { color: #555; flex: 1; }
-  .paper-row .year { color: #bbb; font-size: 11px; }
-
-  /* Step 2: Extraction */
-  .extraction {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .extract-row {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    font-size: 12px;
-  }
-
-  .extract-row .paper-tag {
-    padding: 3px 8px;
-    background: #f0f0ec;
-    border-radius: 4px;
-    color: #888;
-    font-size: 11px;
-    flex-shrink: 0;
-    min-width: 80px;
-    text-align: center;
-  }
-
-  .extract-row .arrow { color: #ccc; flex-shrink: 0; }
-
-  .extract-row .concepts {
-    display: flex;
-    gap: 4px;
-    flex-wrap: wrap;
-  }
-
-  .concept-chip {
-    padding: 3px 8px;
-    background: #e8f0e8;
-    border-radius: 12px;
-    font-size: 11px;
-    color: #5a7a5a;
-    white-space: nowrap;
-  }
-
-  .concept-chip.method { background: #e8e8f0; color: #5a5a7a; }
-  .concept-chip.finding { background: #f0ece8; color: #7a6a5a; }
-
-  /* Step 3: Graph */
-  .graph-viz {
-    position: relative;
-    height: 200px;
-    overflow: hidden;
-  }
-
-  .node {
-    position: absolute;
-    width: 10px; height: 10px;
-    border-radius: 50%;
-    background: #bbb;
-  }
-
-  .node.cluster-a { background: #7aaa7a; }
-  .node.cluster-b { background: #7a7aaa; }
-  .node.cluster-c { background: #aa8a6a; }
-
-  .edge {
-    position: absolute;
-    background: #e0e0dc;
-    height: 1px;
-    transform-origin: left center;
-  }
-
-  .edge.weak {
-    background: #f0e0e0;
-    height: 1px;
-    border-top: 1px dashed #d0b0b0;
-    background: none;
-  }
-
-  .cluster-label {
-    position: absolute;
-    font-size: 10px;
-    font-weight: 500;
-    color: #999;
-    letter-spacing: 0.04em;
-  }
-
-  /* Step 4: Insights */
-  .insight-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .insight-card {
-    padding: 12px 14px;
-    border-radius: 8px;
-    font-size: 13px;
-    line-height: 1.6;
-  }
-
-  .insight-card.cluster-card {
-    background: #f0f5f0;
-    border-left: 3px solid #7aaa7a;
-  }
-
-  .insight-card.gap-card {
-    background: #fdf5f0;
-    border-left: 3px solid #cc8855;
-  }
-
-  .insight-card.bridge-card {
-    background: #f0f0f8;
-    border-left: 3px solid #7a7aaa;
-  }
-
-  .insight-card .insight-type {
-    font-size: 11px;
-    font-weight: 500;
-    color: #999;
-    letter-spacing: 0.04em;
-    margin-bottom: 4px;
-  }
-
-  .insight-card .insight-text {
-    font-weight: 300;
-    color: #444;
-  }
-
-  .insight-card .insight-text strong {
-    font-weight: 500;
-    color: #1a1a1a;
-  }
-
-  /* ── Summary ── */
-  .summary {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 0 24px 8vh;
-  }
-
-  .summary-box {
-    padding: 28px 24px;
-    background: #1a1a1a;
-    border-radius: 12px;
-    color: #d0d0cc;
-  }
-
-  .summary-box h3 {
-    font-size: 16px;
-    font-weight: 500;
-    color: #fff;
-    margin-bottom: 14px;
-  }
-
-  .summary-box p {
-    font-size: 14px;
-    font-weight: 300;
-    line-height: 1.8;
-  }
-
-  .summary-box .key {
-    margin-top: 16px;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .summary-box .key-item {
-    display: flex;
-    gap: 10px;
-    font-size: 13px;
-    align-items: flex-start;
-  }
-
-  .summary-box .key-icon {
-    flex-shrink: 0;
-    margin-top: 2px;
-    font-size: 12px;
-  }
-
-  .summary-box .key-text { font-weight: 300; color: #aaa; }
-  .summary-box .key-text strong { font-weight: 500; color: #e0e0dc; }
-
-  /* ── Deep dive sections ── */
-  .deep {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 0 24px;
-  }
-
-  .deep-section {
-    padding: 40px 0;
-    border-top: 1px solid #eee;
-  }
-
-  .deep-section h2 {
-    font-size: 20px;
-    font-weight: 500;
-    letter-spacing: -0.02em;
-    margin-bottom: 16px;
-  }
-
-  .deep-section .desc {
-    font-size: 14px;
-    font-weight: 300;
-    color: #555;
-    line-height: 1.9;
-    margin-bottom: 20px;
-  }
-
-  .deep-section .desc strong {
-    font-weight: 500;
-    color: #1a1a1a;
-  }
-
-  /* Role split cards */
-  .role-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 14px;
-    margin-bottom: 16px;
-  }
-
-  @media (max-width: 500px) {
-    .role-split { grid-template-columns: 1fr; }
-  }
-
-  .role-card {
-    padding: 18px;
-    border-radius: 10px;
-    border: 1px solid #eee;
-  }
-
-  .role-card.llm { background: #f7f9f4; border-color: #e0e8d8; }
-  .role-card.net { background: #f4f5f9; border-color: #d8dae8; }
-
-  .role-card .role-title {
-    font-size: 14px;
-    font-weight: 600;
-    margin-bottom: 12px;
-  }
-
-  .role-card.llm .role-title { color: #5a7a4a; }
-  .role-card.net .role-title { color: #4a5a7a; }
-
-  .role-card .role-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-  }
-
-  .role-card .role-list li {
-    font-size: 13px;
-    font-weight: 300;
-    color: #555;
-    padding-left: 14px;
-    position: relative;
-    line-height: 1.6;
-  }
-
-  .role-card .role-list li::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 8px;
-    width: 5px; height: 5px;
-    border-radius: 50%;
-  }
-
-  .role-card.llm .role-list li::before { background: #9aba8a; }
-  .role-card.net .role-list li::before { background: #8a9aba; }
-
-  .role-card .role-list li strong {
-    font-weight: 500;
-    color: #333;
-  }
-
-  /* Why-both box */
-  .why-box {
-    padding: 16px 18px;
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 300;
-    color: #666;
-    line-height: 1.8;
-    margin-bottom: 16px;
-  }
-
-  .why-box strong { font-weight: 500; color: #1a1a1a; }
-
-  /* Combo flow */
-  .combo-flow {
-    padding: 18px;
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    margin-bottom: 16px;
-  }
-
-  .combo-step {
-    display: flex;
-    gap: 10px;
-    padding: 10px 0;
-    font-size: 13px;
-    align-items: flex-start;
-  }
-
-  .combo-step + .combo-step { border-top: 1px solid #f5f5f3; }
-
-  .combo-badge {
-    flex-shrink: 0;
-    padding: 2px 8px;
-    border-radius: 4px;
-    font-size: 10px;
-    font-weight: 600;
-    min-width: 60px;
-    text-align: center;
-    margin-top: 2px;
-  }
-
-  .combo-badge.llm { background: #e8f0e0; color: #5a7a4a; }
-  .combo-badge.net { background: #e0e4f0; color: #4a5a7a; }
-  .combo-badge.both { background: #f0ece0; color: #7a6a4a; }
-
-  .combo-text {
-    color: #555;
-    font-weight: 300;
-    line-height: 1.6;
-  }
-
-  .combo-text strong { font-weight: 500; color: #333; }
-
-  /* Theory cards */
-  .theory-card {
-    padding: 16px 18px;
-    background: #f8f8f6;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    margin-bottom: 12px;
-  }
-
-  .theory-card .theory-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: 6px;
-  }
-
-  .theory-card .theory-body {
-    font-size: 13px;
-    font-weight: 300;
-    color: #666;
-    line-height: 1.7;
-  }
-
-  .theory-card .theory-body strong { font-weight: 500; color: #333; }
-
-  .theory-card .theory-ref {
-    margin-top: 8px;
-    font-size: 11px;
-    color: #aaa;
-    font-weight: 300;
-  }
-
-  /* Claim relation diagram */
-  .claim-relations {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 6px;
-    margin-top: 10px;
-  }
-
-  .claim-rel {
-    padding: 4px 10px;
-    border-radius: 6px;
-    font-size: 11px;
-    font-weight: 400;
-  }
-
-  .claim-rel.supports { background: #e8f0e8; color: #4a7a4a; }
-  .claim-rel.contradicts { background: #f0e0e0; color: #8a4a4a; }
-  .claim-rel.extends { background: #e0e8f0; color: #4a5a7a; }
-  .claim-rel.qualifies { background: #f0ece0; color: #7a6a4a; }
-  .claim-rel.depends { background: #f0e8f0; color: #6a4a6a; }
-
-  /* Gap types */
-  .gap-types {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-
-  .gap-type-card {
-    padding: 12px 14px;
-    border-radius: 8px;
-    background: #fdf8f4;
-    border: 1px solid #f0e0d0;
-  }
-
-  .gap-type-card .gap-name {
-    font-size: 13px;
-    font-weight: 500;
-    color: #aa7744;
-    margin-bottom: 4px;
-  }
-
-  .gap-type-card .gap-explain {
-    font-size: 12px;
-    font-weight: 300;
-    color: #888;
-    line-height: 1.6;
-  }
-
-  .gap-type-card .gap-pattern {
-    margin-top: 6px;
-    font-size: 11px;
-    color: #bba888;
-    font-weight: 400;
-  }
-
-  /* Caveat */
-  .caveat {
-    padding: 18px;
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    font-size: 13px;
-    font-weight: 300;
-    color: #666;
-    line-height: 1.8;
-  }
-
-  .caveat strong { font-weight: 500; color: #1a1a1a; }
-
-  .caveat .caveat-title {
-    font-size: 14px;
-    font-weight: 500;
-    color: #1a1a1a;
-    margin-bottom: 8px;
-  }
-
-  /* Lens cards */
-  .lens-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-bottom: 16px;
-  }
-
-  @media (max-width: 500px) {
-    .lens-grid { grid-template-columns: 1fr; }
-  }
-
-  .lens-card {
-    padding: 18px;
-    border-radius: 10px;
-    border: 1px solid #eee;
-    background: #fff;
-  }
-
-  .lens-card .lens-icon {
-    font-size: 20px;
-    margin-bottom: 8px;
-  }
-
-  .lens-card .lens-name {
-    font-size: 14px;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: 4px;
-  }
-
-  .lens-card .lens-question {
-    font-size: 12px;
-    font-weight: 400;
-    color: #aa7744;
-    margin-bottom: 8px;
-    font-style: italic;
-  }
-
-  .lens-card .lens-desc {
-    font-size: 12px;
-    font-weight: 300;
-    color: #777;
-    line-height: 1.6;
-    margin-bottom: 8px;
-  }
-
-  .lens-card .lens-mechanism {
-    font-size: 11px;
-    color: #999;
-    line-height: 1.5;
-    padding: 8px 10px;
-    background: #f8f8f6;
-    border-radius: 6px;
-  }
-
-  .lens-card .lens-mechanism strong {
-    font-weight: 500;
-    color: #666;
-  }
-
-  .lens-card.landscape { border-left: 3px solid #7aaa7a; }
-  .lens-card.extension { border-left: 3px solid #5a8aba; }
-  .lens-card.controversy { border-left: 3px solid #ba5a5a; }
-  .lens-card.temporal { border-left: 3px solid #aa8a5a; }
-
-  .lens-principle {
-    padding: 16px 18px;
-    background: #f8f8f6;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    margin-bottom: 16px;
-  }
-
-  .lens-principle .lp-title {
-    font-size: 13px;
-    font-weight: 600;
-    color: #1a1a1a;
-    margin-bottom: 8px;
-  }
-
-  .lens-principle .lp-split {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin-top: 10px;
-  }
-
-  @media (max-width: 500px) {
-    .lens-principle .lp-split { grid-template-columns: 1fr; }
-  }
-
-  .lens-principle .lp-col {
-    font-size: 12px;
-    font-weight: 300;
-    color: #666;
-    line-height: 1.6;
-  }
-
-  .lens-principle .lp-col .lp-label {
-    font-size: 11px;
-    font-weight: 500;
-    color: #999;
-    letter-spacing: 0.04em;
-    margin-bottom: 4px;
-  }
-
-  .lens-principle .lp-col ul {
-    list-style: none;
-    padding: 0;
-  }
-
-  .lens-principle .lp-col ul li {
-    padding-left: 12px;
-    position: relative;
-    margin-bottom: 3px;
-  }
-
-  .lens-principle .lp-col ul li::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 7px;
-    width: 4px; height: 4px;
-    border-radius: 50%;
-    background: #ccc;
-  }
-
-  /* References */
-  .references {
-    max-width: 860px;
-    margin: 0 auto;
-    padding: 40px 24px 12vh;
-  }
-
-  .references h3 {
-    font-size: 14px;
-    font-weight: 500;
-    color: #999;
-    margin-bottom: 12px;
-    letter-spacing: 0.02em;
-  }
-
-  .ref-list {
-    list-style: none;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-  }
-
-  .ref-list li {
-    font-size: 12px;
-    font-weight: 300;
-    color: #aaa;
-    line-height: 1.5;
-    padding-left: 12px;
-    position: relative;
-  }
-
-  .ref-list li::before {
-    content: '';
-    position: absolute;
-    left: 0; top: 7px;
-    width: 4px; height: 4px;
-    border-radius: 50%;
-    background: #ddd;
-  }
-</style>
-</head>
-<body>
-  <a class="back" href="index.html">&#8592; 목록으로</a>
-
-  <div class="header">
-    <h1>이론적 배경</h1>
-    <div class="lead">
-      AI와 네트워크의 역할 분담, 파이프라인, 핵심 연산, 렌즈 구조, Claim 관계, Gap 유형, 정직한 한계.
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>이론적 배경 — Light House 지식맵</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap");
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Noto Sans KR", sans-serif;
+        background: #fafaf8;
+        color: #1a1a1a;
+        min-height: 100vh;
+        line-height: 1.7;
+      }
+
+      .back {
+        position: fixed;
+        top: 28px;
+        left: 28px;
+        font-size: 13px;
+        color: #999;
+        text-decoration: none;
+        z-index: 10;
+      }
+
+      .back:hover {
+        color: #1a1a1a;
+      }
+
+      /* ── Header ── */
+      .header {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 12vh 24px 6vh;
+      }
+
+      .header h1 {
+        font-size: 28px;
+        font-weight: 500;
+        letter-spacing: -0.03em;
+        line-height: 1.4;
+        margin-bottom: 12px;
+      }
+
+      .header .lead {
+        font-size: 15px;
+        font-weight: 300;
+        color: #777;
+        line-height: 1.8;
+      }
+
+      /* ── Steps ── */
+      .steps {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 0 24px 12vh;
+      }
+
+      .step {
+        padding: 40px 0;
+        border-top: 1px solid #eee;
+      }
+
+      .step-header {
+        display: flex;
+        align-items: baseline;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      .step-num {
+        font-size: 12px;
+        font-weight: 600;
+        color: #ccc;
+        letter-spacing: 0.04em;
+        flex-shrink: 0;
+      }
+
+      .step-title {
+        font-size: 18px;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+      }
+
+      .step-body {
+        font-size: 14px;
+        font-weight: 300;
+        color: #555;
+        line-height: 1.8;
+        margin-bottom: 20px;
+        padding-left: 36px;
+      }
+
+      /* Visual diagrams */
+      .diagram {
+        margin-left: 36px;
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 10px;
+      }
+
+      .impl-box {
+        padding: 20px;
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 10px;
+      }
+
+      .impl-box p {
+        font-size: 14px;
+        font-weight: 300;
+        color: #555;
+        line-height: 1.8;
+        margin-bottom: 10px;
+      }
+
+      .impl-box p:last-child {
+        margin-bottom: 0;
+      }
+
+      .impl-box code {
+        font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+        font-size: 12px;
+        background: #f5f5f3;
+        padding: 2px 5px;
+        border-radius: 4px;
+      }
+
+      /* Step 1: Search */
+      .search-demo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        background: #f5f5f3;
+        border-radius: 8px;
+        font-size: 13px;
+        color: #999;
+        margin-bottom: 12px;
+      }
+
+      .search-demo .q {
+        color: #1a1a1a;
+        font-weight: 400;
+      }
+
+      .papers-list {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .paper-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 12px;
+        padding: 6px 8px;
+        background: #f8f8f6;
+        border-radius: 6px;
+      }
+
+      .paper-row .dot-paper {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: #ddd;
+        flex-shrink: 0;
+      }
+
+      .paper-row .name {
+        color: #555;
+        flex: 1;
+      }
+      .paper-row .year {
+        color: #bbb;
+        font-size: 11px;
+      }
+
+      /* Step 2: Extraction */
+      .extraction {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .extract-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 12px;
+      }
+
+      .extract-row .paper-tag {
+        padding: 3px 8px;
+        background: #f0f0ec;
+        border-radius: 4px;
+        color: #888;
+        font-size: 11px;
+        flex-shrink: 0;
+        min-width: 80px;
+        text-align: center;
+      }
+
+      .extract-row .arrow {
+        color: #ccc;
+        flex-shrink: 0;
+      }
+
+      .extract-row .concepts {
+        display: flex;
+        gap: 4px;
+        flex-wrap: wrap;
+      }
+
+      .concept-chip {
+        padding: 3px 8px;
+        background: #e8f0e8;
+        border-radius: 12px;
+        font-size: 11px;
+        color: #5a7a5a;
+        white-space: nowrap;
+      }
+
+      .concept-chip.method {
+        background: #e8e8f0;
+        color: #5a5a7a;
+      }
+      .concept-chip.finding {
+        background: #f0ece8;
+        color: #7a6a5a;
+      }
+
+      /* Step 3: Graph */
+      .graph-viz {
+        position: relative;
+        height: 200px;
+        overflow: hidden;
+      }
+
+      .node {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: #bbb;
+      }
+
+      .node.cluster-a {
+        background: #7aaa7a;
+      }
+      .node.cluster-b {
+        background: #7a7aaa;
+      }
+      .node.cluster-c {
+        background: #aa8a6a;
+      }
+
+      .edge {
+        position: absolute;
+        background: #e0e0dc;
+        height: 1px;
+        transform-origin: left center;
+      }
+
+      .edge.weak {
+        background: #f0e0e0;
+        height: 1px;
+        border-top: 1px dashed #d0b0b0;
+        background: none;
+      }
+
+      .cluster-label {
+        position: absolute;
+        font-size: 10px;
+        font-weight: 500;
+        color: #999;
+        letter-spacing: 0.04em;
+      }
+
+      /* Step 4: Insights */
+      .insight-cards {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .insight-card {
+        padding: 12px 14px;
+        border-radius: 8px;
+        font-size: 13px;
+        line-height: 1.6;
+      }
+
+      .insight-card.cluster-card {
+        background: #f0f5f0;
+        border-left: 3px solid #7aaa7a;
+      }
+
+      .insight-card.gap-card {
+        background: #fdf5f0;
+        border-left: 3px solid #cc8855;
+      }
+
+      .insight-card.bridge-card {
+        background: #f0f0f8;
+        border-left: 3px solid #7a7aaa;
+      }
+
+      .insight-card .insight-type {
+        font-size: 11px;
+        font-weight: 500;
+        color: #999;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
+      }
+
+      .insight-card .insight-text {
+        font-weight: 300;
+        color: #444;
+      }
+
+      .insight-card .insight-text strong {
+        font-weight: 500;
+        color: #1a1a1a;
+      }
+
+      /* ── Summary ── */
+      .summary {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 0 24px 8vh;
+      }
+
+      .summary-box {
+        padding: 28px 24px;
+        background: #1a1a1a;
+        border-radius: 12px;
+        color: #d0d0cc;
+      }
+
+      .summary-box h3 {
+        font-size: 16px;
+        font-weight: 500;
+        color: #fff;
+        margin-bottom: 14px;
+      }
+
+      .summary-box p {
+        font-size: 14px;
+        font-weight: 300;
+        line-height: 1.8;
+      }
+
+      .summary-box .key {
+        margin-top: 16px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .summary-box .key-item {
+        display: flex;
+        gap: 10px;
+        font-size: 13px;
+        align-items: flex-start;
+      }
+
+      .summary-box .key-icon {
+        flex-shrink: 0;
+        margin-top: 2px;
+        font-size: 12px;
+      }
+
+      .summary-box .key-text {
+        font-weight: 300;
+        color: #aaa;
+      }
+      .summary-box .key-text strong {
+        font-weight: 500;
+        color: #e0e0dc;
+      }
+
+      /* ── Deep dive sections ── */
+      .deep {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 0 24px;
+      }
+
+      .deep-section {
+        padding: 40px 0;
+        border-top: 1px solid #eee;
+      }
+
+      .deep-section h2 {
+        font-size: 20px;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        margin-bottom: 16px;
+      }
+
+      .deep-section .desc {
+        font-size: 14px;
+        font-weight: 300;
+        color: #555;
+        line-height: 1.9;
+        margin-bottom: 20px;
+      }
+
+      .deep-section .desc strong {
+        font-weight: 500;
+        color: #1a1a1a;
+      }
+
+      /* Role split cards */
+      .role-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+        margin-bottom: 16px;
+      }
+
+      @media (max-width: 500px) {
+        .role-split {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .role-card {
+        padding: 18px;
+        border-radius: 10px;
+        border: 1px solid #eee;
+      }
+
+      .role-card.llm {
+        background: #f7f9f4;
+        border-color: #e0e8d8;
+      }
+      .role-card.net {
+        background: #f4f5f9;
+        border-color: #d8dae8;
+      }
+
+      .role-card .role-title {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 12px;
+      }
+
+      .role-card.llm .role-title {
+        color: #5a7a4a;
+      }
+      .role-card.net .role-title {
+        color: #4a5a7a;
+      }
+
+      .role-card .role-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+
+      .role-card .role-list li {
+        font-size: 13px;
+        font-weight: 300;
+        color: #555;
+        padding-left: 14px;
+        position: relative;
+        line-height: 1.6;
+      }
+
+      .role-card .role-list li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 8px;
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+      }
+
+      .role-card.llm .role-list li::before {
+        background: #9aba8a;
+      }
+      .role-card.net .role-list li::before {
+        background: #8a9aba;
+      }
+
+      .role-card .role-list li strong {
+        font-weight: 500;
+        color: #333;
+      }
+
+      /* Why-both box */
+      .why-box {
+        padding: 16px 18px;
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 300;
+        color: #666;
+        line-height: 1.8;
+        margin-bottom: 16px;
+      }
+
+      .why-box strong {
+        font-weight: 500;
+        color: #1a1a1a;
+      }
+
+      /* Combo flow */
+      .combo-flow {
+        padding: 18px;
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        margin-bottom: 16px;
+      }
+
+      .combo-step {
+        display: flex;
+        gap: 10px;
+        padding: 10px 0;
+        font-size: 13px;
+        align-items: flex-start;
+      }
+
+      .combo-step + .combo-step {
+        border-top: 1px solid #f5f5f3;
+      }
+
+      .combo-badge {
+        flex-shrink: 0;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 10px;
+        font-weight: 600;
+        min-width: 60px;
+        text-align: center;
+        margin-top: 2px;
+      }
+
+      .combo-badge.llm {
+        background: #e8f0e0;
+        color: #5a7a4a;
+      }
+      .combo-badge.net {
+        background: #e0e4f0;
+        color: #4a5a7a;
+      }
+      .combo-badge.both {
+        background: #f0ece0;
+        color: #7a6a4a;
+      }
+
+      .combo-text {
+        color: #555;
+        font-weight: 300;
+        line-height: 1.6;
+      }
+
+      .combo-text strong {
+        font-weight: 500;
+        color: #333;
+      }
+
+      /* Theory cards */
+      .theory-card {
+        padding: 16px 18px;
+        background: #f8f8f6;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        margin-bottom: 12px;
+      }
+
+      .theory-card .theory-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 6px;
+      }
+
+      .theory-card .theory-body {
+        font-size: 13px;
+        font-weight: 300;
+        color: #666;
+        line-height: 1.7;
+      }
+
+      .theory-card .theory-body strong {
+        font-weight: 500;
+        color: #333;
+      }
+
+      .theory-card .theory-ref {
+        margin-top: 8px;
+        font-size: 11px;
+        color: #aaa;
+        font-weight: 300;
+      }
+
+      /* Claim relation diagram */
+      .claim-relations {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        margin-top: 10px;
+      }
+
+      .claim-rel {
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 400;
+      }
+
+      .claim-rel.supports {
+        background: #e8f0e8;
+        color: #4a7a4a;
+      }
+      .claim-rel.contradicts {
+        background: #f0e0e0;
+        color: #8a4a4a;
+      }
+      .claim-rel.extends {
+        background: #e0e8f0;
+        color: #4a5a7a;
+      }
+      .claim-rel.qualifies {
+        background: #f0ece0;
+        color: #7a6a4a;
+      }
+      .claim-rel.depends {
+        background: #f0e8f0;
+        color: #6a4a6a;
+      }
+
+      /* Gap types */
+      .gap-types {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .gap-type-card {
+        padding: 12px 14px;
+        border-radius: 8px;
+        background: #fdf8f4;
+        border: 1px solid #f0e0d0;
+      }
+
+      .gap-type-card .gap-name {
+        font-size: 13px;
+        font-weight: 500;
+        color: #aa7744;
+        margin-bottom: 4px;
+      }
+
+      .gap-type-card .gap-explain {
+        font-size: 12px;
+        font-weight: 300;
+        color: #888;
+        line-height: 1.6;
+      }
+
+      .gap-type-card .gap-pattern {
+        margin-top: 6px;
+        font-size: 11px;
+        color: #bba888;
+        font-weight: 400;
+      }
+
+      /* Caveat */
+      .caveat {
+        padding: 18px;
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        font-size: 13px;
+        font-weight: 300;
+        color: #666;
+        line-height: 1.8;
+      }
+
+      .caveat strong {
+        font-weight: 500;
+        color: #1a1a1a;
+      }
+
+      .caveat .caveat-title {
+        font-size: 14px;
+        font-weight: 500;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+      }
+
+      /* Lens cards */
+      .lens-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-bottom: 16px;
+      }
+
+      @media (max-width: 500px) {
+        .lens-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .lens-card {
+        padding: 18px;
+        border-radius: 10px;
+        border: 1px solid #eee;
+        background: #fff;
+      }
+
+      .lens-card .lens-icon {
+        font-size: 20px;
+        margin-bottom: 8px;
+      }
+
+      .lens-card .lens-name {
+        font-size: 14px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 4px;
+      }
+
+      .lens-card .lens-question {
+        font-size: 12px;
+        font-weight: 400;
+        color: #aa7744;
+        margin-bottom: 8px;
+        font-style: italic;
+      }
+
+      .lens-card .lens-desc {
+        font-size: 12px;
+        font-weight: 300;
+        color: #777;
+        line-height: 1.6;
+        margin-bottom: 8px;
+      }
+
+      .lens-card .lens-mechanism {
+        font-size: 11px;
+        color: #999;
+        line-height: 1.5;
+        padding: 8px 10px;
+        background: #f8f8f6;
+        border-radius: 6px;
+      }
+
+      .lens-card .lens-mechanism strong {
+        font-weight: 500;
+        color: #666;
+      }
+
+      .lens-card.landscape {
+        border-left: 3px solid #7aaa7a;
+      }
+      .lens-card.extension {
+        border-left: 3px solid #5a8aba;
+      }
+      .lens-card.controversy {
+        border-left: 3px solid #ba5a5a;
+      }
+      .lens-card.temporal {
+        border-left: 3px solid #aa8a5a;
+      }
+
+      .lens-principle {
+        padding: 16px 18px;
+        background: #f8f8f6;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        margin-bottom: 16px;
+      }
+
+      .lens-principle .lp-title {
+        font-size: 13px;
+        font-weight: 600;
+        color: #1a1a1a;
+        margin-bottom: 8px;
+      }
+
+      .lens-principle .lp-split {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+        margin-top: 10px;
+      }
+
+      @media (max-width: 500px) {
+        .lens-principle .lp-split {
+          grid-template-columns: 1fr;
+        }
+      }
+
+      .lens-principle .lp-col {
+        font-size: 12px;
+        font-weight: 300;
+        color: #666;
+        line-height: 1.6;
+      }
+
+      .lens-principle .lp-col .lp-label {
+        font-size: 11px;
+        font-weight: 500;
+        color: #999;
+        letter-spacing: 0.04em;
+        margin-bottom: 4px;
+      }
+
+      .lens-principle .lp-col ul {
+        list-style: none;
+        padding: 0;
+      }
+
+      .lens-principle .lp-col ul li {
+        padding-left: 12px;
+        position: relative;
+        margin-bottom: 3px;
+      }
+
+      .lens-principle .lp-col ul li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 7px;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: #ccc;
+      }
+
+      /* References */
+      .references {
+        max-width: 860px;
+        margin: 0 auto;
+        padding: 40px 24px 12vh;
+      }
+
+      .references h3 {
+        font-size: 14px;
+        font-weight: 500;
+        color: #999;
+        margin-bottom: 12px;
+        letter-spacing: 0.02em;
+      }
+
+      .ref-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+      }
+
+      .ref-list li {
+        font-size: 12px;
+        font-weight: 300;
+        color: #aaa;
+        line-height: 1.5;
+        padding-left: 12px;
+        position: relative;
+      }
+
+      .ref-list li::before {
+        content: "";
+        position: absolute;
+        left: 0;
+        top: 7px;
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: #ddd;
+      }
+    </style>
+  </head>
+  <body>
+    <a class="back" href="index.html">&#8592; 목록으로</a>
+
+    <div class="header">
+      <h1>이론적 배경</h1>
+      <div class="lead">
+        AI와 네트워크의 역할 분담, 파이프라인, 핵심 연산, 렌즈 구조, Claim 관계, Gap 유형, 정직한
+        한계.
+      </div>
     </div>
-  </div>
 
-  <!-- 4단계 설명은 index.html에 있음 -->
-  <div style="display:none">
-    <!-- Step 1 -->
-    <div class="step">
-      <div class="step-header">
-        <span class="step-num">01</span>
-        <span class="step-title">논문을 검색한다</span>
-      </div>
-      <div class="step-body">
-        검색바에 키워드를 입력하거나, 대화로 주제를 던지면 관련 논문을 찾는다. 여기까지는 일반 검색과 같다. 이때 들어온 검색 결과가 이번 지식맵의 경계를 정한다. 맵이 보여주는 것은 이 검색 범위 안의 구조다.
-      </div>
-      <div class="diagram">
-        <div class="search-demo">
-          <span>&#x1F50D;</span>
-          <span class="q">LLM agent memory architecture</span>
+    <!-- 4단계 설명은 index.html에 있음 -->
+    <div style="display: none">
+      <!-- Step 1 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-num">01</span>
+          <span class="step-title">논문을 검색한다</span>
         </div>
-        <div class="papers-list">
-          <div class="paper-row"><div class="dot-paper"></div><span class="name">MemoryBank: Enhancing LLM Agents...</span><span class="year">2024</span></div>
-          <div class="paper-row"><div class="dot-paper"></div><span class="name">Cognitive Architectures for Language Agents</span><span class="year">2024</span></div>
-          <div class="paper-row"><div class="dot-paper"></div><span class="name">Generative Agents: Interactive Simulacra</span><span class="year">2023</span></div>
-          <div class="paper-row"><div class="dot-paper"></div><span class="name">RAG for AI-Generated Content: A Survey</span><span class="year">2024</span></div>
+        <div class="step-body">
+          검색바에 키워드를 입력하거나, 대화로 주제를 던지면 관련 논문을 찾는다. 여기까지는 일반
+          검색과 같다. 이때 들어온 검색 결과가 이번 지식맵의 경계를 정한다. 맵이 보여주는 것은 이
+          검색 범위 안의 구조다.
         </div>
-      </div>
-    </div>
-
-    <!-- Step 2 -->
-    <div class="step">
-      <div class="step-header">
-        <span class="step-num">02</span>
-        <span class="step-title">AI가 개념을 뽑는다</span>
-      </div>
-      <div class="step-body">
-        각 논문에서 AI가 핵심 개념(주제, 방법론, 발견)을 추출한다. 사람이 논문을 읽으며 밑줄 치는 것과 같다. 다만 수십 편을 동시에 읽고 정리한다. 같은 뜻의 다른 표현("RAG"와 "retrieval-augmented generation" 등)은 하나의 표준 개념(canonical concept)으로 묶고, 어느 논문의 어느 문장에서 나왔는지 근거와 함께 저장한다.
-      </div>
-      <div class="diagram">
-        <div class="extraction">
-          <div class="extract-row">
-            <span class="paper-tag">MemoryBank</span>
-            <span class="arrow">&rarr;</span>
-            <div class="concepts">
-              <span class="concept-chip">장기 기억</span>
-              <span class="concept-chip method">망각 곡선</span>
-              <span class="concept-chip">외부 저장소</span>
+        <div class="diagram">
+          <div class="search-demo">
+            <span>&#x1F50D;</span>
+            <span class="q">LLM agent memory architecture</span>
+          </div>
+          <div class="papers-list">
+            <div class="paper-row">
+              <div class="dot-paper"></div>
+              <span class="name">MemoryBank: Enhancing LLM Agents...</span
+              ><span class="year">2024</span>
+            </div>
+            <div class="paper-row">
+              <div class="dot-paper"></div>
+              <span class="name">Cognitive Architectures for Language Agents</span
+              ><span class="year">2024</span>
+            </div>
+            <div class="paper-row">
+              <div class="dot-paper"></div>
+              <span class="name">Generative Agents: Interactive Simulacra</span
+              ><span class="year">2023</span>
+            </div>
+            <div class="paper-row">
+              <div class="dot-paper"></div>
+              <span class="name">RAG for AI-Generated Content: A Survey</span
+              ><span class="year">2024</span>
             </div>
           </div>
-          <div class="extract-row">
-            <span class="paper-tag">CoALA</span>
-            <span class="arrow">&rarr;</span>
-            <div class="concepts">
-              <span class="concept-chip">인지 아키텍처</span>
-              <span class="concept-chip method">계획-행동 루프</span>
-              <span class="concept-chip finding">기억 분류 체계</span>
+        </div>
+      </div>
+
+      <!-- Step 2 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-num">02</span>
+          <span class="step-title">AI가 개념을 뽑는다</span>
+        </div>
+        <div class="step-body">
+          각 논문에서 AI가 핵심 개념(주제, 방법론, 발견)을 추출한다. 사람이 논문을 읽으며 밑줄 치는
+          것과 같다. 다만 수십 편을 동시에 읽고 정리한다. 같은 뜻의 다른 표현("RAG"와
+          "retrieval-augmented generation" 등)은 하나의 표준 개념(canonical concept)으로 묶고, 어느
+          논문의 어느 문장에서 나왔는지 근거와 함께 저장한다.
+        </div>
+        <div class="diagram">
+          <div class="extraction">
+            <div class="extract-row">
+              <span class="paper-tag">MemoryBank</span>
+              <span class="arrow">&rarr;</span>
+              <div class="concepts">
+                <span class="concept-chip">장기 기억</span>
+                <span class="concept-chip method">망각 곡선</span>
+                <span class="concept-chip">외부 저장소</span>
+              </div>
+            </div>
+            <div class="extract-row">
+              <span class="paper-tag">CoALA</span>
+              <span class="arrow">&rarr;</span>
+              <div class="concepts">
+                <span class="concept-chip">인지 아키텍처</span>
+                <span class="concept-chip method">계획-행동 루프</span>
+                <span class="concept-chip finding">기억 분류 체계</span>
+              </div>
+            </div>
+            <div class="extract-row">
+              <span class="paper-tag">Generative Agents</span>
+              <span class="arrow">&rarr;</span>
+              <div class="concepts">
+                <span class="concept-chip">반성 기억</span>
+                <span class="concept-chip method">기억 스트림</span>
+                <span class="concept-chip">시뮬레이션</span>
+              </div>
             </div>
           </div>
-          <div class="extract-row">
-            <span class="paper-tag">Generative Agents</span>
-            <span class="arrow">&rarr;</span>
-            <div class="concepts">
-              <span class="concept-chip">반성 기억</span>
-              <span class="concept-chip method">기억 스트림</span>
-              <span class="concept-chip">시뮬레이션</span>
+        </div>
+      </div>
+
+      <!-- Step 3 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-num">03</span>
+          <span class="step-title">네트워크가 구조를 잡는다</span>
+        </div>
+        <div class="step-body">
+          추출된 개념들이 어떻게 연결되는지를 네트워크로 그린다. 같은 논문에 함께 등장하는 개념은
+          가깝고, 안 그런 개념은 멀다. 비슷한 것끼리 <strong>클러스터</strong>(연구 갈래)가
+          형성되고, 클러스터 사이에 <strong>이어질 법한데 실제 연결이 약한 곳</strong> — 공통 과제나
+          인용 맥락이 있는데도 직접 연결이 빈약한 곳 — 이 드러난다.
+        </div>
+        <div class="diagram">
+          <div class="graph-viz">
+            <!-- Cluster A: External Memory -->
+            <div class="node cluster-a" style="left: 15%; top: 30%"></div>
+            <div class="node cluster-a" style="left: 20%; top: 50%"></div>
+            <div class="node cluster-a" style="left: 10%; top: 60%"></div>
+            <div class="node cluster-a" style="left: 25%; top: 40%"></div>
+            <div class="node cluster-a" style="left: 18%; top: 70%"></div>
+            <div class="cluster-label" style="left: 5%; top: 15%; color: #7aaa7a">외부 메모리</div>
+
+            <!-- Cluster B: Cognitive -->
+            <div class="node cluster-b" style="left: 65%; top: 25%"></div>
+            <div class="node cluster-b" style="left: 72%; top: 45%"></div>
+            <div class="node cluster-b" style="left: 60%; top: 55%"></div>
+            <div class="node cluster-b" style="left: 75%; top: 35%"></div>
+            <div class="node cluster-b" style="left: 68%; top: 65%"></div>
+            <div class="cluster-label" style="left: 62%; top: 12%; color: #7a7aaa">
+              인지 아키텍처
+            </div>
+
+            <!-- Cluster C: Simulation -->
+            <div class="node cluster-c" style="left: 40%; top: 75%"></div>
+            <div class="node cluster-c" style="left: 48%; top: 85%"></div>
+            <div class="node cluster-c" style="left: 35%; top: 88%"></div>
+            <div class="cluster-label" style="left: 32%; top: 95%; color: #aa8a6a">시뮬레이션</div>
+
+            <!-- Gap indicator -->
+            <div
+              style="
+                position: absolute;
+                left: 38%;
+                top: 38%;
+                font-size: 24px;
+                color: #dcc0a0;
+                font-weight: 300;
+                opacity: 0.7;
+              "
+            >
+              ?
+            </div>
+            <div
+              style="
+                position: absolute;
+                left: 33%;
+                top: 48%;
+                font-size: 10px;
+                color: #cc8855;
+                font-weight: 400;
+                letter-spacing: 0.02em;
+              "
+            >
+              공백
+            </div>
+
+            <!-- Some edges (simplified - just dots suggesting connections) -->
+            <svg
+              style="position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none"
+            >
+              <!-- Cluster A internal -->
+              <line x1="15%" y1="30%" x2="20%" y2="50%" stroke="#d0ddd0" stroke-width="1" />
+              <line x1="20%" y1="50%" x2="25%" y2="40%" stroke="#d0ddd0" stroke-width="1" />
+              <line x1="10%" y1="60%" x2="18%" y2="70%" stroke="#d0ddd0" stroke-width="1" />
+              <line x1="15%" y1="30%" x2="25%" y2="40%" stroke="#d0ddd0" stroke-width="1" />
+              <!-- Cluster B internal -->
+              <line x1="65%" y1="25%" x2="75%" y2="35%" stroke="#d0d0dd" stroke-width="1" />
+              <line x1="72%" y1="45%" x2="60%" y2="55%" stroke="#d0d0dd" stroke-width="1" />
+              <line x1="65%" y1="25%" x2="72%" y2="45%" stroke="#d0d0dd" stroke-width="1" />
+              <!-- Weak cross-cluster -->
+              <line
+                x1="25%"
+                y1="40%"
+                x2="60%"
+                y2="55%"
+                stroke="#e0c0a0"
+                stroke-width="1"
+                stroke-dasharray="4,4"
+              />
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4 -->
+      <div class="step">
+        <div class="step-header">
+          <span class="step-num">04</span>
+          <span class="step-title">클러스터와 공백이 보인다</span>
+        </div>
+        <div class="step-body">
+          지식맵이 알려주는 것은 세 가지다. 연구가 어떤 <strong>갈래</strong>로 나뉘는지, 갈래
+          사이에 <strong>비어있는 곳</strong>이 어디인지, 그리고 갈래를 잇는
+          <strong>다리 논문</strong>이 무엇인지.
+        </div>
+        <div class="diagram">
+          <div class="insight-cards">
+            <div class="insight-card cluster-card">
+              <div class="insight-type">클러스터 (연구 갈래)</div>
+              <div class="insight-text">
+                "이 분야는 크게 <strong>외부 메모리 접근</strong>과
+                <strong>인지 아키텍처 접근</strong>으로 나뉜다."
+              </div>
+            </div>
+            <div class="insight-card gap-card">
+              <div class="insight-type">공백 (gap candidate)</div>
+              <div class="insight-text">
+                "두 갈래 모두 단일 세션 기억에 집중한다. <strong>세션 간 장기 기억 통합</strong>은
+                양쪽 다 얇다."
+              </div>
+            </div>
+            <div class="insight-card bridge-card">
+              <div class="insight-type">다리 (bridge)</div>
+              <div class="insight-text">
+                "Generative Agents(2023)가 두 갈래를 연결하는 징검다리 논문이다. 외부 메모리를 인지
+                아키텍처 안에서 사용한 초기 사례."
+              </div>
             </div>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Step 3 -->
-    <div class="step">
-      <div class="step-header">
-        <span class="step-num">03</span>
-        <span class="step-title">네트워크가 구조를 잡는다</span>
-      </div>
-      <div class="step-body">
-        추출된 개념들이 어떻게 연결되는지를 네트워크로 그린다. 같은 논문에 함께 등장하는 개념은 가깝고, 안 그런 개념은 멀다. 비슷한 것끼리 <strong>클러스터</strong>(연구 갈래)가 형성되고, 클러스터 사이에 <strong>이어질 법한데 실제 연결이 약한 곳</strong> — 공통 과제나 인용 맥락이 있는데도 직접 연결이 빈약한 곳 — 이 드러난다.
-      </div>
-      <div class="diagram">
-        <div class="graph-viz">
-          <!-- Cluster A: External Memory -->
-          <div class="node cluster-a" style="left:15%;top:30%"></div>
-          <div class="node cluster-a" style="left:20%;top:50%"></div>
-          <div class="node cluster-a" style="left:10%;top:60%"></div>
-          <div class="node cluster-a" style="left:25%;top:40%"></div>
-          <div class="node cluster-a" style="left:18%;top:70%"></div>
-          <div class="cluster-label" style="left:5%;top:15%;color:#7aaa7a">외부 메모리</div>
-
-          <!-- Cluster B: Cognitive -->
-          <div class="node cluster-b" style="left:65%;top:25%"></div>
-          <div class="node cluster-b" style="left:72%;top:45%"></div>
-          <div class="node cluster-b" style="left:60%;top:55%"></div>
-          <div class="node cluster-b" style="left:75%;top:35%"></div>
-          <div class="node cluster-b" style="left:68%;top:65%"></div>
-          <div class="cluster-label" style="left:62%;top:12%;color:#7a7aaa">인지 아키텍처</div>
-
-          <!-- Cluster C: Simulation -->
-          <div class="node cluster-c" style="left:40%;top:75%"></div>
-          <div class="node cluster-c" style="left:48%;top:85%"></div>
-          <div class="node cluster-c" style="left:35%;top:88%"></div>
-          <div class="cluster-label" style="left:32%;top:95%;color:#aa8a6a">시뮬레이션</div>
-
-          <!-- Gap indicator -->
-          <div style="position:absolute;left:38%;top:38%;font-size:24px;color:#dcc0a0;font-weight:300;opacity:0.7">?</div>
-          <div style="position:absolute;left:33%;top:48%;font-size:10px;color:#cc8855;font-weight:400;letter-spacing:0.02em">공백</div>
-
-          <!-- Some edges (simplified - just dots suggesting connections) -->
-          <svg style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none">
-            <!-- Cluster A internal -->
-            <line x1="15%" y1="30%" x2="20%" y2="50%" stroke="#d0ddd0" stroke-width="1"/>
-            <line x1="20%" y1="50%" x2="25%" y2="40%" stroke="#d0ddd0" stroke-width="1"/>
-            <line x1="10%" y1="60%" x2="18%" y2="70%" stroke="#d0ddd0" stroke-width="1"/>
-            <line x1="15%" y1="30%" x2="25%" y2="40%" stroke="#d0ddd0" stroke-width="1"/>
-            <!-- Cluster B internal -->
-            <line x1="65%" y1="25%" x2="75%" y2="35%" stroke="#d0d0dd" stroke-width="1"/>
-            <line x1="72%" y1="45%" x2="60%" y2="55%" stroke="#d0d0dd" stroke-width="1"/>
-            <line x1="65%" y1="25%" x2="72%" y2="45%" stroke="#d0d0dd" stroke-width="1"/>
-            <!-- Weak cross-cluster -->
-            <line x1="25%" y1="40%" x2="60%" y2="55%" stroke="#e0c0a0" stroke-width="1" stroke-dasharray="4,4"/>
-          </svg>
-        </div>
-      </div>
-    </div>
-
-    <!-- Step 4 -->
-    <div class="step">
-      <div class="step-header">
-        <span class="step-num">04</span>
-        <span class="step-title">클러스터와 공백이 보인다</span>
-      </div>
-      <div class="step-body">
-        지식맵이 알려주는 것은 세 가지다. 연구가 어떤 <strong>갈래</strong>로 나뉘는지, 갈래 사이에 <strong>비어있는 곳</strong>이 어디인지, 그리고 갈래를 잇는 <strong>다리 논문</strong>이 무엇인지.
-      </div>
-      <div class="diagram">
-        <div class="insight-cards">
-          <div class="insight-card cluster-card">
-            <div class="insight-type">클러스터 (연구 갈래)</div>
-            <div class="insight-text">"이 분야는 크게 <strong>외부 메모리 접근</strong>과 <strong>인지 아키텍처 접근</strong>으로 나뉜다."</div>
+    <!-- Summary removed (in index.html) -->
+    <div style="display: none" class="summary">
+      <div class="summary-box">
+        <h3>한 줄 요약</h3>
+        <p>
+          AI가 논문에서 개념을 뽑고, 네트워크 분석이 구조를 계산한다. 그 결과로 연구의 갈래, 공백,
+          다리가 보인다.
+        </p>
+        <div class="key">
+          <div class="key-item">
+            <span class="key-icon" style="color: #7aaa7a">&#9679;</span>
+            <span class="key-text"><strong>클러스터</strong> — 비슷한 연구가 모인 갈래</span>
           </div>
-          <div class="insight-card gap-card">
-            <div class="insight-type">공백 (gap candidate)</div>
-            <div class="insight-text">"두 갈래 모두 단일 세션 기억에 집중한다. <strong>세션 간 장기 기억 통합</strong>은 양쪽 다 얇다."</div>
+          <div class="key-item">
+            <span class="key-icon" style="color: #cc8855">&#9679;</span>
+            <span class="key-text"><strong>공백</strong> — 연결될 이유가 있는데 아직 약한 곳</span>
           </div>
-          <div class="insight-card bridge-card">
-            <div class="insight-type">다리 (bridge)</div>
-            <div class="insight-text">"Generative Agents(2023)가 두 갈래를 연결하는 징검다리 논문이다. 외부 메모리를 인지 아키텍처 안에서 사용한 초기 사례."</div>
+          <div class="key-item">
+            <span class="key-icon" style="color: #7a7aaa">&#9679;</span>
+            <span class="key-text"
+              ><strong>다리</strong> — 갈래 사이를 잇는 핵심 논문이나 개념</span
+            >
           </div>
         </div>
       </div>
     </div>
 
-  </div>
-
-  </div><!-- end hidden steps -->
-
-  <!-- Summary removed (in index.html) -->
-  <div style="display:none" class="summary">
-    <div class="summary-box">
-      <h3>한 줄 요약</h3>
-      <p>AI가 논문에서 개념을 뽑고, 네트워크 분석이 구조를 계산한다. 그 결과로 연구의 갈래, 공백, 다리가 보인다.</p>
-      <div class="key">
-        <div class="key-item">
-          <span class="key-icon" style="color:#7aaa7a">&#9679;</span>
-          <span class="key-text"><strong>클러스터</strong> — 비슷한 연구가 모인 갈래</span>
-        </div>
-        <div class="key-item">
-          <span class="key-icon" style="color:#cc8855">&#9679;</span>
-          <span class="key-text"><strong>공백</strong> — 연결될 이유가 있는데 아직 약한 곳</span>
-        </div>
-        <div class="key-item">
-          <span class="key-icon" style="color:#7a7aaa">&#9679;</span>
-          <span class="key-text"><strong>다리</strong> — 갈래 사이를 잇는 핵심 논문이나 개념</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  </div><!-- end hidden summary -->
-
-  <!-- ══ 전체 원칙 ══ -->
-  <div class="deep">
-
-    <!-- Section: LLM + Network 역할 분담 -->
-    <div class="deep-section">
-      <h2>AI와 네트워크의 역할 분담</h2>
-      <div class="desc">
-        지식맵의 핵심 설계 원칙은 <strong>"AI는 의미 추출기, 네트워크는 구조 계산기"</strong>다. 두 역할은 명확히 나뉘며, 한쪽만으로는 풀리지 않는 문제를 조합으로 푼다.
-      </div>
-
-      <div class="role-split">
-        <div class="role-card llm">
-          <div class="role-title">AI (LLM)</div>
-          <ul class="role-list">
-            <li>논문에서 <strong>핵심 개념</strong> 추출 (주제, 방법론, 발견)</li>
-            <li>개념에 <strong>타입 부여</strong> — paper, topic, method, finding</li>
-            <li>논문 간 <strong>주장(claim)의 관계</strong> 분류</li>
-            <li>근거 텍스트와 <strong>신뢰도</strong> 추출</li>
-            <li>계산 결과를 <strong>자연어로 설명</strong></li>
-          </ul>
-        </div>
-        <div class="role-card net">
-          <div class="role-title">네트워크 분석</div>
-          <ul class="role-list">
-            <li><strong>커뮤니티 탐지</strong>로 연구 갈래 분할</li>
-            <li>클러스터 사이 <strong>연결 강도</strong> 측정</li>
-            <li><strong>중심성 분석</strong>으로 다리 논문/개념 탐지</li>
-            <li><strong>링크 예측</strong>으로 공백 후보 계산</li>
-            <li><strong>시간축 분석</strong>으로 새로운 연결 탐지</li>
-          </ul>
-        </div>
-      </div>
-
-      <div class="why-box">
-        <strong>왜 둘 다 필요한가?</strong><br><br>
-        AI만 쓰면 — "이 개념이 중요하다"까지는 되지만, "전체 구조에서 이 개념의 위치가 어디인가"는 흔들린다. LLM이 "이게 gap이다"를 직접 판정하면 근거 추적이 어렵고 결과가 불안정하다.<br><br>
-        네트워크만 쓰면 — 구조는 계산되지만, 노드가 무슨 뜻인지 비어있다. 키워드 동시 출현만으로는 "왜 연결되는가"를 설명할 수 없다.<br><br>
-        <strong>AI가 의미를 채우고, 네트워크가 구조를 잡는다.</strong> AI는 최종 판정기가 아니라 구조화된 산출물을 만드는 역할로 제한한다. 공백 판정은 coverage, uncertainty, 점수 정책을 조합한 네트워크 연산이 담당한다.
-      </div>
-    </div>
-
-    <!-- Section: 구체적 파이프라인 -->
-    <div class="deep-section">
-      <h2>파이프라인: 검색에서 지식맵까지</h2>
-      <div class="desc">
-        검색부터 지식맵 완성까지 5단계다. 각 단계에서 AI와 네트워크가 번갈아 일한다.
-      </div>
-
-      <div class="combo-flow">
-        <div class="combo-step">
-          <div class="combo-badge llm">AI</div>
-          <div class="combo-text">논문 초록·본문에서 <strong>개념 멘션</strong>(concept mention)을 추출하고 타입을 부여한다</div>
-        </div>
-        <div class="combo-step">
-          <div class="combo-badge llm">AI</div>
-          <div class="combo-text">개념들 사이의 <strong>주장 관계</strong>를 분류한다 — support, extend, qualify, refute</div>
-        </div>
-        <div class="combo-step">
-          <div class="combo-badge net">Network</div>
-          <div class="combo-text">개념을 노드, 관계를 엣지로 <strong>그래프 투영</strong>. 커뮤니티 탐지(Leiden 알고리즘)로 클러스터를 나눈다</div>
-        </div>
-        <div class="combo-step">
-          <div class="combo-badge net">Network</div>
-          <div class="combo-text">클러스터 사이 연결 강도를 측정하고, <strong>중심성(betweenness)</strong>으로 다리 노드를, <strong>링크 예측</strong>으로 공백 후보를 계산한다</div>
-        </div>
-        <div class="combo-step">
-          <div class="combo-badge both">AI + Net</div>
-          <div class="combo-text">네트워크 점수와 의미 점수를 <strong>합산</strong>하여 최종 순위를 매기고, AI가 자연어 설명을 덧붙인다</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- 핵심 연산, 렌즈, Claim, Gap 유형은 각 주제 페이지로 이동 -->
-    <!-- community.html, centrality.html, temporal.html, gaps.html, argumentation.html 참조 -->
-
-    <!-- REMOVED: 핵심 연산, 렌즈, Claim, Gap 유형 (각 주제 페이지에 통합됨) -->
-    <!-- 여기서부터 정직한 한계까지 건너뜀 -->
-    <div style="display:none">
-
-      <div class="theory-card">
-        <div class="theory-title">1. 커뮤니티 탐지 (Leiden Algorithm)</div>
-        <div class="theory-body">
-          <strong>"이 분야는 어떤 갈래로 나뉘는가?"</strong><br><br>
-          비슷한 개념들이 밀집한 영역을 자동으로 찾는다. 기존 Louvain 알고리즘의 개선판으로, 모든 커뮤니티가 내부적으로 연결된 상태(connected community)를 보장한다. 클러스터의 품질이 곧 gap 발견의 품질을 결정한다.
-        </div>
-        <div class="theory-ref">Traag et al. (2019). From Louvain to Leiden: guaranteeing well-connected communities.</div>
-      </div>
-
-      <div class="theory-card">
-        <div class="theory-title">2. 중심성 + 경로 분석 (Betweenness Centrality)</div>
-        <div class="theory-body">
-          <strong>"어떤 논문/개념이 갈래를 잇는 다리인가?"</strong><br><br>
-          네트워크에서 서로 다른 영역을 연결하는 데 가장 많이 거쳐가는 노드를 찾는다. 높은 betweenness = 학제간 연결의 핵심. 이 개념을 제거하면 네트워크가 분리되는 노드가 진짜 다리다. 계량서지학(scientometrics)에서는 이를 학제간성(interdisciplinarity) 지표로 사용한다.
-        </div>
-        <div class="theory-ref">Leydesdorff (2007). Betweenness centrality as indicator of interdisciplinarity.</div>
-      </div>
-
-      <div class="theory-card">
-        <div class="theory-title">3. 시간축 네트워크 (Temporal Analysis)</div>
-        <div class="theory-body">
-          <strong>"지금 무엇이 새롭게 연결되기 시작했는가?"</strong><br><br>
-          논문의 발행 연도를 이용해 네트워크의 시간적 변화를 추적한다. 최근 급격히 연결이 늘어나는 영역은 떠오르는 프런티어이고, 오래전에 활발했지만 최근 연결이 줄어든 영역은 성숙하거나 정체된 갈래다. 정적 스냅샷이 아니라 살아있는 지형을 보여준다.
-        </div>
-      </div>
-    </div>
-
-    <!-- Section: 맵 유형 (Lens) -->
-    <div class="deep-section">
-      <h2>맵의 4가지 렌즈</h2>
-      <div class="desc">
-        같은 검색 결과에서도 연구자마다 먼저 보고 싶은 것이 다르다. 새 분야에 처음 들어가는 사람은 전체 지형을, 제안서를 쓰는 사람은 공백을, 시니어 연구자는 최근 논쟁을 본다.<br><br>
-        지식맵은 <strong>같은 정본 데이터 위에 서로 다른 렌즈를 얹는 구조</strong>다. 렌즈가 바뀌면 보이는 것의 우선순위가 달라지지만, 기저 데이터(개념, 관계, 논문)는 같다.
-      </div>
-
-      <div class="lens-grid">
-        <div class="lens-card landscape">
-          <div class="lens-icon">&#x1F5FA;</div>
-          <div class="lens-name">지형 파악</div>
-          <div class="lens-question">"이 분야는 어떻게 나뉘나?"</div>
-          <div class="lens-desc">전체 클러스터 구조를 먼저 보여준다. 새 분야 진입자가 큰 그림을 잡을 때.</div>
-          <div class="lens-mechanism">
-            <strong>형성 메커니즘:</strong> 커뮤니티 탐지(Leiden)로 클러스터를 나누고, 각 클러스터의 대표 개념과 대표 논문을 추출. 클러스터 크기와 밀도로 주요/부수 갈래를 구분한다.
-          </div>
+    <!-- ══ 전체 원칙 ══ -->
+    <div class="deep">
+      <!-- Section: LLM + Network 역할 분담 -->
+      <div class="deep-section">
+        <h2>AI와 네트워크의 역할 분담</h2>
+        <div class="desc">
+          지식맵의 핵심 설계 원칙은 <strong>"AI는 의미 추출기, 네트워크는 구조 계산기"</strong>다.
+          두 역할은 명확히 나뉘며, 한쪽만으로는 풀리지 않는 문제를 조합으로 푼다.
         </div>
 
-        <div class="lens-card extension">
-          <div class="lens-icon">&#x1F500;</div>
-          <div class="lens-name">확장 흐름</div>
-          <div class="lens-question">"누가 누구를 확장하고 있나?"</div>
-          <div class="lens-desc">extends 관계를 중심으로 연구의 진행 방향을 보여준다. 선행 연구에서 다음 탐색 방향을 잡을 때.</div>
-          <div class="lens-mechanism">
-            <strong>형성 메커니즘:</strong> claim 관계 중 extends와 supports 엣지에 가중치를 높인다. 확장 체인(A→B→C)의 끝점이 현재 프런티어. 체인이 끊기는 곳이 확장 가능 공백이다.
-          </div>
-        </div>
-
-        <div class="lens-card controversy">
-          <div class="lens-icon">&#x26A1;</div>
-          <div class="lens-name">논쟁 구조</div>
-          <div class="lens-question">"어디서 의견이 갈리는가?"</div>
-          <div class="lens-desc">refute와 qualify 관계를 부각한다. 합의가 안 된 영역, 조건별 결론이 다른 영역을 보여준다.</div>
-          <div class="lens-mechanism">
-            <strong>형성 메커니즘:</strong> refute 엣지 밀도가 높은 영역을 논쟁 핫스팟으로 표시. qualify가 부족하면 "아직 맥락이 정리되지 않은 논쟁"으로 분류한다. 범위 공백의 시각적 표현이다.
-          </div>
-        </div>
-
-        <div class="lens-card temporal">
-          <div class="lens-icon">&#x23F3;</div>
-          <div class="lens-name">최근 변화</div>
-          <div class="lens-question">"지금 어디가 움직이고 있나?"</div>
-          <div class="lens-desc">시간축을 기준으로 최근 연결이 급증하는 영역과 정체된 영역을 구분한다.</div>
-          <div class="lens-mechanism">
-            <strong>형성 메커니즘:</strong> 논문 발행 연도를 기준으로 엣지에 시간 가중치를 부여. 최근 2~3년에 cross-cluster 연결이 새로 생기면 "떠오르는 프런티어". 오래전 활발했지만 최근 추가가 없으면 "성숙/정체".
-          </div>
-        </div>
-      </div>
-
-      <div class="lens-principle">
-        <div class="lp-title">핵심 설계: 같은 정본, 다른 렌즈</div>
-        <div class="lp-split">
-          <div class="lp-col">
-            <div class="lp-label">렌즈가 바꾸는 것</div>
-            <ul>
-              <li>초기 화면과 노드 우선순위</li>
-              <li>엣지 강조 기준</li>
-              <li>공백 점수의 보조 가중치</li>
-              <li>설명 텍스트의 초점</li>
+        <div class="role-split">
+          <div class="role-card llm">
+            <div class="role-title">AI (LLM)</div>
+            <ul class="role-list">
+              <li>논문에서 <strong>핵심 개념</strong> 추출 (주제, 방법론, 발견)</li>
+              <li>개념에 <strong>타입 부여</strong> — paper, topic, method, finding</li>
+              <li>논문 간 <strong>주장(claim)의 관계</strong> 분류</li>
+              <li>근거 텍스트와 <strong>신뢰도</strong> 추출</li>
+              <li>계산 결과를 <strong>자연어로 설명</strong></li>
             </ul>
           </div>
-          <div class="lp-col">
-            <div class="lp-label">렌즈가 바꾸지 않는 것</div>
-            <ul>
-              <li>개념 추출 방식 (taxonomy)</li>
-              <li>정본 저장 구조 (provenance)</li>
-              <li>재현 가능한 계산 기록</li>
-              <li>기저 그래프 데이터</li>
+          <div class="role-card net">
+            <div class="role-title">네트워크 분석</div>
+            <ul class="role-list">
+              <li><strong>커뮤니티 탐지</strong>로 연구 갈래 분할</li>
+              <li>클러스터 사이 <strong>연결 강도</strong> 측정</li>
+              <li><strong>중심성 분석</strong>으로 다리 논문/개념 탐지</li>
+              <li><strong>링크 예측</strong>으로 공백 후보 계산</li>
+              <li><strong>시간축 분석</strong>으로 새로운 연결 탐지</li>
             </ul>
+          </div>
+        </div>
+
+        <div class="why-box">
+          <strong>왜 둘 다 필요한가?</strong><br /><br />
+          AI만 쓰면 — "이 개념이 중요하다"까지는 되지만, "전체 구조에서 이 개념의 위치가 어디인가"는
+          흔들린다. LLM이 "이게 gap이다"를 직접 판정하면 근거 추적이 어렵고 결과가 불안정하다.<br /><br />
+          네트워크만 쓰면 — 구조는 계산되지만, 노드가 무슨 뜻인지 비어있다. 키워드 동시 출현만으로는
+          "왜 연결되는가"를 설명할 수 없다.<br /><br />
+          <strong>AI가 의미를 채우고, 네트워크가 구조를 잡는다.</strong> AI는 최종 판정기가 아니라
+          구조화된 산출물을 만드는 역할로 제한한다. 공백 판정은 coverage, uncertainty, 점수 정책을
+          조합한 네트워크 연산이 담당한다.
+        </div>
+      </div>
+
+      <!-- Section: 구체적 파이프라인 -->
+      <div class="deep-section">
+        <h2>파이프라인: 검색에서 지식맵까지</h2>
+        <div class="desc">
+          검색부터 지식맵 완성까지 5단계다. 각 단계에서 AI와 네트워크가 번갈아 일한다.
+        </div>
+
+        <div class="combo-flow">
+          <div class="combo-step">
+            <div class="combo-badge llm">AI</div>
+            <div class="combo-text">
+              논문 초록·본문에서 <strong>개념 멘션</strong>(concept mention)을 추출하고 타입을
+              부여한다
+            </div>
+          </div>
+          <div class="combo-step">
+            <div class="combo-badge llm">AI</div>
+            <div class="combo-text">
+              개념들 사이의 <strong>주장 관계</strong>를 분류한다 — support, extend, qualify, refute
+            </div>
+          </div>
+          <div class="combo-step">
+            <div class="combo-badge net">Network</div>
+            <div class="combo-text">
+              개념을 노드, 관계를 엣지로 <strong>그래프 투영</strong>. 커뮤니티 탐지(Leiden
+              알고리즘)로 클러스터를 나눈다
+            </div>
+          </div>
+          <div class="combo-step">
+            <div class="combo-badge net">Network</div>
+            <div class="combo-text">
+              클러스터 사이 연결 강도를 측정하고, <strong>중심성(betweenness)</strong>으로 다리
+              노드를, <strong>링크 예측</strong>으로 공백 후보를 계산한다
+            </div>
+          </div>
+          <div class="combo-step">
+            <div class="combo-badge both">AI + Net</div>
+            <div class="combo-text">
+              네트워크 점수와 의미 점수를 <strong>합산</strong>하여 최종 순위를 매기고, AI가 자연어
+              설명을 덧붙인다
+            </div>
           </div>
         </div>
       </div>
 
-      <div class="why-box">
-        <strong>왜 이 구조인가?</strong><br><br>
-        렌즈마다 별도 파이프라인을 돌리면, 데이터가 분기하고 유지보수가 폭발한다. 정본 하나를 만들고, 그 위에 "무엇을 먼저 보여줄지"만 바꾸면 — 렌즈를 추가해도 파이프라인은 하나다.<br><br>
-        사용자는 맵을 만든 뒤에도 렌즈를 즉시 전환할 수 있다. "지형 파악"으로 시작해서 관심 영역이 좁혀지면 "논쟁 구조"로 전환하는 식이다.
+      <!-- 핵심 연산, 렌즈, Claim, Gap 유형은 각 주제 페이지로 이동 -->
+      <!-- community.html, centrality.html, temporal.html, gaps.html, argumentation.html 참조 -->
+
+      <!-- REMOVED: 핵심 연산, 렌즈, Claim, Gap 유형 (각 주제 페이지에 통합됨) -->
+      <!-- 여기서부터 정직한 한계까지 건너뜀 -->
+      <div style="display: none">
+        <div class="theory-card">
+          <div class="theory-title">1. 커뮤니티 탐지 (Leiden Algorithm)</div>
+          <div class="theory-body">
+            <strong>"이 분야는 어떤 갈래로 나뉘는가?"</strong><br /><br />
+            비슷한 개념들이 밀집한 영역을 자동으로 찾는다. 기존 Louvain 알고리즘의 개선판으로, 모든
+            커뮤니티가 내부적으로 연결된 상태(connected community)를 보장한다. 클러스터의 품질이 곧
+            gap 발견의 품질을 결정한다.
+          </div>
+          <div class="theory-ref">
+            Traag et al. (2019). From Louvain to Leiden: guaranteeing well-connected communities.
+          </div>
+        </div>
+
+        <div class="theory-card">
+          <div class="theory-title">2. 중심성 + 경로 분석 (Betweenness Centrality)</div>
+          <div class="theory-body">
+            <strong>"어떤 논문/개념이 갈래를 잇는 다리인가?"</strong><br /><br />
+            네트워크에서 서로 다른 영역을 연결하는 데 가장 많이 거쳐가는 노드를 찾는다. 높은
+            betweenness = 학제간 연결의 핵심. 이 개념을 제거하면 네트워크가 분리되는 노드가 진짜
+            다리다. 계량서지학(scientometrics)에서는 이를 학제간성(interdisciplinarity) 지표로
+            사용한다.
+          </div>
+          <div class="theory-ref">
+            Leydesdorff (2007). Betweenness centrality as indicator of interdisciplinarity.
+          </div>
+        </div>
+
+        <div class="theory-card">
+          <div class="theory-title">3. 시간축 네트워크 (Temporal Analysis)</div>
+          <div class="theory-body">
+            <strong>"지금 무엇이 새롭게 연결되기 시작했는가?"</strong><br /><br />
+            논문의 발행 연도를 이용해 네트워크의 시간적 변화를 추적한다. 최근 급격히 연결이 늘어나는
+            영역은 떠오르는 프런티어이고, 오래전에 활발했지만 최근 연결이 줄어든 영역은 성숙하거나
+            정체된 갈래다. 정적 스냅샷이 아니라 살아있는 지형을 보여준다.
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: 맵 유형 (Lens) -->
+      <div class="deep-section">
+        <h2>맵의 4가지 렌즈</h2>
+        <div class="desc">
+          같은 검색 결과에서도 연구자마다 먼저 보고 싶은 것이 다르다. 새 분야에 처음 들어가는 사람은
+          전체 지형을, 제안서를 쓰는 사람은 공백을, 시니어 연구자는 최근 논쟁을 본다.<br /><br />
+          지식맵은 <strong>같은 정본 데이터 위에 서로 다른 렌즈를 얹는 구조</strong>다. 렌즈가
+          바뀌면 보이는 것의 우선순위가 달라지지만, 기저 데이터(개념, 관계, 논문)는 같다.
+        </div>
+
+        <div class="lens-grid">
+          <div class="lens-card landscape">
+            <div class="lens-icon">&#x1F5FA;</div>
+            <div class="lens-name">지형 파악</div>
+            <div class="lens-question">"이 분야는 어떻게 나뉘나?"</div>
+            <div class="lens-desc">
+              전체 클러스터 구조를 먼저 보여준다. 새 분야 진입자가 큰 그림을 잡을 때.
+            </div>
+            <div class="lens-mechanism">
+              <strong>형성 메커니즘:</strong> 커뮤니티 탐지(Leiden)로 클러스터를 나누고, 각
+              클러스터의 대표 개념과 대표 논문을 추출. 클러스터 크기와 밀도로 주요/부수 갈래를
+              구분한다.
+            </div>
+          </div>
+
+          <div class="lens-card extension">
+            <div class="lens-icon">&#x1F500;</div>
+            <div class="lens-name">확장 흐름</div>
+            <div class="lens-question">"누가 누구를 확장하고 있나?"</div>
+            <div class="lens-desc">
+              extends 관계를 중심으로 연구의 진행 방향을 보여준다. 선행 연구에서 다음 탐색 방향을
+              잡을 때.
+            </div>
+            <div class="lens-mechanism">
+              <strong>형성 메커니즘:</strong> claim 관계 중 extends와 supports 엣지에 가중치를
+              높인다. 확장 체인(A→B→C)의 끝점이 현재 프런티어. 체인이 끊기는 곳이 확장 가능
+              공백이다.
+            </div>
+          </div>
+
+          <div class="lens-card controversy">
+            <div class="lens-icon">&#x26A1;</div>
+            <div class="lens-name">논쟁 구조</div>
+            <div class="lens-question">"어디서 의견이 갈리는가?"</div>
+            <div class="lens-desc">
+              refute와 qualify 관계를 부각한다. 합의가 안 된 영역, 조건별 결론이 다른 영역을
+              보여준다.
+            </div>
+            <div class="lens-mechanism">
+              <strong>형성 메커니즘:</strong> refute 엣지 밀도가 높은 영역을 논쟁 핫스팟으로 표시.
+              qualify가 부족하면 "아직 맥락이 정리되지 않은 논쟁"으로 분류한다. 범위 공백의 시각적
+              표현이다.
+            </div>
+          </div>
+
+          <div class="lens-card temporal">
+            <div class="lens-icon">&#x23F3;</div>
+            <div class="lens-name">최근 변화</div>
+            <div class="lens-question">"지금 어디가 움직이고 있나?"</div>
+            <div class="lens-desc">
+              시간축을 기준으로 최근 연결이 급증하는 영역과 정체된 영역을 구분한다.
+            </div>
+            <div class="lens-mechanism">
+              <strong>형성 메커니즘:</strong> 논문 발행 연도를 기준으로 엣지에 시간 가중치를 부여.
+              최근 2~3년에 cross-cluster 연결이 새로 생기면 "떠오르는 프런티어". 오래전 활발했지만
+              최근 추가가 없으면 "성숙/정체".
+            </div>
+          </div>
+        </div>
+
+        <div class="lens-principle">
+          <div class="lp-title">핵심 설계: 같은 정본, 다른 렌즈</div>
+          <div class="lp-split">
+            <div class="lp-col">
+              <div class="lp-label">렌즈가 바꾸는 것</div>
+              <ul>
+                <li>초기 화면과 노드 우선순위</li>
+                <li>엣지 강조 기준</li>
+                <li>공백 점수의 보조 가중치</li>
+                <li>설명 텍스트의 초점</li>
+              </ul>
+            </div>
+            <div class="lp-col">
+              <div class="lp-label">렌즈가 바꾸지 않는 것</div>
+              <ul>
+                <li>개념 추출 방식 (taxonomy)</li>
+                <li>정본 저장 구조 (provenance)</li>
+                <li>재현 가능한 계산 기록</li>
+                <li>기저 그래프 데이터</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div class="why-box">
+          <strong>왜 이 구조인가?</strong><br /><br />
+          렌즈마다 별도 파이프라인을 돌리면, 데이터가 분기하고 유지보수가 폭발한다. 정본 하나를
+          만들고, 그 위에 "무엇을 먼저 보여줄지"만 바꾸면 — 렌즈를 추가해도 파이프라인은 하나다.<br /><br />
+          사용자는 맵을 만든 뒤에도 렌즈를 즉시 전환할 수 있다. "지형 파악"으로 시작해서 관심 영역이
+          좁혀지면 "논쟁 구조"로 전환하는 식이다.
+        </div>
+      </div>
+
+      <!-- Section: Claim 관계 -->
+      <div class="deep-section">
+        <h2>AI가 읽는 주장(Claim)의 관계</h2>
+        <div class="desc">
+          논문은 단순한 정보 덩어리가 아니라 <strong>주장(claim)</strong>의 모음이다. "A가 B보다
+          낫다", "C 방법이 D 문제를 해결한다" 같은 것들이다. AI는 이 주장들 사이의 관계를 4가지로
+          분류한다.
+        </div>
+
+        <div class="claim-relations">
+          <span class="claim-rel supports">지지 (support)</span>
+          <span class="claim-rel extends">확장 (extend)</span>
+          <span class="claim-rel qualifies">제한 (qualify)</span>
+          <span class="claim-rel contradicts">반박 (refute)</span>
+        </div>
+
+        <div class="theory-card" style="margin-top: 16px">
+          <div class="theory-body">
+            예를 들어, 논문 A가 "외부 메모리가 에이전트 성능을 높인다"고 주장하고, 논문 B가 "다만
+            단일 세션에서만 효과가 있다"고 제한하면 — A→B 관계는
+            <strong>qualify</strong>다.<br /><br />
+            이 관계들이 네트워크에 엣지로 들어가면, 단순히 "같은 키워드를 쓴다"보다 훨씬 의미 있는
+            구조가 만들어진다. refute가 많은 영역은 아직 합의가 없는 논쟁 지대이고, extend만 있고
+            qualify가 없는 영역은 검증이 약한 곳이다.
+          </div>
+          <div class="theory-ref">
+            ClaimFlow (preprint, 2026): 논문 간 claim 관계 5종 taxonomy. Toulmin (1958):
+            Claim-Evidence-Warrant 논증 모델.
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: 공백의 유형 -->
+      <div class="deep-section">
+        <h2>공백(Gap)의 유형</h2>
+        <div class="desc">
+          모든 공백이 같은 공백이 아니다. claim 관계 패턴에 따라 공백의 성격이 달라진다.
+        </div>
+
+        <div class="gap-types">
+          <div class="gap-type-card">
+            <div class="gap-name">연결 공백</div>
+            <div class="gap-explain">
+              두 클러스터 사이에 cross-cluster extend 관계가 없다. 비슷한 문제를 다루는데 서로를
+              모른다.
+            </div>
+            <div class="gap-pattern">패턴: 클러스터 간 extend 엣지 부재</div>
+          </div>
+          <div class="gap-type-card">
+            <div class="gap-name">통합 공백</div>
+            <div class="gap-explain">
+              최근 claim이 급증하지만 종합 정리(synthesis)가 없다. 떠오르는 프런티어인데 아직 아무도
+              정리를 안 했다.
+            </div>
+            <div class="gap-pattern">패턴: 최근 claim 증가 + synthesis 부재</div>
+          </div>
+          <div class="gap-type-card">
+            <div class="gap-name">기초 공백</div>
+            <div class="gap-explain">
+              여러 연구가 같은 전제를 support하는데, 그 전제 자체의 검증이 얇다. 많이 인용되지만
+              직접 검증한 연구가 적다.
+            </div>
+            <div class="gap-pattern">패턴: support 많지만 검증 연구 부재</div>
+          </div>
+          <div class="gap-type-card">
+            <div class="gap-name">범위 공백</div>
+            <div class="gap-explain">
+              refute 관계가 많은데 qualify가 빈약하다. "어떤 조건에서 맞고 어떤 조건에서 틀리는가"가
+              정리되지 않은 논쟁 상태.
+            </div>
+            <div class="gap-pattern">패턴: refute 많고 qualify 빈약</div>
+          </div>
+          <div class="gap-type-card">
+            <div class="gap-name">검증 공백</div>
+            <div class="gap-explain">
+              고립된 claim이 많다. 누가 주장했지만 아무도 검증하거나 확장하지 않았다.
+            </div>
+            <div class="gap-pattern">패턴: 후속 support/extend/refute 없는 고립 claim</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section: 정직한 한계 -->
+      <div class="deep-section">
+        <h2>정직한 한계</h2>
+
+        <div class="caveat">
+          <div class="caveat-title">공백은 "후보"다</div>
+          Light House의 공백은 처음부터 "분야 전체의 객관적 진실"이 아니다. 기본 단위는
+          <strong>query-local gap candidate</strong> — 현재 검색 결과 안에서 연결이 약한 곳이다.<br /><br />
+          검색 결과에 논문이 안 나온 것(absence of evidence)과 세상에 연구가 없는 것(true
+          field-level gap)은 다르다. AI가 "이게 연구 공백이다"라고 단정하지 않는 이유다.<br /><br />
+          그래서 모든 공백 후보에는 <strong>coverage</strong>(검색 범위가 충분한가)와
+          <strong>uncertainty</strong>(AI 추출의 불확실성)를 별도 축으로 표시하고, 근거가 되는
+          논문과 개념을 함께 보여준다. AI가 헷갈려한 개념은 신뢰도와 함께 보여주며, 애매한 표현은
+          보수적으로 묶는다. 진짜 기회인지는 연구자가 판단한다.
+        </div>
+
+        <div class="caveat" style="margin-top: 12px">
+          <div class="caveat-title">LLM은 의미 추출기이지 최종 판정기가 아니다</div>
+          AI가 "이게 gap이다"를 직접 판정하면 흔들림이 크고 근거 추적이 어렵다. 같은 질문에 다른
+          답을 낼 수 있다.<br /><br />
+          따라서 AI의 역할은
+          <strong>구조화된 산출물(개념, 타입, 관계)을 만드는 데까지로 제한</strong>한다. "어디가
+          비어 있는가"는 네트워크 연산이 coverage, uncertainty, 점수 정책을 조합하여 계산한다. AI 한
+          마디가 아니라, 추적 가능한 구조에서 나오는 결론이다.
+        </div>
+
+        <div class="caveat" style="margin-top: 12px">
+          <div class="caveat-title">근거를 거슬러 올라갈 수 있다</div>
+          지식맵의 모든 개념과 관계는 근거 문장과 원본 논문으로 거슬러 올라갈 수 있다. 같은 검색
+          결과와 같은 버전의 추출·점수 정책이라면 같은 계산을 재현할 수 있다. "왜 이런 결과가
+          나왔는지"를 다시 따라갈 수 있는 것이 이 시스템의 기본 설계다.
+        </div>
+      </div>
+
+      <div class="deep-section">
+        <h2>현재 구현 내역</h2>
+        <div class="impl-box">
+          <p>
+            현재 제품의 지식맵 입력은 <strong>Semantic Scholar 검색 결과와 abstract</strong>로
+            한정된다. PDF 본문과 inlineAnalysis는 지식맵 정본 계산에 쓰지 않는다.
+          </p>
+          <p>
+            LLM이 없으면 지식맵은 생성/표시되지 않는다. 현재 LLM은 query clause 정규화, source paper
+            selection adjudication, concept extraction, 일부 paper-pair relationship 판정에 필수로
+            쓰인다.
+          </p>
+          <p>
+            현재 source selection은 검색 100편을 보존한 뒤, 규칙 기반 signal로 넓게 후보를 잡고
+            LLM이 <strong>dynamic 40~60편</strong>을 판정한 뒤 hard curation한다.
+          </p>
+          <p>
+            핵심 구현 파일:
+            <code>app/server/services/query-clause-normalization-service.ts</code>,
+            <code>app/server/services/source-selection-judgment-service.ts</code>,
+            <code>app/server/services/concept-extraction-service.ts</code>,
+            <code>app/server/services/gap-detection-service.ts</code>,
+            <code>app/server/services/graph-community-service.ts</code>,
+            <code>app/server/services/graph-bridge-service.ts</code>,
+            <code>app/server/services/temporal-graph-service.ts</code>,
+            <code>app/server/services/claim-graph-service.ts</code>.
+          </p>
+          <p>
+            현재 기본 맵은 약한 연결 찾기, 지형 파악, 연결 경로 보기, 최근 변화, 논쟁 구조다. 각
+            하위 페이지 하단의 <strong>현재 구현 내역</strong> 섹션에서 실제 계산 신호와 renderer
+            파일을 따로 적는다.
+          </p>
+        </div>
       </div>
     </div>
 
-    <!-- Section: Claim 관계 -->
-    <div class="deep-section">
-      <h2>AI가 읽는 주장(Claim)의 관계</h2>
-      <div class="desc">
-        논문은 단순한 정보 덩어리가 아니라 <strong>주장(claim)</strong>의 모음이다. "A가 B보다 낫다", "C 방법이 D 문제를 해결한다" 같은 것들이다. AI는 이 주장들 사이의 관계를 4가지로 분류한다.
-      </div>
-
-      <div class="claim-relations">
-        <span class="claim-rel supports">지지 (support)</span>
-        <span class="claim-rel extends">확장 (extend)</span>
-        <span class="claim-rel qualifies">제한 (qualify)</span>
-        <span class="claim-rel contradicts">반박 (refute)</span>
-      </div>
-
-      <div class="theory-card" style="margin-top: 16px">
-        <div class="theory-body">
-          예를 들어, 논문 A가 "외부 메모리가 에이전트 성능을 높인다"고 주장하고, 논문 B가 "다만 단일 세션에서만 효과가 있다"고 제한하면 — A→B 관계는 <strong>qualify</strong>다.<br><br>
-          이 관계들이 네트워크에 엣지로 들어가면, 단순히 "같은 키워드를 쓴다"보다 훨씬 의미 있는 구조가 만들어진다. refute가 많은 영역은 아직 합의가 없는 논쟁 지대이고, extend만 있고 qualify가 없는 영역은 검증이 약한 곳이다.
-        </div>
-        <div class="theory-ref">ClaimFlow (preprint, 2026): 논문 간 claim 관계 5종 taxonomy. Toulmin (1958): Claim-Evidence-Warrant 논증 모델.</div>
-      </div>
+    <!-- References -->
+    <div class="references">
+      <h3>참고 문헌</h3>
+      <ul class="ref-list">
+        <li>
+          Traag, V.A., Waltman, L. & van Eck, N.J. (2019). From Louvain to Leiden: guaranteeing
+          well-connected communities. <em>Scientific Reports</em>.
+        </li>
+        <li>
+          Leydesdorff, L. (2007). Betweenness centrality as indicator of the interdisciplinarity of
+          scientific journals. <em>JASIST</em>.
+        </li>
+        <li>
+          ClaimFlow (preprint, 2026). 논문 간 claim 관계 taxonomy — support, extend, qualify,
+          refute.
+        </li>
+        <li>
+          Toulmin, S. (1958). <em>The Uses of Argument</em>. Claim-Evidence-Warrant 논증 모델.
+        </li>
+        <li>
+          Beckers, R. et al. (2012). Ontology-based identification of research gaps and immature
+          research areas.
+        </li>
+        <li>Burt, R. (1992). <em>Structural Holes: The Social Structure of Competition</em>.</li>
+        <li>
+          Dung, P.M. (1995). On the acceptability of arguments. <em>Artificial Intelligence</em>.
+        </li>
+        <li>
+          Barab&aacute;si, A.L. & Albert, R. (1999). Emergence of scaling in random networks.
+          <em>Science</em>.
+        </li>
+        <li>
+          Watts, D.J. & Strogatz, S.H. (1998). Collective dynamics of small-world networks.
+          <em>Nature</em>.
+        </li>
+        <li>
+          Brehmer, M. & Munzner, T. (2013). A Multi-Level Typology of Abstract Visualization Tasks.
+          <em>IEEE TVCG</em>.
+        </li>
+        <li>Cleveland, W.S. & McGill, R. (1984). Graphical Perception. <em>JASA</em>.</li>
+      </ul>
     </div>
-
-    <!-- Section: 공백의 유형 -->
-    <div class="deep-section">
-      <h2>공백(Gap)의 유형</h2>
-      <div class="desc">
-        모든 공백이 같은 공백이 아니다. claim 관계 패턴에 따라 공백의 성격이 달라진다.
-      </div>
-
-      <div class="gap-types">
-        <div class="gap-type-card">
-          <div class="gap-name">연결 공백</div>
-          <div class="gap-explain">두 클러스터 사이에 cross-cluster extend 관계가 없다. 비슷한 문제를 다루는데 서로를 모른다.</div>
-          <div class="gap-pattern">패턴: 클러스터 간 extend 엣지 부재</div>
-        </div>
-        <div class="gap-type-card">
-          <div class="gap-name">통합 공백</div>
-          <div class="gap-explain">최근 claim이 급증하지만 종합 정리(synthesis)가 없다. 떠오르는 프런티어인데 아직 아무도 정리를 안 했다.</div>
-          <div class="gap-pattern">패턴: 최근 claim 증가 + synthesis 부재</div>
-        </div>
-        <div class="gap-type-card">
-          <div class="gap-name">기초 공백</div>
-          <div class="gap-explain">여러 연구가 같은 전제를 support하는데, 그 전제 자체의 검증이 얇다. 많이 인용되지만 직접 검증한 연구가 적다.</div>
-          <div class="gap-pattern">패턴: support 많지만 검증 연구 부재</div>
-        </div>
-        <div class="gap-type-card">
-          <div class="gap-name">범위 공백</div>
-          <div class="gap-explain">refute 관계가 많은데 qualify가 빈약하다. "어떤 조건에서 맞고 어떤 조건에서 틀리는가"가 정리되지 않은 논쟁 상태.</div>
-          <div class="gap-pattern">패턴: refute 많고 qualify 빈약</div>
-        </div>
-        <div class="gap-type-card">
-          <div class="gap-name">검증 공백</div>
-          <div class="gap-explain">고립된 claim이 많다. 누가 주장했지만 아무도 검증하거나 확장하지 않았다.</div>
-          <div class="gap-pattern">패턴: 후속 support/extend/refute 없는 고립 claim</div>
-        </div>
-      </div>
-    </div>
-
-    </div><!-- end hidden block -->
-
-    <!-- Section: 정직한 한계 -->
-    <div class="deep-section">
-      <h2>정직한 한계</h2>
-
-      <div class="caveat">
-        <div class="caveat-title">공백은 "후보"다</div>
-        Light House의 공백은 처음부터 "분야 전체의 객관적 진실"이 아니다. 기본 단위는 <strong>query-local gap candidate</strong> — 현재 검색 결과 안에서 연결이 약한 곳이다.<br><br>
-        검색 결과에 논문이 안 나온 것(absence of evidence)과 세상에 연구가 없는 것(true field-level gap)은 다르다. AI가 "이게 연구 공백이다"라고 단정하지 않는 이유다.<br><br>
-        그래서 모든 공백 후보에는 <strong>coverage</strong>(검색 범위가 충분한가)와 <strong>uncertainty</strong>(AI 추출의 불확실성)를 별도 축으로 표시하고, 근거가 되는 논문과 개념을 함께 보여준다. AI가 헷갈려한 개념은 신뢰도와 함께 보여주며, 애매한 표현은 보수적으로 묶는다. 진짜 기회인지는 연구자가 판단한다.
-      </div>
-
-      <div class="caveat" style="margin-top: 12px">
-        <div class="caveat-title">LLM은 의미 추출기이지 최종 판정기가 아니다</div>
-        AI가 "이게 gap이다"를 직접 판정하면 흔들림이 크고 근거 추적이 어렵다. 같은 질문에 다른 답을 낼 수 있다.<br><br>
-        따라서 AI의 역할은 <strong>구조화된 산출물(개념, 타입, 관계)을 만드는 데까지로 제한</strong>한다. "어디가 비어 있는가"는 네트워크 연산이 coverage, uncertainty, 점수 정책을 조합하여 계산한다. AI 한 마디가 아니라, 추적 가능한 구조에서 나오는 결론이다.
-      </div>
-
-      <div class="caveat" style="margin-top: 12px">
-        <div class="caveat-title">근거를 거슬러 올라갈 수 있다</div>
-        지식맵의 모든 개념과 관계는 근거 문장과 원본 논문으로 거슬러 올라갈 수 있다. 같은 검색 결과와 같은 버전의 추출·점수 정책이라면 같은 계산을 재현할 수 있다. "왜 이런 결과가 나왔는지"를 다시 따라갈 수 있는 것이 이 시스템의 기본 설계다.
-      </div>
-    </div>
-
-  </div>
-
-  <!-- References -->
-  <div class="references">
-    <h3>참고 문헌</h3>
-    <ul class="ref-list">
-      <li>Traag, V.A., Waltman, L. & van Eck, N.J. (2019). From Louvain to Leiden: guaranteeing well-connected communities. <em>Scientific Reports</em>.</li>
-      <li>Leydesdorff, L. (2007). Betweenness centrality as indicator of the interdisciplinarity of scientific journals. <em>JASIST</em>.</li>
-      <li>ClaimFlow (preprint, 2026). 논문 간 claim 관계 taxonomy — support, extend, qualify, refute.</li>
-      <li>Toulmin, S. (1958). <em>The Uses of Argument</em>. Claim-Evidence-Warrant 논증 모델.</li>
-      <li>Beckers, R. et al. (2012). Ontology-based identification of research gaps and immature research areas.</li>
-      <li>Burt, R. (1992). <em>Structural Holes: The Social Structure of Competition</em>.</li>
-      <li>Dung, P.M. (1995). On the acceptability of arguments. <em>Artificial Intelligence</em>.</li>
-      <li>Barab&aacute;si, A.L. & Albert, R. (1999). Emergence of scaling in random networks. <em>Science</em>.</li>
-      <li>Watts, D.J. & Strogatz, S.H. (1998). Collective dynamics of small-world networks. <em>Nature</em>.</li>
-      <li>Brehmer, M. & Munzner, T. (2013). A Multi-Level Typology of Abstract Visualization Tasks. <em>IEEE TVCG</em>.</li>
-      <li>Cleveland, W.S. & McGill, R. (1984). Graphical Perception. <em>JASA</em>.</li>
-    </ul>
-  </div>
-
-</body>
+  </body>
 </html>

@@ -1,171 +1,257 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>시간 변화 — Light House</title>
-<style>
-  @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap');
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body { font-family: 'Noto Sans KR', sans-serif; background: #fafaf8; color: #1a1a1a; min-height: 100vh; line-height: 1.7; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>시간 변화 — Light House</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;600&display=swap");
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        font-family: "Noto Sans KR", sans-serif;
+        background: #fafaf8;
+        color: #1a1a1a;
+        min-height: 100vh;
+        line-height: 1.7;
+      }
 
-  .page { max-width: 1100px; margin: 0 auto; padding: 8vh 24px 12vh; }
+      .page {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 8vh 24px 12vh;
+      }
 
-  .back-link {
-    display: inline-block;
-    font-size: 14px;
-    font-weight: 400;
-    color: #888;
-    text-decoration: none;
-    margin-bottom: 32px;
-    transition: color 0.2s;
-  }
-  .back-link:hover { color: #1a1a1a; }
+      .back-link {
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 400;
+        color: #888;
+        text-decoration: none;
+        margin-bottom: 32px;
+        transition: color 0.2s;
+      }
+      .back-link:hover {
+        color: #1a1a1a;
+      }
 
-  h1 { font-size: 28px; font-weight: 500; letter-spacing: -0.03em; margin-bottom: 8px; }
-  .question { font-size: 16px; font-weight: 500; color: #cc8844; margin-bottom: 40px; }
+      h1 {
+        font-size: 28px;
+        font-weight: 500;
+        letter-spacing: -0.03em;
+        margin-bottom: 8px;
+      }
+      .question {
+        font-size: 16px;
+        font-weight: 500;
+        color: #cc8844;
+        margin-bottom: 40px;
+      }
 
-  h2 { font-size: 18px; font-weight: 500; margin-top: 40px; margin-bottom: 12px; letter-spacing: -0.02em; }
+      h2 {
+        font-size: 18px;
+        font-weight: 500;
+        margin-top: 40px;
+        margin-bottom: 12px;
+        letter-spacing: -0.02em;
+      }
 
-  p, .body-text {
-    font-size: 14px;
-    font-weight: 300;
-    color: #555;
-    line-height: 1.8;
-  }
+      p,
+      .body-text {
+        font-size: 14px;
+        font-weight: 300;
+        color: #555;
+        line-height: 1.8;
+      }
 
-  .card {
-    background: #fff;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    padding: 20px;
-    margin-bottom: 24px;
-  }
+      .card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        padding: 20px;
+        margin-bottom: 24px;
+      }
 
-  .card p { margin-bottom: 12px; }
-  .card p:last-child { margin-bottom: 0; }
+      .card p {
+        margin-bottom: 12px;
+      }
+      .card p:last-child {
+        margin-bottom: 0;
+      }
 
-  .card ol {
-    font-size: 14px;
-    font-weight: 300;
-    color: #555;
-    line-height: 1.8;
-    padding-left: 20px;
-    margin-bottom: 12px;
-  }
-  .card ol li { margin-bottom: 6px; }
-  .card ol:last-child { margin-bottom: 0; }
+      .card ol {
+        font-size: 14px;
+        font-weight: 300;
+        color: #555;
+        line-height: 1.8;
+        padding-left: 20px;
+        margin-bottom: 12px;
+      }
+      .card ol li {
+        margin-bottom: 6px;
+      }
+      .card ol:last-child {
+        margin-bottom: 0;
+      }
 
-  .ref {
-    font-size: 12px;
-    color: #aaa;
-    margin-top: 12px;
-    line-height: 1.6;
-  }
+      .ref {
+        font-size: 12px;
+        color: #aaa;
+        margin-top: 12px;
+        line-height: 1.6;
+      }
 
-  .viz-section { margin-bottom: 48px; }
-  .viz-label { font-size: 16px; font-weight: 500; letter-spacing: -0.02em; margin-bottom: 6px; }
-  .viz-why {
-    font-size: 14px;
-    font-weight: 300;
-    color: #555;
-    line-height: 1.8;
-    margin-bottom: 14px;
-  }
+      .viz-section {
+        margin-bottom: 48px;
+      }
+      .viz-label {
+        font-size: 16px;
+        font-weight: 500;
+        letter-spacing: -0.02em;
+        margin-bottom: 6px;
+      }
+      .viz-why {
+        font-size: 14px;
+        font-weight: 300;
+        color: #555;
+        line-height: 1.8;
+        margin-bottom: 14px;
+      }
 
-  iframe {
-    width: 100%;
-    height: 680px;
-    border: 1px solid #eee;
-    border-radius: 10px;
-    background: #fff;
-  }
+      iframe {
+        width: 100%;
+        height: 680px;
+        border: 1px solid #eee;
+        border-radius: 10px;
+        background: #fff;
+      }
 
-  .product-note {
-    font-size: 14px;
-    font-weight: 300;
-    color: #555;
-    line-height: 1.8;
-  }
+      .product-note {
+        font-size: 14px;
+        font-weight: 300;
+        color: #555;
+        line-height: 1.8;
+      }
 
-  .bottom-back {
-    display: inline-block;
-    font-size: 14px;
-    font-weight: 400;
-    color: #888;
-    text-decoration: none;
-    margin-top: 16px;
-    transition: color 0.2s;
-  }
-  .bottom-back:hover { color: #1a1a1a; }
-</style>
-</head>
-<body>
-  <div class="page">
-    <a class="back-link" href="index.html">&larr; 목록으로</a>
+      .bottom-back {
+        display: inline-block;
+        font-size: 14px;
+        font-weight: 400;
+        color: #888;
+        text-decoration: none;
+        margin-top: 16px;
+        transition: color 0.2s;
+      }
+      .bottom-back:hover {
+        color: #1a1a1a;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="page">
+      <a class="back-link" href="index.html">&larr; 목록으로</a>
 
-    <h1>시간 변화</h1>
-    <div class="question">"지금 어디가 움직이고 있나?"</div>
+      <h1>시간 변화</h1>
+      <div class="question">"지금 어디가 움직이고 있나?"</div>
 
-    <!-- 왜 이 분석이 필요한가 -->
-    <h2>왜 이 분석이 필요한가</h2>
-    <p>
-      연구 네트워크는 정적이 아니다. 3년 전에 활발했던 분야가 지금은 정체되었을 수 있고, 최근 급부상하는 연결이 다음 프런티어일 수 있다. 시간축 없이는 "지금"을 알 수 없다.
-    </p>
-
-    <!-- 어떻게 계산하는가 -->
-    <h2>어떻게 계산하는가</h2>
-    <div class="card">
+      <!-- 왜 이 분석이 필요한가 -->
+      <h2>왜 이 분석이 필요한가</h2>
       <p>
-        Light House는 논문의 발행 연도를 기준으로 세 가지 temporal 분석을 수행한다:
+        연구 네트워크는 정적이 아니다. 3년 전에 활발했던 분야가 지금은 정체되었을 수 있고, 최근
+        급부상하는 연결이 다음 프런티어일 수 있다. 시간축 없이는 "지금"을 알 수 없다.
       </p>
-      <ol>
-        <li><strong>Edge trend</strong> — 각 cross-cluster 엣지에 대해 recent window(최근 2~3년) 안의 가중치와 이전 가중치의 차이(delta)를 계산한다. delta가 큰 엣지 = 최근 급증하는 연결.</li>
-        <li><strong>Concept trend</strong> — 각 개념이 최근 논문에서 얼마나 자주 언급되는지를 과거와 비교한다.</li>
-        <li><strong>Paper trend</strong> — 각 논문의 cross-cluster bridge 기여가 최근에 얼마나 증가했는지.</li>
-      </ol>
-      <p>
-        이 세 delta를 합산하여 recencyOpportunity(최근성 기회)를 gap 후보에 부여한다. CiteSpace의 burst detection이 이 분야의 선구적 기법이다.
+
+      <!-- 어떻게 계산하는가 -->
+      <h2>어떻게 계산하는가</h2>
+      <div class="card">
+        <p>Light House는 논문의 발행 연도를 기준으로 세 가지 temporal 분석을 수행한다:</p>
+        <ol>
+          <li>
+            <strong>Edge trend</strong> — 각 cross-cluster 엣지에 대해 recent window(최근 2~3년)
+            안의 가중치와 이전 가중치의 차이(delta)를 계산한다. delta가 큰 엣지 = 최근 급증하는
+            연결.
+          </li>
+          <li>
+            <strong>Concept trend</strong> — 각 개념이 최근 논문에서 얼마나 자주 언급되는지를 과거와
+            비교한다.
+          </li>
+          <li>
+            <strong>Paper trend</strong> — 각 논문의 cross-cluster bridge 기여가 최근에 얼마나
+            증가했는지.
+          </li>
+        </ol>
+        <p>
+          이 세 delta를 합산하여 recencyOpportunity(최근성 기회)를 gap 후보에 부여한다. CiteSpace의
+          burst detection이 이 분야의 선구적 기법이다.
+        </p>
+        <div class="ref">
+          Chen (2006).
+          <em
+            >CiteSpace II: Detecting and visualizing emerging trends and transient patterns in
+            scientific literature.</em
+          >
+          JASIST.
+        </div>
+      </div>
+
+      <!-- 어떻게 보이는가 -->
+      <h2>어떻게 보이는가</h2>
+
+      <div class="viz-section">
+        <div class="viz-label">연도별 Small Multiples</div>
+        <div class="viz-why">
+          같은 노드 위치에서 엣지만 시간에 따라 변화한다. 네트워크의 시간 변화를 가장 직접적으로
+          비교할 수 있는 기법이다.
+        </div>
+        <iframe src="../viz-network-science/temporal-1-small-multiples.html"></iframe>
+      </div>
+
+      <div class="viz-section">
+        <div class="viz-label">Streamgraph</div>
+        <div class="viz-why">면적으로 규모를 쌓아서 급증과 정체가 유기적으로 보인다.</div>
+        <iframe src="../viz-network-science/temporal-2-streamgraph.html"></iframe>
+      </div>
+
+      <div class="viz-section">
+        <div class="viz-label">클러스터 쌍 x 연도 Heatmap</div>
+        <div class="viz-why">
+          cross-cluster 연결의 시간 변화를 gap 관점에서 본다. burst 감지 구간을 표시하여 급증 시점이
+          드러난다.
+        </div>
+        <iframe src="../viz-network-science/temporal-3-edge-heatmap.html"></iframe>
+      </div>
+
+      <!-- Light House에서의 용도 -->
+      <h2>Light House에서의 용도</h2>
+      <p class="product-note">
+        Light House의 "최근 변화" 맵이 이 분석에 대응한다. trend-stream 기본 표현으로 갈래별 성장
+        흐름을 먼저 보여 주고, trend-timeline으로 연도별 막대와 cluster-pair heatmap을 더 본다.
       </p>
-      <div class="ref">
-        Chen (2006). <em>CiteSpace II: Detecting and visualizing emerging trends and transient patterns in scientific literature.</em> JASIST.
+
+      <h2>현재 구현 내역</h2>
+      <div class="card">
+        <p>
+          현재 제품은 발행 연도 기반으로 <strong>edge trend</strong>,
+          <strong>concept trend</strong>, <strong>paper trend</strong>,
+          <strong>pair trend</strong>를 계산한다. pair trend가 없을 때도 temporal map이 완전히 비지
+          않도록 edge/concept trend fallback을 같이 쓴다.
+        </p>
+        <p>
+          계산은 <code>app/server/services/temporal-graph-service.ts</code>, 표시용 정리는
+          <code>app/components/documents/graph/graph-map-analytics.ts</code>, 기본 표현은
+          <code>GraphTrendStreamRenderer.tsx</code>와 <code>GraphTrendTimelineRenderer.tsx</code>가
+          맡는다.
+        </p>
+        <p>
+          현재 temporal 신호는 최근성 기회와 cluster-pair movement를 보여 주는 수준이며, 더 dense한
+          historical comparison mode는 아직 후속 과제다.
+        </p>
       </div>
+
+      <a class="bottom-back" href="index.html">&larr; 목록으로</a>
     </div>
-
-    <!-- 어떻게 보이는가 -->
-    <h2>어떻게 보이는가</h2>
-
-    <div class="viz-section">
-      <div class="viz-label">연도별 Small Multiples</div>
-      <div class="viz-why">
-        같은 노드 위치에서 엣지만 시간에 따라 변화한다. 네트워크의 시간 변화를 가장 직접적으로 비교할 수 있는 기법이다.
-      </div>
-      <iframe src="../viz-network-science/temporal-1-small-multiples.html"></iframe>
-    </div>
-
-    <div class="viz-section">
-      <div class="viz-label">Streamgraph</div>
-      <div class="viz-why">
-        면적으로 규모를 쌓아서 급증과 정체가 유기적으로 보인다.
-      </div>
-      <iframe src="../viz-network-science/temporal-2-streamgraph.html"></iframe>
-    </div>
-
-    <div class="viz-section">
-      <div class="viz-label">클러스터 쌍 x 연도 Heatmap</div>
-      <div class="viz-why">
-        cross-cluster 연결의 시간 변화를 gap 관점에서 본다. burst 감지 구간을 표시하여 급증 시점이 드러난다.
-      </div>
-      <iframe src="../viz-network-science/temporal-3-edge-heatmap.html"></iframe>
-    </div>
-
-    <!-- Light House에서의 용도 -->
-    <h2>Light House에서의 용도</h2>
-    <p class="product-note">
-      Light House의 "최근 변화" 렌즈(v4a)가 이 분석에 대응한다. trend-timeline 기본 표현에 stacked timeline과 cluster-pair heatmap이 들어가 있다.
-    </p>
-
-    <a class="bottom-back" href="index.html">&larr; 목록으로</a>
-  </div>
-</body>
+  </body>
 </html>

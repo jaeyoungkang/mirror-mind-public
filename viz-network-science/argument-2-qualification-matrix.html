@@ -1,305 +1,414 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Qualification Deficit Matrix</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #fafaf8;
-    font-family: 'Noto Sans KR', sans-serif;
-    color: #2a2a2a;
-    padding: 40px;
-  }
-  h1 {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    color: #1a1a1a;
-  }
-  .question {
-    font-size: 16px;
-    font-weight: 400;
-    color: #666;
-    margin-bottom: 12px;
-  }
-  .rationale {
-    font-size: 14px;
-    font-weight: 300;
-    color: #888;
-    line-height: 1.7;
-    margin-bottom: 32px;
-    max-width: 800px;
-  }
-  #chart {
-    width: 100%;
-    max-width: 960px;
-    overflow-x: auto;
-  }
-  .legend {
-    display: flex;
-    gap: 24px;
-    margin-top: 16px;
-    font-size: 13px;
-    color: #555;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-  }
-  .legend-swatch {
-    width: 14px;
-    height: 14px;
-    border-radius: 3px;
-  }
-  .tooltip {
-    position: absolute;
-    background: #fff;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    padding: 10px 14px;
-    font-size: 13px;
-    line-height: 1.6;
-    pointer-events: none;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    max-width: 300px;
-  }
-  .deficit-row {
-    font-weight: 700;
-    fill: #ba5a5a !important;
-  }
-</style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Qualification Deficit Matrix</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #fafaf8;
+        font-family: "Noto Sans KR", sans-serif;
+        color: #2a2a2a;
+        padding: 40px;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        color: #1a1a1a;
+      }
+      .question {
+        font-size: 16px;
+        font-weight: 400;
+        color: #666;
+        margin-bottom: 12px;
+      }
+      .rationale {
+        font-size: 14px;
+        font-weight: 300;
+        color: #888;
+        line-height: 1.7;
+        margin-bottom: 32px;
+        max-width: 800px;
+      }
+      #chart {
+        width: 100%;
+        max-width: 960px;
+        overflow-x: auto;
+      }
+      .legend {
+        display: flex;
+        gap: 24px;
+        margin-top: 16px;
+        font-size: 13px;
+        color: #555;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .legend-swatch {
+        width: 14px;
+        height: 14px;
+        border-radius: 3px;
+      }
+      .tooltip {
+        position: absolute;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-size: 13px;
+        line-height: 1.6;
+        pointer-events: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        max-width: 300px;
+      }
+      .deficit-row {
+        font-weight: 700;
+        fill: #ba5a5a !important;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Qualification Deficit Matrix</h1>
+    <p class="question">이 시각화가 답하는 질문: 어떤 zone 쌍 사이에 qualification이 부족한가?</p>
+    <p class="rationale">
+      논증 이론에서 qualification(한정)은 주장의 범위와 조건을 명시하는 핵심 요소이다. Toulmin
+      모델에서 qualifier 없는 주장은 과도한 일반화의 위험을 갖는다. 인접 행렬(adjacency matrix)은
+      네트워크 과학에서 밀집 그래프의 패턴을 발견하는 데 방향 그래프보다 효과적이다. 각 셀에 4종
+      관계를 미니 스택 바로 인코딩하면, 행(source) 합계 대비 qualify 비율이 낮은 행 -- 즉 "미정리
+      논쟁"을 한눈에 식별할 수 있다.
+    </p>
 
-<h1>Qualification Deficit Matrix</h1>
-<p class="question">이 시각화가 답하는 질문: 어떤 zone 쌍 사이에 qualification이 부족한가?</p>
-<p class="rationale">
-  논증 이론에서 qualification(한정)은 주장의 범위와 조건을 명시하는 핵심 요소이다. Toulmin 모델에서 qualifier 없는 주장은 과도한 일반화의 위험을 갖는다.
-  인접 행렬(adjacency matrix)은 네트워크 과학에서 밀집 그래프의 패턴을 발견하는 데 방향 그래프보다 효과적이다.
-  각 셀에 4종 관계를 미니 스택 바로 인코딩하면, 행(source) 합계 대비 qualify 비율이 낮은 행 -- 즉 "미정리 논쟁"을 한눈에 식별할 수 있다.
-</p>
+    <div id="chart"></div>
 
-<div id="chart"></div>
+    <div class="legend">
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: #7aaa7a"></div>
+        Support
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: #5a8aba"></div>
+        Extend
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: #c9a84c"></div>
+        Qualify
+      </div>
+      <div class="legend-item">
+        <div class="legend-swatch" style="background: #ba5a5a"></div>
+        Refute
+      </div>
+      <div class="legend-item" style="margin-left: 24px; color: #ba5a5a; font-weight: 600">
+        ★ 행 배경 = qualification deficit 높음
+      </div>
+    </div>
 
-<div class="legend">
-  <div class="legend-item"><div class="legend-swatch" style="background:#7aaa7a"></div>Support</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:#5a8aba"></div>Extend</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:#c9a84c"></div>Qualify</div>
-  <div class="legend-item"><div class="legend-swatch" style="background:#ba5a5a"></div>Refute</div>
-  <div class="legend-item" style="margin-left: 24px; color: #ba5a5a; font-weight: 600;">
-    ★ 행 배경 = qualification deficit 높음
-  </div>
-</div>
+    <div class="tooltip" id="tooltip" style="display: none"></div>
 
-<div class="tooltip" id="tooltip" style="display:none"></div>
+    <script>
+      // ── Data ──
+      const zoneNames = [
+        "외부 메모리 vs 내부 상태",
+        "망각 곡선 유효성",
+        "RAG vs 에이전트 기억",
+        "계획-행동 루프 구조",
+        "시뮬레이션 일반화",
+        "멀티모달 기억 통합",
+      ];
 
-<script>
-// ── Data ──
-const zoneNames = [
-  "외부 메모리 vs 내부 상태",
-  "망각 곡선 유효성",
-  "RAG vs 에이전트 기억",
-  "계획-행동 루프 구조",
-  "시뮬레이션 일반화",
-  "멀티모달 기억 통합"
-];
+      const zones = [
+        {
+          id: 0,
+          name: zoneNames[0],
+          support: 12,
+          extend: 5,
+          qualify: 3,
+          refute: 4,
+          unresolvedScore: 0.72,
+          qualificationDeficit: 0.6,
+          claimIsolation: 0.15,
+          lineageSignal: 0.8,
+          avgConfidence: 0.65,
+        },
+        {
+          id: 1,
+          name: zoneNames[1],
+          support: 8,
+          extend: 3,
+          qualify: 6,
+          refute: 2,
+          unresolvedScore: 0.35,
+          qualificationDeficit: 0.2,
+          claimIsolation: 0.3,
+          lineageSignal: 0.55,
+          avgConfidence: 0.78,
+        },
+        {
+          id: 2,
+          name: zoneNames[2],
+          support: 15,
+          extend: 7,
+          qualify: 2,
+          refute: 6,
+          unresolvedScore: 0.81,
+          qualificationDeficit: 0.75,
+          claimIsolation: 0.1,
+          lineageSignal: 0.9,
+          avgConfidence: 0.58,
+        },
+        {
+          id: 3,
+          name: zoneNames[3],
+          support: 10,
+          extend: 8,
+          qualify: 4,
+          refute: 3,
+          unresolvedScore: 0.45,
+          qualificationDeficit: 0.35,
+          claimIsolation: 0.2,
+          lineageSignal: 0.7,
+          avgConfidence: 0.72,
+        },
+        {
+          id: 4,
+          name: zoneNames[4],
+          support: 6,
+          extend: 4,
+          qualify: 5,
+          refute: 7,
+          unresolvedScore: 0.68,
+          qualificationDeficit: 0.45,
+          claimIsolation: 0.45,
+          lineageSignal: 0.4,
+          avgConfidence: 0.52,
+        },
+        {
+          id: 5,
+          name: zoneNames[5],
+          support: 9,
+          extend: 6,
+          qualify: 1,
+          refute: 2,
+          unresolvedScore: 0.55,
+          qualificationDeficit: 0.8,
+          claimIsolation: 0.35,
+          lineageSignal: 0.65,
+          avgConfidence: 0.69,
+        },
+      ];
 
-const zones = [
-  { id: 0, name: zoneNames[0], support: 12, extend: 5, qualify: 3, refute: 4, unresolvedScore: 0.72, qualificationDeficit: 0.6, claimIsolation: 0.15, lineageSignal: 0.8, avgConfidence: 0.65 },
-  { id: 1, name: zoneNames[1], support: 8, extend: 3, qualify: 6, refute: 2, unresolvedScore: 0.35, qualificationDeficit: 0.2, claimIsolation: 0.3, lineageSignal: 0.55, avgConfidence: 0.78 },
-  { id: 2, name: zoneNames[2], support: 15, extend: 7, qualify: 2, refute: 6, unresolvedScore: 0.81, qualificationDeficit: 0.75, claimIsolation: 0.1, lineageSignal: 0.9, avgConfidence: 0.58 },
-  { id: 3, name: zoneNames[3], support: 10, extend: 8, qualify: 4, refute: 3, unresolvedScore: 0.45, qualificationDeficit: 0.35, claimIsolation: 0.2, lineageSignal: 0.7, avgConfidence: 0.72 },
-  { id: 4, name: zoneNames[4], support: 6, extend: 4, qualify: 5, refute: 7, unresolvedScore: 0.68, qualificationDeficit: 0.45, claimIsolation: 0.45, lineageSignal: 0.4, avgConfidence: 0.52 },
-  { id: 5, name: zoneNames[5], support: 9, extend: 6, qualify: 1, refute: 2, unresolvedScore: 0.55, qualificationDeficit: 0.8, claimIsolation: 0.35, lineageSignal: 0.65, avgConfidence: 0.69 }
-];
+      const relations = [
+        { source: 0, target: 2, type: "support", count: 5 },
+        { source: 0, target: 1, type: "qualify", count: 3 },
+        { source: 0, target: 3, type: "extend", count: 2 },
+        { source: 1, target: 3, type: "extend", count: 4 },
+        { source: 1, target: 4, type: "refute", count: 2 },
+        { source: 2, target: 0, type: "refute", count: 3 },
+        { source: 2, target: 3, type: "support", count: 6 },
+        { source: 2, target: 5, type: "extend", count: 4 },
+        { source: 3, target: 4, type: "support", count: 3 },
+        { source: 3, target: 5, type: "qualify", count: 2 },
+        { source: 3, target: 1, type: "refute", count: 2 },
+        { source: 4, target: 0, type: "refute", count: 4 },
+        { source: 4, target: 5, type: "extend", count: 3 },
+        { source: 5, target: 1, type: "support", count: 3 },
+        { source: 5, target: 2, type: "qualify", count: 2 },
+        { source: 5, target: 4, type: "support", count: 2 },
+      ];
 
-const relations = [
-  { source: 0, target: 2, type: "support", count: 5 },
-  { source: 0, target: 1, type: "qualify", count: 3 },
-  { source: 0, target: 3, type: "extend", count: 2 },
-  { source: 1, target: 3, type: "extend", count: 4 },
-  { source: 1, target: 4, type: "refute", count: 2 },
-  { source: 2, target: 0, type: "refute", count: 3 },
-  { source: 2, target: 3, type: "support", count: 6 },
-  { source: 2, target: 5, type: "extend", count: 4 },
-  { source: 3, target: 4, type: "support", count: 3 },
-  { source: 3, target: 5, type: "qualify", count: 2 },
-  { source: 3, target: 1, type: "refute", count: 2 },
-  { source: 4, target: 0, type: "refute", count: 4 },
-  { source: 4, target: 5, type: "extend", count: 3 },
-  { source: 5, target: 1, type: "support", count: 3 },
-  { source: 5, target: 2, type: "qualify", count: 2 },
-  { source: 5, target: 4, type: "support", count: 2 }
-];
+      // Build matrix: matrix[source][target] = { support, extend, qualify, refute }
+      const n = zoneNames.length;
+      const matrix = Array.from({ length: n }, () =>
+        Array.from({ length: n }, () => ({ support: 0, extend: 0, qualify: 0, refute: 0 })),
+      );
+      relations.forEach((r) => {
+        matrix[r.source][r.target][r.type] += r.count;
+      });
 
-// Build matrix: matrix[source][target] = { support, extend, qualify, refute }
-const n = zoneNames.length;
-const matrix = Array.from({ length: n }, () =>
-  Array.from({ length: n }, () => ({ support: 0, extend: 0, qualify: 0, refute: 0 }))
-);
-relations.forEach(r => { matrix[r.source][r.target][r.type] += r.count; });
+      // Row totals and qualify ratios
+      const rowStats = zones.map((z, i) => {
+        let total = 0,
+          qualifyTotal = 0;
+        matrix[i].forEach((cell) => {
+          total += cell.support + cell.extend + cell.qualify + cell.refute;
+          qualifyTotal += cell.qualify;
+        });
+        return { total, qualifyTotal, qualifyRatio: total > 0 ? qualifyTotal / total : 0 };
+      });
 
-// Row totals and qualify ratios
-const rowStats = zones.map((z, i) => {
-  let total = 0, qualifyTotal = 0;
-  matrix[i].forEach(cell => {
-    total += cell.support + cell.extend + cell.qualify + cell.refute;
-    qualifyTotal += cell.qualify;
-  });
-  return { total, qualifyTotal, qualifyRatio: total > 0 ? qualifyTotal / total : 0 };
-});
+      // ── Layout ──
+      const margin = { top: 160, right: 40, bottom: 40, left: 200 };
+      const cellSize = 100;
+      const barHeight = 50;
+      const svgWidth = margin.left + n * cellSize + margin.right + 140;
+      const svgHeight = margin.top + n * cellSize + margin.bottom;
 
-// ── Layout ──
-const margin = { top: 160, right: 40, bottom: 40, left: 200 };
-const cellSize = 100;
-const barHeight = 50;
-const svgWidth = margin.left + n * cellSize + margin.right + 140;
-const svgHeight = margin.top + n * cellSize + margin.bottom;
+      const svg = d3
+        .select("#chart")
+        .append("svg")
+        .attr("width", svgWidth)
+        .attr("height", svgHeight);
 
-const svg = d3.select("#chart").append("svg")
-  .attr("width", svgWidth)
-  .attr("height", svgHeight);
+      const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
 
-const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
+      const tooltip = d3.select("#tooltip");
+      const types = ["support", "extend", "qualify", "refute"];
+      const colorMap = {
+        support: "#7aaa7a",
+        extend: "#5a8aba",
+        qualify: "#c9a84c",
+        refute: "#ba5a5a",
+      };
 
-const tooltip = d3.select("#tooltip");
-const types = ["support", "extend", "qualify", "refute"];
-const colorMap = { support: "#7aaa7a", extend: "#5a8aba", qualify: "#c9a84c", refute: "#ba5a5a" };
+      const maxCellTotal = d3.max(relations, (d) => d.count) || 1;
+      const barScale = d3
+        .scaleLinear()
+        .domain([0, maxCellTotal + 2])
+        .range([0, barHeight]);
 
-const maxCellTotal = d3.max(relations, d => d.count) || 1;
-const barScale = d3.scaleLinear().domain([0, maxCellTotal + 2]).range([0, barHeight]);
+      // ── Row backgrounds (deficit highlight) ──
+      g.selectAll(".row-bg")
+        .data(zones)
+        .join("rect")
+        .attr("x", -margin.left + 10)
+        .attr("y", (d, i) => i * cellSize)
+        .attr("width", margin.left - 10 + n * cellSize)
+        .attr("height", cellSize)
+        .attr("fill", (d) =>
+          d.qualificationDeficit > 0.5 ? "rgba(186,90,90,0.06)" : "transparent",
+        )
+        .attr("rx", 4);
 
-// ── Row backgrounds (deficit highlight) ──
-g.selectAll(".row-bg")
-  .data(zones)
-  .join("rect")
-  .attr("x", -margin.left + 10)
-  .attr("y", (d, i) => i * cellSize)
-  .attr("width", margin.left - 10 + n * cellSize)
-  .attr("height", cellSize)
-  .attr("fill", (d) => d.qualificationDeficit > 0.5 ? "rgba(186,90,90,0.06)" : "transparent")
-  .attr("rx", 4);
+      // ── Grid cells ──
+      for (let i = 0; i < n; i++) {
+        for (let j = 0; j < n; j++) {
+          const cell = matrix[i][j];
+          const total = cell.support + cell.extend + cell.qualify + cell.refute;
+          const cx = j * cellSize;
+          const cy = i * cellSize;
 
-// ── Grid cells ──
-for (let i = 0; i < n; i++) {
-  for (let j = 0; j < n; j++) {
-    const cell = matrix[i][j];
-    const total = cell.support + cell.extend + cell.qualify + cell.refute;
-    const cx = j * cellSize;
-    const cy = i * cellSize;
+          // Cell border
+          g.append("rect")
+            .attr("x", cx)
+            .attr("y", cy)
+            .attr("width", cellSize)
+            .attr("height", cellSize)
+            .attr("fill", i === j ? "#f0f0ec" : "#fff")
+            .attr("stroke", "#e0e0dc")
+            .attr("stroke-width", 1);
 
-    // Cell border
-    g.append("rect")
-      .attr("x", cx)
-      .attr("y", cy)
-      .attr("width", cellSize)
-      .attr("height", cellSize)
-      .attr("fill", i === j ? "#f0f0ec" : "#fff")
-      .attr("stroke", "#e0e0dc")
-      .attr("stroke-width", 1);
+          if (total === 0 || i === j) continue;
 
-    if (total === 0 || i === j) continue;
+          // Mini stacked bar
+          const barW = 20;
+          const barX = cx + (cellSize - barW * 2) / 2;
+          let cumY = cy + cellSize - 8;
 
-    // Mini stacked bar
-    const barW = 20;
-    const barX = cx + (cellSize - barW * 2) / 2;
-    let cumY = cy + cellSize - 8;
+          types.forEach((type) => {
+            const val = cell[type];
+            if (val === 0) return;
+            const h = barScale(val);
+            cumY -= h;
+            g.append("rect")
+              .attr("x", barX)
+              .attr("y", cumY)
+              .attr("width", barW * 2)
+              .attr("height", h)
+              .attr("fill", colorMap[type])
+              .attr("rx", 2)
+              .attr("opacity", 0.85);
+          });
 
-    types.forEach(type => {
-      const val = cell[type];
-      if (val === 0) return;
-      const h = barScale(val);
-      cumY -= h;
-      g.append("rect")
-        .attr("x", barX)
-        .attr("y", cumY)
-        .attr("width", barW * 2)
-        .attr("height", h)
-        .attr("fill", colorMap[type])
-        .attr("rx", 2)
-        .attr("opacity", 0.85);
-    });
-
-    // Hover overlay
-    g.append("rect")
-      .attr("x", cx)
-      .attr("y", cy)
-      .attr("width", cellSize)
-      .attr("height", cellSize)
-      .attr("fill", "transparent")
-      .style("cursor", "pointer")
-      .on("mouseover", (e) => {
-        tooltip.style("display", "block").html(`
+          // Hover overlay
+          g.append("rect")
+            .attr("x", cx)
+            .attr("y", cy)
+            .attr("width", cellSize)
+            .attr("height", cellSize)
+            .attr("fill", "transparent")
+            .style("cursor", "pointer")
+            .on("mouseover", (e) => {
+              tooltip.style("display", "block").html(`
           <strong>${zoneNames[i]}</strong> &rarr; <strong>${zoneNames[j]}</strong><br/>
           Support: ${cell.support} / Extend: ${cell.extend}<br/>
           Qualify: ${cell.qualify} / Refute: ${cell.refute}<br/>
           합계: ${total}
         `);
-      })
-      .on("mousemove", (e) => {
-        tooltip.style("left", (e.pageX + 14) + "px").style("top", (e.pageY - 10) + "px");
-      })
-      .on("mouseout", () => tooltip.style("display", "none"));
-  }
-}
+            })
+            .on("mousemove", (e) => {
+              tooltip.style("left", e.pageX + 14 + "px").style("top", e.pageY - 10 + "px");
+            })
+            .on("mouseout", () => tooltip.style("display", "none"));
+        }
+      }
 
-// ── Row labels (left) ──
-g.selectAll(".row-label")
-  .data(zones)
-  .join("text")
-  .attr("x", -12)
-  .attr("y", (d, i) => i * cellSize + cellSize / 2)
-  .attr("dy", "0.35em")
-  .attr("text-anchor", "end")
-  .attr("font-size", "12px")
-  .attr("font-weight", d => d.qualificationDeficit > 0.5 ? "700" : "400")
-  .attr("fill", d => d.qualificationDeficit > 0.5 ? "#ba5a5a" : "#2a2a2a")
-  .text(d => d.name);
+      // ── Row labels (left) ──
+      g.selectAll(".row-label")
+        .data(zones)
+        .join("text")
+        .attr("x", -12)
+        .attr("y", (d, i) => i * cellSize + cellSize / 2)
+        .attr("dy", "0.35em")
+        .attr("text-anchor", "end")
+        .attr("font-size", "12px")
+        .attr("font-weight", (d) => (d.qualificationDeficit > 0.5 ? "700" : "400"))
+        .attr("fill", (d) => (d.qualificationDeficit > 0.5 ? "#ba5a5a" : "#2a2a2a"))
+        .text((d) => d.name);
 
-// ── Column labels (top) ──
-g.selectAll(".col-label")
-  .data(zones)
-  .join("text")
-  .attr("x", (d, i) => i * cellSize + cellSize / 2)
-  .attr("y", -12)
-  .attr("text-anchor", "start")
-  .attr("font-size", "12px")
-  .attr("fill", "#2a2a2a")
-  .attr("transform", (d, i) => `rotate(-45, ${i * cellSize + cellSize / 2}, -12)`)
-  .text(d => d.name);
+      // ── Column labels (top) ──
+      g.selectAll(".col-label")
+        .data(zones)
+        .join("text")
+        .attr("x", (d, i) => i * cellSize + cellSize / 2)
+        .attr("y", -12)
+        .attr("text-anchor", "start")
+        .attr("font-size", "12px")
+        .attr("fill", "#2a2a2a")
+        .attr("transform", (d, i) => `rotate(-45, ${i * cellSize + cellSize / 2}, -12)`)
+        .text((d) => d.name);
 
-// ── Row summary (right) ──
-g.selectAll(".row-summary")
-  .data(rowStats)
-  .join("text")
-  .attr("x", n * cellSize + 12)
-  .attr("y", (d, i) => i * cellSize + cellSize / 2)
-  .attr("dy", "0.35em")
-  .attr("font-size", "11px")
-  .attr("fill", "#888")
-  .text(d => `합: ${d.total}, Q비율: ${(d.qualifyRatio * 100).toFixed(0)}%`);
+      // ── Row summary (right) ──
+      g.selectAll(".row-summary")
+        .data(rowStats)
+        .join("text")
+        .attr("x", n * cellSize + 12)
+        .attr("y", (d, i) => i * cellSize + cellSize / 2)
+        .attr("dy", "0.35em")
+        .attr("font-size", "11px")
+        .attr("fill", "#888")
+        .text((d) => `합: ${d.total}, Q비율: ${(d.qualifyRatio * 100).toFixed(0)}%`);
 
-// ── Axis titles ──
-svg.append("text")
-  .attr("x", margin.left / 2)
-  .attr("y", margin.top - 50)
-  .attr("text-anchor", "middle")
-  .attr("font-size", "12px")
-  .attr("fill", "#aaa")
-  .text("Source zone (행) →");
+      // ── Axis titles ──
+      svg
+        .append("text")
+        .attr("x", margin.left / 2)
+        .attr("y", margin.top - 50)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "12px")
+        .attr("fill", "#aaa")
+        .text("Source zone (행) →");
 
-svg.append("text")
-  .attr("x", margin.left + n * cellSize / 2)
-  .attr("y", margin.top - 80)
-  .attr("text-anchor", "middle")
-  .attr("font-size", "12px")
-  .attr("fill", "#aaa")
-  .text("← Target zone (열)");
-</script>
-</body>
+      svg
+        .append("text")
+        .attr("x", margin.left + (n * cellSize) / 2)
+        .attr("y", margin.top - 80)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "12px")
+        .attr("fill", "#aaa")
+        .text("← Target zone (열)");
+    </script>
+  </body>
 </html>

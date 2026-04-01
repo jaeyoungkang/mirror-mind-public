@@ -1,467 +1,651 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Rich Club / Core-Periphery</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<style>
-* { margin: 0; padding: 0; box-sizing: border-box; }
-body {
-  background: #fafaf8;
-  font-family: 'Noto Sans KR', sans-serif;
-  color: #2a2a2a;
-  padding: 40px 48px;
-}
-h1 {
-  font-size: 28px;
-  font-weight: 700;
-  margin-bottom: 8px;
-  letter-spacing: -0.5px;
-}
-.question {
-  font-size: 16px;
-  font-weight: 500;
-  color: #5a5a5a;
-  margin-bottom: 12px;
-  padding-left: 2px;
-}
-.rationale {
-  font-size: 14px;
-  font-weight: 300;
-  color: #6a6a6a;
-  line-height: 1.7;
-  max-width: 960px;
-  margin-bottom: 32px;
-  padding-left: 2px;
-}
-.container {
-  display: flex;
-  gap: 48px;
-  align-items: flex-start;
-}
-.chart-section { flex: 1; min-width: 0; }
-.chart-title {
-  font-size: 13px;
-  font-weight: 500;
-  color: #888;
-  text-transform: uppercase;
-  letter-spacing: 1px;
-  margin-bottom: 12px;
-}
-svg { display: block; }
-.tooltip {
-  position: absolute;
-  background: #fff;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  padding: 10px 14px;
-  font-size: 13px;
-  line-height: 1.5;
-  pointer-events: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  max-width: 280px;
-}
-.tooltip strong { font-weight: 600; }
-.legend {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 16px;
-  margin-top: 16px;
-}
-.legend-item {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 12px;
-  color: #666;
-}
-.legend-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-.shell-label {
-  font-size: 11px;
-  fill: #999;
-  font-weight: 400;
-}
-.shell-info {
-  display: flex;
-  gap: 24px;
-  margin-top: 20px;
-  flex-wrap: wrap;
-}
-.shell-card {
-  background: #fff;
-  border: 1px solid #eee;
-  border-radius: 8px;
-  padding: 12px 16px;
-  font-size: 12px;
-  line-height: 1.6;
-  min-width: 120px;
-}
-.shell-card .k-val {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 4px;
-}
-</style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Rich Club / Core-Periphery</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #fafaf8;
+        font-family: "Noto Sans KR", sans-serif;
+        color: #2a2a2a;
+        padding: 40px 48px;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
+      }
+      .question {
+        font-size: 16px;
+        font-weight: 500;
+        color: #5a5a5a;
+        margin-bottom: 12px;
+        padding-left: 2px;
+      }
+      .rationale {
+        font-size: 14px;
+        font-weight: 300;
+        color: #6a6a6a;
+        line-height: 1.7;
+        max-width: 960px;
+        margin-bottom: 32px;
+        padding-left: 2px;
+      }
+      .container {
+        display: flex;
+        gap: 48px;
+        align-items: flex-start;
+      }
+      .chart-section {
+        flex: 1;
+        min-width: 0;
+      }
+      .chart-title {
+        font-size: 13px;
+        font-weight: 500;
+        color: #888;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        margin-bottom: 12px;
+      }
+      svg {
+        display: block;
+      }
+      .tooltip {
+        position: absolute;
+        background: #fff;
+        border: 1px solid #ddd;
+        border-radius: 6px;
+        padding: 10px 14px;
+        font-size: 13px;
+        line-height: 1.5;
+        pointer-events: none;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        max-width: 280px;
+      }
+      .tooltip strong {
+        font-weight: 600;
+      }
+      .legend {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+        margin-top: 16px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #666;
+      }
+      .legend-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+      }
+      .shell-label {
+        font-size: 11px;
+        fill: #999;
+        font-weight: 400;
+      }
+      .shell-info {
+        display: flex;
+        gap: 24px;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+      .shell-card {
+        background: #fff;
+        border: 1px solid #eee;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 12px;
+        line-height: 1.6;
+        min-width: 120px;
+      }
+      .shell-card .k-val {
+        font-size: 18px;
+        font-weight: 700;
+        margin-bottom: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Rich Club / Core-Periphery</h1>
+    <p class="question">이 시각화가 답하는 질문: "핵심 논문과 주변부 논문은 어떻게 나뉘는가?"</p>
+    <p class="rationale">
+      k-core decomposition은 네트워크에서 모든 노드가 최소 k개의 연결을 가진 maximal subgraph를
+      추출한다. Seidman (1983)이 제안하고 Dorogovtsev et al. (2006)이 scale-free 네트워크에 적용한
+      이 방법은, 네트워크를 "양파 껍질"처럼 벗겨내며 핵심부(core)와 주변부(periphery)를 구조적으로
+      구분한다. Rich-club 계수(Zhou & Mondragon, 2004)는 고차 허브끼리의 연결 밀도를 측정하여,
+      핵심부가 단순히 많이 연결된 것이 아니라 서로 간에도 밀접한지를 보여준다.
+    </p>
 
-<h1>Rich Club / Core-Periphery</h1>
-<p class="question">이 시각화가 답하는 질문: "핵심 논문과 주변부 논문은 어떻게 나뉘는가?"</p>
-<p class="rationale">
-  k-core decomposition은 네트워크에서 모든 노드가 최소 k개의 연결을 가진 maximal subgraph를 추출한다.
-  Seidman (1983)이 제안하고 Dorogovtsev et al. (2006)이 scale-free 네트워크에 적용한 이 방법은,
-  네트워크를 "양파 껍질"처럼 벗겨내며 핵심부(core)와 주변부(periphery)를 구조적으로 구분한다.
-  Rich-club 계수(Zhou & Mondragon, 2004)는 고차 허브끼리의 연결 밀도를 측정하여, 핵심부가 단순히 많이 연결된 것이 아니라 서로 간에도 밀접한지를 보여준다.
-</p>
+    <div class="container">
+      <div class="chart-section">
+        <div class="chart-title">K-Core Concentric Shell Diagram</div>
+        <div id="core-chart"></div>
+        <div class="legend" id="legend"></div>
+      </div>
+      <div class="chart-section">
+        <div class="chart-title">Core Statistics</div>
+        <div class="shell-info" id="shell-info"></div>
+      </div>
+    </div>
 
-<div class="container">
-  <div class="chart-section">
-    <div class="chart-title">K-Core Concentric Shell Diagram</div>
-    <div id="core-chart"></div>
-    <div class="legend" id="legend"></div>
-  </div>
-  <div class="chart-section">
-    <div class="chart-title">Core Statistics</div>
-    <div class="shell-info" id="shell-info"></div>
-  </div>
-</div>
+    <div class="tooltip" id="tooltip" style="display: none"></div>
 
-<div class="tooltip" id="tooltip" style="display:none;"></div>
+    <script>
+      const clusters = [
+        { id: "external-memory", label: "외부 메모리", color: "#7aaa7a" },
+        { id: "cognitive-arch", label: "인지 아키텍처", color: "#7a7aaa" },
+        { id: "simulation", label: "시뮬레이션", color: "#aa8a6a" },
+        { id: "rag", label: "RAG", color: "#8aaa8a" },
+        { id: "multimodal", label: "멀티모달", color: "#aa7a8a" },
+      ];
 
-<script>
-const clusters = [
-  { id: 'external-memory', label: '외부 메모리', color: '#7aaa7a' },
-  { id: 'cognitive-arch',  label: '인지 아키텍처', color: '#7a7aaa' },
-  { id: 'simulation',      label: '시뮬레이션', color: '#aa8a6a' },
-  { id: 'rag',             label: 'RAG', color: '#8aaa8a' },
-  { id: 'multimodal',      label: '멀티모달', color: '#aa7a8a' }
-];
+      const nodes = [
+        {
+          id: 0,
+          label: "MemoryBank: Long-term Storage for LLM Agents",
+          cluster: 0,
+          degree: 8,
+          betweenness: 0.42,
+          citationCount: 312,
+          year: 2024,
+        },
+        {
+          id: 1,
+          label: "Cognitive Architectures for Language Agents",
+          cluster: 1,
+          degree: 7,
+          betweenness: 0.38,
+          citationCount: 287,
+          year: 2023,
+        },
+        {
+          id: 2,
+          label: "Generative Agents: Interactive Simulacra",
+          cluster: 2,
+          degree: 6,
+          betweenness: 0.31,
+          citationCount: 1843,
+          year: 2023,
+        },
+        {
+          id: 3,
+          label: "Retrieval-Augmented Generation for Knowledge",
+          cluster: 3,
+          degree: 6,
+          betweenness: 0.28,
+          citationCount: 2104,
+          year: 2020,
+        },
+        {
+          id: 4,
+          label: "Reflexion: Language Agents with Verbal RL",
+          cluster: 1,
+          degree: 5,
+          betweenness: 0.25,
+          citationCount: 541,
+          year: 2023,
+        },
+        {
+          id: 5,
+          label: "Self-RAG: Learning to Retrieve and Reflect",
+          cluster: 3,
+          degree: 5,
+          betweenness: 0.22,
+          citationCount: 389,
+          year: 2024,
+        },
+        {
+          id: 6,
+          label: "Voyager: Open-Ended Embodied Agent with LLM",
+          cluster: 2,
+          degree: 4,
+          betweenness: 0.19,
+          citationCount: 612,
+          year: 2023,
+        },
+        {
+          id: 7,
+          label: "VisualGPT: Multimodal Memory Reasoning",
+          cluster: 4,
+          degree: 4,
+          betweenness: 0.17,
+          citationCount: 178,
+          year: 2024,
+        },
+        {
+          id: 8,
+          label: "RAISE: Retrieval-Augmented Impersonation",
+          cluster: 0,
+          degree: 3,
+          betweenness: 0.14,
+          citationCount: 95,
+          year: 2024,
+        },
+        {
+          id: 9,
+          label: "RET-LLM: General Read-Write Memory for LLM",
+          cluster: 0,
+          degree: 3,
+          betweenness: 0.12,
+          citationCount: 67,
+          year: 2023,
+        },
+        {
+          id: 10,
+          label: "SCM: Structured Context Memory Architecture",
+          cluster: 1,
+          degree: 3,
+          betweenness: 0.1,
+          citationCount: 42,
+          year: 2024,
+        },
+        {
+          id: 11,
+          label: "AgentSims: Open-Source Sandbox for LLM Eval",
+          cluster: 2,
+          degree: 2,
+          betweenness: 0.07,
+          citationCount: 156,
+          year: 2023,
+        },
+        {
+          id: 12,
+          label: "LLM-Augmented Autonomous Agents Survey",
+          cluster: 3,
+          degree: 2,
+          betweenness: 0.05,
+          citationCount: 203,
+          year: 2023,
+        },
+        {
+          id: 13,
+          label: "AudioPalm: Multimodal Agent Memory",
+          cluster: 4,
+          degree: 1,
+          betweenness: 0.03,
+          citationCount: 88,
+          year: 2024,
+        },
+        {
+          id: 14,
+          label: "MemGPT: Towards LLMs as Operating Systems",
+          cluster: 0,
+          degree: 1,
+          betweenness: 0.02,
+          citationCount: 421,
+          year: 2023,
+        },
+      ];
 
-const nodes = [
-  { id: 0,  label: 'MemoryBank: Long-term Storage for LLM Agents', cluster: 0, degree: 8, betweenness: 0.42, citationCount: 312, year: 2024 },
-  { id: 1,  label: 'Cognitive Architectures for Language Agents', cluster: 1, degree: 7, betweenness: 0.38, citationCount: 287, year: 2023 },
-  { id: 2,  label: 'Generative Agents: Interactive Simulacra', cluster: 2, degree: 6, betweenness: 0.31, citationCount: 1843, year: 2023 },
-  { id: 3,  label: 'Retrieval-Augmented Generation for Knowledge', cluster: 3, degree: 6, betweenness: 0.28, citationCount: 2104, year: 2020 },
-  { id: 4,  label: 'Reflexion: Language Agents with Verbal RL', cluster: 1, degree: 5, betweenness: 0.25, citationCount: 541, year: 2023 },
-  { id: 5,  label: 'Self-RAG: Learning to Retrieve and Reflect', cluster: 3, degree: 5, betweenness: 0.22, citationCount: 389, year: 2024 },
-  { id: 6,  label: 'Voyager: Open-Ended Embodied Agent with LLM', cluster: 2, degree: 4, betweenness: 0.19, citationCount: 612, year: 2023 },
-  { id: 7,  label: 'VisualGPT: Multimodal Memory Reasoning', cluster: 4, degree: 4, betweenness: 0.17, citationCount: 178, year: 2024 },
-  { id: 8,  label: 'RAISE: Retrieval-Augmented Impersonation', cluster: 0, degree: 3, betweenness: 0.14, citationCount: 95, year: 2024 },
-  { id: 9,  label: 'RET-LLM: General Read-Write Memory for LLM', cluster: 0, degree: 3, betweenness: 0.12, citationCount: 67, year: 2023 },
-  { id: 10, label: 'SCM: Structured Context Memory Architecture', cluster: 1, degree: 3, betweenness: 0.10, citationCount: 42, year: 2024 },
-  { id: 11, label: 'AgentSims: Open-Source Sandbox for LLM Eval', cluster: 2, degree: 2, betweenness: 0.07, citationCount: 156, year: 2023 },
-  { id: 12, label: 'LLM-Augmented Autonomous Agents Survey', cluster: 3, degree: 2, betweenness: 0.05, citationCount: 203, year: 2023 },
-  { id: 13, label: 'AudioPalm: Multimodal Agent Memory', cluster: 4, degree: 1, betweenness: 0.03, citationCount: 88, year: 2024 },
-  { id: 14, label: 'MemGPT: Towards LLMs as Operating Systems', cluster: 0, degree: 1, betweenness: 0.02, citationCount: 421, year: 2023 }
-];
+      const edges = [
+        { source: 0, target: 1, weight: 0.8, type: "cross" },
+        { source: 0, target: 2, weight: 0.6, type: "cross" },
+        { source: 0, target: 3, weight: 0.7, type: "cross" },
+        { source: 0, target: 8, weight: 0.9, type: "intra" },
+        { source: 0, target: 9, weight: 0.85, type: "intra" },
+        { source: 0, target: 14, weight: 0.8, type: "intra" },
+        { source: 0, target: 5, weight: 0.5, type: "cross" },
+        { source: 0, target: 4, weight: 0.55, type: "cross" },
+        { source: 1, target: 4, weight: 0.9, type: "intra" },
+        { source: 1, target: 10, weight: 0.85, type: "intra" },
+        { source: 1, target: 2, weight: 0.7, type: "cross" },
+        { source: 1, target: 6, weight: 0.5, type: "cross" },
+        { source: 1, target: 3, weight: 0.55, type: "cross" },
+        { source: 1, target: 12, weight: 0.4, type: "cross" },
+        { source: 2, target: 6, weight: 0.9, type: "intra" },
+        { source: 2, target: 11, weight: 0.85, type: "intra" },
+        { source: 2, target: 7, weight: 0.45, type: "cross" },
+        { source: 2, target: 4, weight: 0.5, type: "cross" },
+        { source: 3, target: 5, weight: 0.9, type: "intra" },
+        { source: 3, target: 12, weight: 0.85, type: "intra" },
+        { source: 3, target: 8, weight: 0.5, type: "cross" },
+        { source: 3, target: 9, weight: 0.4, type: "cross" },
+        { source: 4, target: 10, weight: 0.7, type: "intra" },
+        { source: 4, target: 5, weight: 0.45, type: "cross" },
+        { source: 5, target: 8, weight: 0.5, type: "cross" },
+        { source: 5, target: 12, weight: 0.6, type: "intra" },
+        { source: 6, target: 11, weight: 0.8, type: "intra" },
+        { source: 6, target: 7, weight: 0.4, type: "cross" },
+        { source: 7, target: 13, weight: 0.9, type: "intra" },
+        { source: 7, target: 2, weight: 0.35, type: "cross" },
+        { source: 8, target: 9, weight: 0.8, type: "intra" },
+        { source: 9, target: 14, weight: 0.7, type: "intra" },
+        { source: 10, target: 12, weight: 0.35, type: "cross" },
+      ];
 
-const edges = [
-  { source: 0, target: 1, weight: 0.8, type: 'cross' },
-  { source: 0, target: 2, weight: 0.6, type: 'cross' },
-  { source: 0, target: 3, weight: 0.7, type: 'cross' },
-  { source: 0, target: 8, weight: 0.9, type: 'intra' },
-  { source: 0, target: 9, weight: 0.85, type: 'intra' },
-  { source: 0, target: 14, weight: 0.8, type: 'intra' },
-  { source: 0, target: 5, weight: 0.5, type: 'cross' },
-  { source: 0, target: 4, weight: 0.55, type: 'cross' },
-  { source: 1, target: 4, weight: 0.9, type: 'intra' },
-  { source: 1, target: 10, weight: 0.85, type: 'intra' },
-  { source: 1, target: 2, weight: 0.7, type: 'cross' },
-  { source: 1, target: 6, weight: 0.5, type: 'cross' },
-  { source: 1, target: 3, weight: 0.55, type: 'cross' },
-  { source: 1, target: 12, weight: 0.4, type: 'cross' },
-  { source: 2, target: 6, weight: 0.9, type: 'intra' },
-  { source: 2, target: 11, weight: 0.85, type: 'intra' },
-  { source: 2, target: 7, weight: 0.45, type: 'cross' },
-  { source: 2, target: 4, weight: 0.5, type: 'cross' },
-  { source: 3, target: 5, weight: 0.9, type: 'intra' },
-  { source: 3, target: 12, weight: 0.85, type: 'intra' },
-  { source: 3, target: 8, weight: 0.5, type: 'cross' },
-  { source: 3, target: 9, weight: 0.4, type: 'cross' },
-  { source: 4, target: 10, weight: 0.7, type: 'intra' },
-  { source: 4, target: 5, weight: 0.45, type: 'cross' },
-  { source: 5, target: 8, weight: 0.5, type: 'cross' },
-  { source: 5, target: 12, weight: 0.6, type: 'intra' },
-  { source: 6, target: 11, weight: 0.8, type: 'intra' },
-  { source: 6, target: 7, weight: 0.4, type: 'cross' },
-  { source: 7, target: 13, weight: 0.9, type: 'intra' },
-  { source: 7, target: 2, weight: 0.35, type: 'cross' },
-  { source: 8, target: 9, weight: 0.8, type: 'intra' },
-  { source: 9, target: 14, weight: 0.7, type: 'intra' },
-  { source: 10, target: 12, weight: 0.35, type: 'cross' },
-];
+      // Compute k-core values via iterative pruning
+      function computeKCore(nodeList, edgeList) {
+        const adj = {};
+        nodeList.forEach((n) => (adj[n.id] = new Set()));
+        edgeList.forEach((e) => {
+          adj[e.source].add(e.target);
+          adj[e.target].add(e.source);
+        });
 
-// Compute k-core values via iterative pruning
-function computeKCore(nodeList, edgeList) {
-  const adj = {};
-  nodeList.forEach(n => adj[n.id] = new Set());
-  edgeList.forEach(e => {
-    adj[e.source].add(e.target);
-    adj[e.target].add(e.source);
-  });
+        const coreness = {};
+        nodeList.forEach((n) => (coreness[n.id] = 0));
 
-  const coreness = {};
-  nodeList.forEach(n => coreness[n.id] = 0);
+        const remainDeg = {};
+        nodeList.forEach((n) => (remainDeg[n.id] = adj[n.id].size));
 
-  const remainDeg = {};
-  nodeList.forEach(n => remainDeg[n.id] = adj[n.id].size);
-
-  const remaining = new Set(nodeList.map(n => n.id));
-  let k = 1;
-  while (remaining.size > 0) {
-    let changed = true;
-    while (changed) {
-      changed = false;
-      for (const nid of [...remaining]) {
-        if (remainDeg[nid] < k) {
-          coreness[nid] = k - 1;
-          remaining.delete(nid);
-          for (const neighbor of adj[nid]) {
-            if (remaining.has(neighbor)) {
-              remainDeg[neighbor]--;
+        const remaining = new Set(nodeList.map((n) => n.id));
+        let k = 1;
+        while (remaining.size > 0) {
+          let changed = true;
+          while (changed) {
+            changed = false;
+            for (const nid of [...remaining]) {
+              if (remainDeg[nid] < k) {
+                coreness[nid] = k - 1;
+                remaining.delete(nid);
+                for (const neighbor of adj[nid]) {
+                  if (remaining.has(neighbor)) {
+                    remainDeg[neighbor]--;
+                  }
+                }
+                changed = true;
+              }
             }
           }
-          changed = true;
+          // all remaining nodes have degree >= k in the subgraph
+          // mark them as at least k-core
+          if (remaining.size > 0) {
+            k++;
+          }
         }
+        // nodes still have coreness = k-1 from when they were removed
+        // but remaining nodes at the end need to be set
+        // Actually let's fix: nodes that survived until the end get k-1
+        // Re-implement properly:
+        return coreness;
       }
-    }
-    // all remaining nodes have degree >= k in the subgraph
-    // mark them as at least k-core
-    if (remaining.size > 0) {
-      k++;
-    }
-  }
-  // nodes still have coreness = k-1 from when they were removed
-  // but remaining nodes at the end need to be set
-  // Actually let's fix: nodes that survived until the end get k-1
-  // Re-implement properly:
-  return coreness;
-}
 
-// Simpler k-core
-function kCore(nodeList, edgeList) {
-  const adj = {};
-  nodeList.forEach(n => adj[n.id] = []);
-  edgeList.forEach(e => {
-    adj[e.source].push(e.target);
-    adj[e.target].push(e.source);
-  });
+      // Simpler k-core
+      function kCore(nodeList, edgeList) {
+        const adj = {};
+        nodeList.forEach((n) => (adj[n.id] = []));
+        edgeList.forEach((e) => {
+          adj[e.source].push(e.target);
+          adj[e.target].push(e.source);
+        });
 
-  const core = {};
-  const deg = {};
-  nodeList.forEach(n => {
-    deg[n.id] = adj[n.id].length;
-    core[n.id] = 0;
-  });
+        const core = {};
+        const deg = {};
+        nodeList.forEach((n) => {
+          deg[n.id] = adj[n.id].length;
+          core[n.id] = 0;
+        });
 
-  const alive = new Set(nodeList.map(n => n.id));
-  const sorted = nodeList.map(n => n.id).sort((a, b) => deg[a] - deg[b]);
+        const alive = new Set(nodeList.map((n) => n.id));
+        const sorted = nodeList.map((n) => n.id).sort((a, b) => deg[a] - deg[b]);
 
-  for (const v of sorted) {
-    if (!alive.has(v)) continue;
-    core[v] = deg[v]; // coreness = remaining degree when removed
-    alive.delete(v);
-    for (const u of adj[v]) {
-      if (alive.has(u) && deg[u] > deg[v]) {
-        deg[u]--;
+        for (const v of sorted) {
+          if (!alive.has(v)) continue;
+          core[v] = deg[v]; // coreness = remaining degree when removed
+          alive.delete(v);
+          for (const u of adj[v]) {
+            if (alive.has(u) && deg[u] > deg[v]) {
+              deg[u]--;
+            }
+          }
+        }
+        return core;
       }
-    }
-  }
-  return core;
-}
 
-const coreValues = kCore(nodes, edges);
-nodes.forEach(n => n.kcore = coreValues[n.id]);
+      const coreValues = kCore(nodes, edges);
+      nodes.forEach((n) => (n.kcore = coreValues[n.id]));
 
-const maxCore = d3.max(nodes, d => d.kcore);
-const coreShells = d3.range(0, maxCore + 1);
+      const maxCore = d3.max(nodes, (d) => d.kcore);
+      const coreShells = d3.range(0, maxCore + 1);
 
-// --- Concentric Shell Visualization ---
-(function() {
-  const w = 560, h = 560;
-  const cx = w / 2, cy = h / 2;
-  const maxR = 240;
-  const minR = 50;
+      // --- Concentric Shell Visualization ---
+      (function () {
+        const w = 560,
+          h = 560;
+        const cx = w / 2,
+          cy = h / 2;
+        const maxR = 240;
+        const minR = 50;
 
-  const svg = d3.select('#core-chart')
-    .append('svg').attr('width', w).attr('height', h);
+        const svg = d3.select("#core-chart").append("svg").attr("width", w).attr("height", h);
 
-  // shells (outer = low core, inner = high core)
-  const shellRadii = {};
-  const usedCores = [...new Set(nodes.map(n => n.kcore))].sort((a, b) => a - b);
-  const shellCount = usedCores.length;
+        // shells (outer = low core, inner = high core)
+        const shellRadii = {};
+        const usedCores = [...new Set(nodes.map((n) => n.kcore))].sort((a, b) => a - b);
+        const shellCount = usedCores.length;
 
-  usedCores.forEach((k, i) => {
-    // higher core = smaller radius (inner)
-    const t = shellCount <= 1 ? 0.5 : (shellCount - 1 - i) / (shellCount - 1);
-    shellRadii[k] = minR + t * (maxR - minR);
-  });
+        usedCores.forEach((k, i) => {
+          // higher core = smaller radius (inner)
+          const t = shellCount <= 1 ? 0.5 : (shellCount - 1 - i) / (shellCount - 1);
+          shellRadii[k] = minR + t * (maxR - minR);
+        });
 
-  // draw shell rings
-  usedCores.forEach(k => {
-    svg.append('circle')
-      .attr('cx', cx).attr('cy', cy).attr('r', shellRadii[k])
-      .attr('fill', 'none')
-      .attr('stroke', '#e0e0e0')
-      .attr('stroke-width', 1)
-      .attr('stroke-dasharray', k === maxCore ? 'none' : '4,3');
+        // draw shell rings
+        usedCores.forEach((k) => {
+          svg
+            .append("circle")
+            .attr("cx", cx)
+            .attr("cy", cy)
+            .attr("r", shellRadii[k])
+            .attr("fill", "none")
+            .attr("stroke", "#e0e0e0")
+            .attr("stroke-width", 1)
+            .attr("stroke-dasharray", k === maxCore ? "none" : "4,3");
 
-    const labelAngle = -Math.PI / 4;
-    const lx = cx + (shellRadii[k] + 8) * Math.cos(labelAngle);
-    const ly = cy + (shellRadii[k] + 8) * Math.sin(labelAngle);
-    svg.append('text')
-      .attr('class', 'shell-label')
-      .attr('x', lx).attr('y', ly)
-      .attr('text-anchor', 'middle')
-      .text(`k=${k}`);
-  });
+          const labelAngle = -Math.PI / 4;
+          const lx = cx + (shellRadii[k] + 8) * Math.cos(labelAngle);
+          const ly = cy + (shellRadii[k] + 8) * Math.sin(labelAngle);
+          svg
+            .append("text")
+            .attr("class", "shell-label")
+            .attr("x", lx)
+            .attr("y", ly)
+            .attr("text-anchor", "middle")
+            .text(`k=${k}`);
+        });
 
-  // inner core highlight
-  svg.append('circle')
-    .attr('cx', cx).attr('cy', cy).attr('r', shellRadii[maxCore] + 10)
-    .attr('fill', '#f5f0e0')
-    .attr('opacity', 0.4);
+        // inner core highlight
+        svg
+          .append("circle")
+          .attr("cx", cx)
+          .attr("cy", cy)
+          .attr("r", shellRadii[maxCore] + 10)
+          .attr("fill", "#f5f0e0")
+          .attr("opacity", 0.4);
 
-  svg.append('text')
-    .attr('x', cx).attr('y', cy + shellRadii[maxCore] + 26)
-    .attr('text-anchor', 'middle')
-    .attr('font-size', '11px')
-    .attr('fill', '#b09060')
-    .attr('font-weight', 500)
-    .text('CORE');
+        svg
+          .append("text")
+          .attr("x", cx)
+          .attr("y", cy + shellRadii[maxCore] + 26)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "11px")
+          .attr("fill", "#b09060")
+          .attr("font-weight", 500)
+          .text("CORE");
 
-  svg.append('text')
-    .attr('x', cx).attr('y', cy - maxR - 12)
-    .attr('text-anchor', 'middle')
-    .attr('font-size', '11px')
-    .attr('fill', '#999')
-    .attr('font-weight', 500)
-    .text('PERIPHERY');
+        svg
+          .append("text")
+          .attr("x", cx)
+          .attr("y", cy - maxR - 12)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "11px")
+          .attr("fill", "#999")
+          .attr("font-weight", 500)
+          .text("PERIPHERY");
 
-  // position nodes on their shell ring
-  const shellNodes = {};
-  usedCores.forEach(k => shellNodes[k] = []);
-  nodes.forEach(n => shellNodes[n.kcore].push(n));
+        // position nodes on their shell ring
+        const shellNodes = {};
+        usedCores.forEach((k) => (shellNodes[k] = []));
+        nodes.forEach((n) => shellNodes[n.kcore].push(n));
 
-  nodes.forEach(n => {
-    const shellList = shellNodes[n.kcore];
-    const idx = shellList.indexOf(n);
-    const count = shellList.length;
-    const angleStep = (2 * Math.PI) / Math.max(count, 1);
-    const baseAngle = Math.PI / 6 * n.kcore; // offset per shell
-    const angle = baseAngle + idx * angleStep;
-    const r = shellRadii[n.kcore];
-    const jitter = (Math.random() - 0.5) * 15;
-    n.sx = cx + (r + jitter) * Math.cos(angle);
-    n.sy = cy + (r + jitter) * Math.sin(angle);
-  });
+        nodes.forEach((n) => {
+          const shellList = shellNodes[n.kcore];
+          const idx = shellList.indexOf(n);
+          const count = shellList.length;
+          const angleStep = (2 * Math.PI) / Math.max(count, 1);
+          const baseAngle = (Math.PI / 6) * n.kcore; // offset per shell
+          const angle = baseAngle + idx * angleStep;
+          const r = shellRadii[n.kcore];
+          const jitter = (Math.random() - 0.5) * 15;
+          n.sx = cx + (r + jitter) * Math.cos(angle);
+          n.sy = cy + (r + jitter) * Math.sin(angle);
+        });
 
-  const nodeMap = {};
-  nodes.forEach(n => nodeMap[n.id] = n);
+        const nodeMap = {};
+        nodes.forEach((n) => (nodeMap[n.id] = n));
 
-  // edges
-  svg.append('g')
-    .selectAll('line').data(edges).enter()
-    .append('line')
-    .attr('x1', d => nodeMap[d.source].sx)
-    .attr('y1', d => nodeMap[d.source].sy)
-    .attr('x2', d => nodeMap[d.target].sx)
-    .attr('y2', d => nodeMap[d.target].sy)
-    .attr('stroke', d => d.type === 'intra' ? '#ddd' : '#e8ddd0')
-    .attr('stroke-width', d => d.weight * 1.8)
-    .attr('stroke-opacity', 0.4)
-    .attr('class', 'edge-line');
+        // edges
+        svg
+          .append("g")
+          .selectAll("line")
+          .data(edges)
+          .enter()
+          .append("line")
+          .attr("x1", (d) => nodeMap[d.source].sx)
+          .attr("y1", (d) => nodeMap[d.source].sy)
+          .attr("x2", (d) => nodeMap[d.target].sx)
+          .attr("y2", (d) => nodeMap[d.target].sy)
+          .attr("stroke", (d) => (d.type === "intra" ? "#ddd" : "#e8ddd0"))
+          .attr("stroke-width", (d) => d.weight * 1.8)
+          .attr("stroke-opacity", 0.4)
+          .attr("class", "edge-line");
 
-  const rScale = d3.scaleSqrt().domain([1, d3.max(nodes, d => d.degree)]).range([5, 22]);
+        const rScale = d3
+          .scaleSqrt()
+          .domain([1, d3.max(nodes, (d) => d.degree)])
+          .range([5, 22]);
 
-  // nodes
-  const nodeG = svg.append('g')
-    .selectAll('g').data(nodes).enter().append('g')
-    .attr('transform', d => `translate(${d.sx},${d.sy})`)
-    .attr('cursor', 'pointer');
+        // nodes
+        const nodeG = svg
+          .append("g")
+          .selectAll("g")
+          .data(nodes)
+          .enter()
+          .append("g")
+          .attr("transform", (d) => `translate(${d.sx},${d.sy})`)
+          .attr("cursor", "pointer");
 
-  // core glow for high-core nodes
-  nodeG.filter(d => d.kcore >= maxCore - 1).append('circle')
-    .attr('r', d => rScale(d.degree) + 6)
-    .attr('fill', d => clusters[d.cluster].color)
-    .attr('opacity', 0.2);
+        // core glow for high-core nodes
+        nodeG
+          .filter((d) => d.kcore >= maxCore - 1)
+          .append("circle")
+          .attr("r", (d) => rScale(d.degree) + 6)
+          .attr("fill", (d) => clusters[d.cluster].color)
+          .attr("opacity", 0.2);
 
-  nodeG.append('circle')
-    .attr('r', d => rScale(d.degree))
-    .attr('fill', d => clusters[d.cluster].color)
-    .attr('stroke', d => d.kcore === maxCore ? '#444' : '#fff')
-    .attr('stroke-width', d => d.kcore === maxCore ? 2.5 : 1.5);
+        nodeG
+          .append("circle")
+          .attr("r", (d) => rScale(d.degree))
+          .attr("fill", (d) => clusters[d.cluster].color)
+          .attr("stroke", (d) => (d.kcore === maxCore ? "#444" : "#fff"))
+          .attr("stroke-width", (d) => (d.kcore === maxCore ? 2.5 : 1.5));
 
-  // labels for core nodes
-  nodeG.filter(d => d.kcore >= maxCore).append('text')
-    .attr('dy', d => -rScale(d.degree) - 5)
-    .attr('text-anchor', 'middle')
-    .attr('font-size', '9px')
-    .attr('font-weight', 600)
-    .attr('fill', '#555')
-    .text(d => {
-      const words = d.label.split(/[\s:]+/);
-      return words.slice(0, 3).join(' ');
-    });
+        // labels for core nodes
+        nodeG
+          .filter((d) => d.kcore >= maxCore)
+          .append("text")
+          .attr("dy", (d) => -rScale(d.degree) - 5)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "9px")
+          .attr("font-weight", 600)
+          .attr("fill", "#555")
+          .text((d) => {
+            const words = d.label.split(/[\s:]+/);
+            return words.slice(0, 3).join(" ");
+          });
 
-  nodeG.on('mouseenter', function(event, d) {
-    d3.select(this).select('circle:last-of-type').attr('stroke', '#111').attr('stroke-width', 3);
+        nodeG
+          .on("mouseenter", function (event, d) {
+            d3.select(this)
+              .select("circle:last-of-type")
+              .attr("stroke", "#111")
+              .attr("stroke-width", 3);
 
-    // highlight same-core nodes
-    nodeG.attr('opacity', n => n.kcore === d.kcore ? 1 : 0.3);
-    d3.selectAll('.edge-line').attr('stroke-opacity', e => {
-      return (e.source === d.id || e.target === d.id) ? 0.8 : 0.08;
-    });
+            // highlight same-core nodes
+            nodeG.attr("opacity", (n) => (n.kcore === d.kcore ? 1 : 0.3));
+            d3.selectAll(".edge-line").attr("stroke-opacity", (e) => {
+              return e.source === d.id || e.target === d.id ? 0.8 : 0.08;
+            });
 
-    d3.select('#tooltip').style('display', 'block')
-      .html(`<strong>${d.label}</strong><br>
+            d3.select("#tooltip")
+              .style("display", "block")
+              .html(
+                `<strong>${d.label}</strong><br>
              Cluster: ${clusters[d.cluster].label}<br>
-             k-core: ${d.kcore} (${d.kcore === maxCore ? 'CORE' : d.kcore <= 1 ? 'PERIPHERY' : 'MIDDLE'})<br>
+             k-core: ${d.kcore} (${d.kcore === maxCore ? "CORE" : d.kcore <= 1 ? "PERIPHERY" : "MIDDLE"})<br>
              Degree: ${d.degree}<br>
              Betweenness: ${d.betweenness.toFixed(2)}<br>
              Citations: ${d.citationCount.toLocaleString()}<br>
-             Year: ${d.year}`)
-      .style('left', (event.pageX + 14) + 'px')
-      .style('top', (event.pageY - 10) + 'px');
-  })
-  .on('mouseleave', function(event, d) {
-    d3.select(this).select('circle:last-of-type')
-      .attr('stroke', d.kcore === maxCore ? '#444' : '#fff')
-      .attr('stroke-width', d.kcore === maxCore ? 2.5 : 1.5);
-    nodeG.attr('opacity', 1);
-    d3.selectAll('.edge-line').attr('stroke-opacity', 0.4);
-    d3.select('#tooltip').style('display', 'none');
-  });
+             Year: ${d.year}`,
+              )
+              .style("left", event.pageX + 14 + "px")
+              .style("top", event.pageY - 10 + "px");
+          })
+          .on("mouseleave", function (event, d) {
+            d3.select(this)
+              .select("circle:last-of-type")
+              .attr("stroke", d.kcore === maxCore ? "#444" : "#fff")
+              .attr("stroke-width", d.kcore === maxCore ? 2.5 : 1.5);
+            nodeG.attr("opacity", 1);
+            d3.selectAll(".edge-line").attr("stroke-opacity", 0.4);
+            d3.select("#tooltip").style("display", "none");
+          });
 
-  // legend
-  const legend = d3.select('#legend');
-  clusters.forEach(c => {
-    const item = legend.append('div').attr('class', 'legend-item');
-    item.append('div').attr('class', 'legend-dot').style('background', c.color);
-    item.append('span').text(c.label);
-  });
+        // legend
+        const legend = d3.select("#legend");
+        clusters.forEach((c) => {
+          const item = legend.append("div").attr("class", "legend-item");
+          item.append("div").attr("class", "legend-dot").style("background", c.color);
+          item.append("span").text(c.label);
+        });
 
-  // shell info cards
-  const info = d3.select('#shell-info');
-  usedCores.sort((a, b) => b - a).forEach(k => {
-    const shellN = nodes.filter(n => n.kcore === k);
-    const card = info.append('div').attr('class', 'shell-card');
-    card.append('div').attr('class', 'k-val').text(`k = ${k}`);
-    card.append('div').text(`${shellN.length} nodes`);
-    card.append('div').text(`Avg degree: ${(shellN.reduce((s, n) => s + n.degree, 0) / shellN.length).toFixed(1)}`);
-    card.append('div').text(`Avg citations: ${Math.round(shellN.reduce((s, n) => s + n.citationCount, 0) / shellN.length).toLocaleString()}`);
-    const cls = shellN.map(n => clusters[n.cluster].label);
-    const unique = [...new Set(cls)];
-    card.append('div').style('color', '#999').style('margin-top', '4px').text(unique.join(', '));
-  });
-})();
-</script>
-</body>
+        // shell info cards
+        const info = d3.select("#shell-info");
+        usedCores
+          .sort((a, b) => b - a)
+          .forEach((k) => {
+            const shellN = nodes.filter((n) => n.kcore === k);
+            const card = info.append("div").attr("class", "shell-card");
+            card.append("div").attr("class", "k-val").text(`k = ${k}`);
+            card.append("div").text(`${shellN.length} nodes`);
+            card
+              .append("div")
+              .text(
+                `Avg degree: ${(shellN.reduce((s, n) => s + n.degree, 0) / shellN.length).toFixed(1)}`,
+              );
+            card
+              .append("div")
+              .text(
+                `Avg citations: ${Math.round(shellN.reduce((s, n) => s + n.citationCount, 0) / shellN.length).toLocaleString()}`,
+              );
+            const cls = shellN.map((n) => clusters[n.cluster].label);
+            const unique = [...new Set(cls)];
+            card
+              .append("div")
+              .style("color", "#999")
+              .style("margin-top", "4px")
+              .text(unique.join(", "));
+          });
+      })();
+    </script>
+  </body>
 </html>

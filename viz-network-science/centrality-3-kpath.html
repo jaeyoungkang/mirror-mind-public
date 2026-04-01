@@ -1,610 +1,784 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>k-Path Visualization — Shortest Path Between Clusters</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #fafaf8;
-    font-family: 'Noto Sans KR', sans-serif;
-    color: #333;
-    padding: 40px 48px;
-  }
-  h1 {
-    font-size: 28px;
-    font-weight: 700;
-    margin-bottom: 8px;
-    letter-spacing: -0.5px;
-  }
-  .question {
-    font-size: 15px;
-    color: #666;
-    margin-bottom: 6px;
-  }
-  .rationale {
-    font-size: 13px;
-    color: #888;
-    line-height: 1.7;
-    margin-bottom: 28px;
-    max-width: 820px;
-  }
-  .controls {
-    margin-bottom: 20px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    flex-wrap: wrap;
-  }
-  .controls label {
-    font-size: 13px;
-    font-weight: 500;
-    color: #555;
-  }
-  .controls select {
-    font-family: 'Noto Sans KR', sans-serif;
-    font-size: 13px;
-    padding: 6px 10px;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-    background: #fff;
-  }
-  .controls .arrow {
-    font-size: 18px;
-    color: #999;
-  }
-  .path-info {
-    font-size: 13px;
-    color: #666;
-    margin-bottom: 16px;
-    min-height: 20px;
-  }
-  svg {
-    display: block;
-    border: 1px solid #e8e8e4;
-    border-radius: 8px;
-    background: #fff;
-  }
-  .tooltip {
-    position: absolute;
-    pointer-events: none;
-    background: rgba(30,30,30,0.92);
-    color: #fff;
-    padding: 10px 14px;
-    border-radius: 6px;
-    font-size: 12px;
-    line-height: 1.6;
-    max-width: 280px;
-    opacity: 0;
-    transition: opacity 0.15s;
-  }
-  .legend {
-    display: flex;
-    gap: 16px;
-    margin-top: 14px;
-    flex-wrap: wrap;
-  }
-  .legend-item {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 12px;
-    color: #666;
-  }
-  .legend-swatch {
-    width: 12px;
-    height: 12px;
-    border-radius: 50%;
-  }
-</style>
-</head>
-<body>
-<h1>k-Path Visualization</h1>
-<p class="question">이 시각화가 답하는 질문: "두 클러스터를 잇는 최단 경로는 무엇이며, 그 위의 다리 후보는 누구인가?"</p>
-<p class="rationale">
-  k-path(최단 경로) 시각화는 네트워크 위의 두 지점 사이를 잇는 가장 짧은 경로를 레이어 다이어그램으로 펼친다.
-  클러스터 간 연결이 어떤 중간 논문을 거쳐 형성되는지 직관적으로 보여주므로,
-  bridge 후보를 구조적으로 식별할 수 있다. 경로 두께(path weight)는 연결 강도를 나타내어
-  "강한 다리"와 "약한 다리"를 구분할 수 있게 해준다.
-</p>
-
-<div class="controls">
-  <label for="cluster-from">출발 클러스터:</label>
-  <select id="cluster-from"></select>
-  <span class="arrow">&rarr;</span>
-  <label for="cluster-to">도착 클러스터:</label>
-  <select id="cluster-to"></select>
-</div>
-<div class="path-info" id="path-info"></div>
-
-<div id="chart"></div>
-<div class="legend" id="legend"></div>
-<div class="tooltip" id="tooltip"></div>
-
-<script>
-// ─── Shared Data ───
-const clusterColors = {
-  "외부 메모리": "#7aaa7a",
-  "인지 아키텍처": "#7a7aaa",
-  "시뮬레이션": "#aa8a6a",
-  "RAG": "#8aaa8a",
-  "멀티모달": "#aa7a8a"
-};
-
-const clusterNames = Object.keys(clusterColors);
-
-const nodes = [
-  { id: "P01", label: "MemFormer", cluster: "외부 메모리", degree: 0.57, betweenness: 0.12, bridgeScore: 0.35, citationCount: 142 },
-  { id: "P02", label: "RecallNet", cluster: "외부 메모리", degree: 0.43, betweenness: 0.08, bridgeScore: 0.18, citationCount: 87 },
-  { id: "P03", label: "EpisodicLLM", cluster: "외부 메모리", degree: 0.36, betweenness: 0.05, bridgeScore: 0.12, citationCount: 63 },
-  { id: "P04", label: "CogArch-T", cluster: "인지 아키텍처", degree: 0.50, betweenness: 0.22, bridgeScore: 0.61, citationCount: 210 },
-  { id: "P05", label: "ThinkLoop", cluster: "인지 아키텍처", degree: 0.43, betweenness: 0.15, bridgeScore: 0.42, citationCount: 156 },
-  { id: "P06", label: "MetaCog", cluster: "인지 아키텍처", degree: 0.29, betweenness: 0.04, bridgeScore: 0.09, citationCount: 44 },
-  { id: "P07", label: "SimWorld", cluster: "시뮬레이션", degree: 0.50, betweenness: 0.19, bridgeScore: 0.55, citationCount: 178 },
-  { id: "P08", label: "EnvSim", cluster: "시뮬레이션", degree: 0.36, betweenness: 0.07, bridgeScore: 0.20, citationCount: 91 },
-  { id: "P09", label: "WorldModel-X", cluster: "시뮬레이션", degree: 0.29, betweenness: 0.03, bridgeScore: 0.08, citationCount: 38 },
-  { id: "P10", label: "RAG-Fuse", cluster: "RAG", degree: 0.57, betweenness: 0.25, bridgeScore: 0.68, citationCount: 230 },
-  { id: "P11", label: "HybridRetriever", cluster: "RAG", degree: 0.43, betweenness: 0.10, bridgeScore: 0.30, citationCount: 115 },
-  { id: "P12", label: "ChunkRank", cluster: "RAG", degree: 0.29, betweenness: 0.03, bridgeScore: 0.07, citationCount: 52 },
-  { id: "P13", label: "ViLM-Bridge", cluster: "멀티모달", degree: 0.50, betweenness: 0.18, bridgeScore: 0.52, citationCount: 168 },
-  { id: "P14", label: "AudioCog", cluster: "멀티모달", degree: 0.36, betweenness: 0.06, bridgeScore: 0.15, citationCount: 72 },
-  { id: "P15", label: "SenseNet", cluster: "멀티모달", degree: 0.29, betweenness: 0.02, bridgeScore: 0.05, citationCount: 31 }
-];
-
-const edges = [
-  { source: "P01", target: "P02", weight: 0.8, confidence: 0.9 },
-  { source: "P01", target: "P03", weight: 0.6, confidence: 0.85 },
-  { source: "P01", target: "P04", weight: 0.5, confidence: 0.7 },
-  { source: "P01", target: "P10", weight: 0.4, confidence: 0.65 },
-  { source: "P02", target: "P03", weight: 0.7, confidence: 0.88 },
-  { source: "P02", target: "P11", weight: 0.3, confidence: 0.6 },
-  { source: "P04", target: "P05", weight: 0.9, confidence: 0.95 },
-  { source: "P04", target: "P06", weight: 0.6, confidence: 0.8 },
-  { source: "P04", target: "P07", weight: 0.5, confidence: 0.72 },
-  { source: "P04", target: "P13", weight: 0.45, confidence: 0.68 },
-  { source: "P05", target: "P06", weight: 0.7, confidence: 0.85 },
-  { source: "P05", target: "P07", weight: 0.4, confidence: 0.65 },
-  { source: "P05", target: "P10", weight: 0.35, confidence: 0.6 },
-  { source: "P07", target: "P08", weight: 0.8, confidence: 0.92 },
-  { source: "P07", target: "P09", weight: 0.6, confidence: 0.82 },
-  { source: "P07", target: "P13", weight: 0.5, confidence: 0.7 },
-  { source: "P08", target: "P09", weight: 0.7, confidence: 0.87 },
-  { source: "P10", target: "P11", weight: 0.85, confidence: 0.93 },
-  { source: "P10", target: "P12", weight: 0.65, confidence: 0.84 },
-  { source: "P10", target: "P13", weight: 0.5, confidence: 0.72 },
-  { source: "P10", target: "P01", weight: 0.4, confidence: 0.65 },
-  { source: "P11", target: "P12", weight: 0.7, confidence: 0.86 },
-  { source: "P13", target: "P14", weight: 0.8, confidence: 0.91 },
-  { source: "P13", target: "P15", weight: 0.55, confidence: 0.78 },
-  { source: "P14", target: "P15", weight: 0.6, confidence: 0.82 },
-  { source: "P08", target: "P14", weight: 0.3, confidence: 0.55 }
-];
-
-const tooltip = d3.select("#tooltip");
-const nodeMap = new Map(nodes.map(n => [n.id, n]));
-
-// Build adjacency list
-const adj = new Map();
-nodes.forEach(n => adj.set(n.id, []));
-edges.forEach(e => {
-  adj.get(e.source).push({ to: e.target, weight: e.weight, confidence: e.confidence });
-  adj.get(e.target).push({ to: e.source, weight: e.weight, confidence: e.confidence });
-});
-
-// Dijkstra shortest path (cost = 1/weight, so heavier edges = shorter)
-function dijkstra(sourceId, targetId) {
-  const dist = new Map();
-  const prev = new Map();
-  const prevEdge = new Map();
-  const visited = new Set();
-  nodes.forEach(n => dist.set(n.id, Infinity));
-  dist.set(sourceId, 0);
-
-  while (true) {
-    let u = null, minD = Infinity;
-    dist.forEach((d, id) => {
-      if (!visited.has(id) && d < minD) { minD = d; u = id; }
-    });
-    if (u === null || u === targetId) break;
-    visited.add(u);
-    for (const edge of adj.get(u)) {
-      const alt = dist.get(u) + (1 / edge.weight);
-      if (alt < dist.get(edge.to)) {
-        dist.set(edge.to, alt);
-        prev.set(edge.to, u);
-        prevEdge.set(edge.to, edge);
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>k-Path Visualization — Shortest Path Between Clusters</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
       }
-    }
-  }
-
-  if (!prev.has(targetId) && sourceId !== targetId) return null;
-
-  const path = [];
-  const pathEdges = [];
-  let cur = targetId;
-  while (cur !== undefined) {
-    path.unshift(cur);
-    if (prev.has(cur)) {
-      pathEdges.unshift(prevEdge.get(cur));
-    }
-    cur = prev.get(cur);
-  }
-  return { path, pathEdges, totalCost: dist.get(targetId) };
-}
-
-// Find all shortest paths between two clusters (pick best pair)
-function findBestClusterPath(fromCluster, toCluster) {
-  const fromNodes = nodes.filter(n => n.cluster === fromCluster);
-  const toNodes = nodes.filter(n => n.cluster === toCluster);
-  let best = null;
-  for (const s of fromNodes) {
-    for (const t of toNodes) {
-      const result = dijkstra(s.id, t.id);
-      if (result && (!best || result.totalCost < best.totalCost)) {
-        best = result;
+      body {
+        background: #fafaf8;
+        font-family: "Noto Sans KR", sans-serif;
+        color: #333;
+        padding: 40px 48px;
       }
-    }
-  }
-  return best;
-}
-
-// Also find top-k alternative paths
-function findTopPaths(fromCluster, toCluster, k = 3) {
-  const fromNodes = nodes.filter(n => n.cluster === fromCluster);
-  const toNodes = nodes.filter(n => n.cluster === toCluster);
-  const allPaths = [];
-  for (const s of fromNodes) {
-    for (const t of toNodes) {
-      const result = dijkstra(s.id, t.id);
-      if (result) {
-        allPaths.push(result);
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        margin-bottom: 8px;
+        letter-spacing: -0.5px;
       }
-    }
-  }
-  allPaths.sort((a, b) => a.totalCost - b.totalCost);
-  // Deduplicate by path signature
-  const seen = new Set();
-  const unique = [];
-  for (const p of allPaths) {
-    const sig = p.path.join("-");
-    if (!seen.has(sig)) {
-      seen.add(sig);
-      unique.push(p);
-    }
-    if (unique.length >= k) break;
-  }
-  return unique;
-}
-
-// ─── Controls ───
-const selectFrom = d3.select("#cluster-from");
-const selectTo = d3.select("#cluster-to");
-
-clusterNames.forEach((c, i) => {
-  selectFrom.append("option").attr("value", c).text(c).property("selected", i === 0);
-  selectTo.append("option").attr("value", c).text(c).property("selected", i === 2);
-});
-
-// Legend
-const legend = d3.select("#legend");
-Object.entries(clusterColors).forEach(([name, color]) => {
-  const item = legend.append("div").attr("class", "legend-item");
-  item.append("div").attr("class", "legend-swatch").style("background", color);
-  item.append("span").text(name);
-});
-
-// ─── SVG ───
-const width = 880, height = 500;
-const svg = d3.select("#chart").append("svg").attr("width", width).attr("height", height);
-const g = svg.append("g");
-
-const radiusScale = d3.scaleSqrt().domain([0, 250]).range([6, 24]);
-
-function drawPaths(fromCluster, toCluster) {
-  g.selectAll("*").remove();
-  const infoEl = d3.select("#path-info");
-
-  if (fromCluster === toCluster) {
-    infoEl.text("같은 클러스터를 선택했습니다. 서로 다른 클러스터를 선택하세요.");
-    return;
-  }
-
-  const paths = findTopPaths(fromCluster, toCluster, 3);
-  if (paths.length === 0) {
-    infoEl.text("경로를 찾을 수 없습니다.");
-    return;
-  }
-
-  const bestPath = paths[0];
-  infoEl.html(
-    `최단 경로: <strong>${bestPath.path.map(id => nodeMap.get(id).label).join(" → ")}</strong>` +
-    ` (cost: ${bestPath.totalCost.toFixed(2)}, hops: ${bestPath.path.length - 1})` +
-    (paths.length > 1 ? ` &nbsp;|&nbsp; 대안 경로 ${paths.length - 1}개 발견` : "")
-  );
-
-  // Layout: layered left-to-right for each path
-  const margin = { top: 40, bottom: 40, left: 60, right: 60 };
-  const innerW = width - margin.left - margin.right;
-  const innerH = height - margin.top - margin.bottom;
-
-  // Allocate vertical lanes for each path
-  const pathGap = innerH / Math.max(paths.length, 1);
-
-  // Cluster zone labels
-  const allClusters = new Set();
-  paths.forEach(p => p.path.forEach(id => allClusters.add(nodeMap.get(id).cluster)));
-  const clusterList = [...allClusters];
-
-  // Draw background for source and target clusters
-  const srcColor = clusterColors[fromCluster];
-  const tgtColor = clusterColors[toCluster];
-
-  g.append("rect")
-    .attr("x", margin.left - 30)
-    .attr("y", margin.top - 20)
-    .attr("width", 50)
-    .attr("height", innerH + 40)
-    .attr("rx", 8)
-    .attr("fill", srcColor)
-    .attr("opacity", 0.08);
-
-  g.append("rect")
-    .attr("x", width - margin.right - 20)
-    .attr("y", margin.top - 20)
-    .attr("width", 50)
-    .attr("height", innerH + 40)
-    .attr("rx", 8)
-    .attr("fill", tgtColor)
-    .attr("opacity", 0.08);
-
-  g.append("text")
-    .attr("x", margin.left - 5)
-    .attr("y", margin.top - 28)
-    .attr("text-anchor", "middle")
-    .attr("font-size", 11)
-    .attr("font-weight", 500)
-    .attr("fill", srcColor)
-    .text(fromCluster);
-
-  g.append("text")
-    .attr("x", width - margin.right + 5)
-    .attr("y", margin.top - 28)
-    .attr("text-anchor", "middle")
-    .attr("font-size", 11)
-    .attr("font-weight", 500)
-    .attr("fill", tgtColor)
-    .text(toCluster);
-
-  // Draw each path
-  paths.forEach((pathData, pi) => {
-    const yCenter = margin.top + pathGap * pi + pathGap / 2;
-    const pathLen = pathData.path.length;
-    const xStep = innerW / Math.max(pathLen - 1, 1);
-    const opacity = pi === 0 ? 1 : 0.4;
-    const pathWeight = pi === 0 ? 1 : 0.5;
-
-    // Position nodes along the path
-    const positions = pathData.path.map((id, i) => ({
-      id,
-      node: nodeMap.get(id),
-      x: margin.left + i * xStep,
-      y: yCenter
-    }));
-
-    // Path rank label
-    g.append("text")
-      .attr("x", margin.left - 48)
-      .attr("y", yCenter + 4)
-      .attr("text-anchor", "middle")
-      .attr("font-size", 11)
-      .attr("font-weight", 600)
-      .attr("fill", pi === 0 ? "#333" : "#bbb")
-      .text(`#${pi + 1}`);
-
-    // Draw path edges
-    for (let i = 0; i < positions.length - 1; i++) {
-      const from = positions[i];
-      const to = positions[i + 1];
-      const edge = pathData.pathEdges[i];
-      const edgeWeight = edge ? edge.weight : 0.5;
-
-      // Edge background glow for best path
-      if (pi === 0) {
-        g.append("line")
-          .attr("x1", from.x)
-          .attr("y1", from.y)
-          .attr("x2", to.x)
-          .attr("y2", to.y)
-          .attr("stroke", clusterColors[from.node.cluster])
-          .attr("stroke-width", edgeWeight * 14)
-          .attr("stroke-opacity", 0.08)
-          .attr("stroke-linecap", "round");
+      .question {
+        font-size: 15px;
+        color: #666;
+        margin-bottom: 6px;
       }
-
-      // Edge line
-      const edgeLine = g.append("line")
-        .attr("x1", from.x)
-        .attr("y1", from.y)
-        .attr("x2", to.x)
-        .attr("y2", to.y)
-        .attr("stroke", pi === 0 ? "#555" : "#ccc")
-        .attr("stroke-width", edgeWeight * 5 * pathWeight)
-        .attr("stroke-opacity", opacity * 0.6)
-        .attr("stroke-linecap", "round");
-
-      // Edge weight label
-      if (edge && pi === 0) {
-        const mx = (from.x + to.x) / 2;
-        const my = (from.y + to.y) / 2 - 14;
-        g.append("text")
-          .attr("x", mx)
-          .attr("y", my)
-          .attr("text-anchor", "middle")
-          .attr("font-size", 10)
-          .attr("fill", "#999")
-          .text(`w=${edgeWeight.toFixed(2)}`);
+      .rationale {
+        font-size: 13px;
+        color: #888;
+        line-height: 1.7;
+        margin-bottom: 28px;
+        max-width: 820px;
       }
-
-      // Arrow
-      const arrowSize = 6;
-      const angle = Math.atan2(to.y - from.y, to.x - from.x);
-      const r = radiusScale(to.node.citationCount) + 4;
-      const ax = to.x - r * Math.cos(angle);
-      const ay = to.y - r * Math.sin(angle);
-
-      if (pi === 0) {
-        g.append("polygon")
-          .attr("points", [
-            [ax, ay],
-            [ax - arrowSize * Math.cos(angle - 0.4), ay - arrowSize * Math.sin(angle - 0.4)],
-            [ax - arrowSize * Math.cos(angle + 0.4), ay - arrowSize * Math.sin(angle + 0.4)]
-          ].map(p => p.join(",")).join(" "))
-          .attr("fill", "#555")
-          .attr("opacity", 0.6);
+      .controls {
+        margin-bottom: 20px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        flex-wrap: wrap;
       }
-    }
-
-    // Draw nodes
-    positions.forEach((pos, i) => {
-      const n = pos.node;
-      const isBridge = n.cluster !== fromCluster && n.cluster !== toCluster;
-
-      const nodeG = g.append("g")
-        .attr("transform", `translate(${pos.x},${pos.y})`)
-        .style("cursor", "pointer");
-
-      // Bridge indicator ring
-      if (isBridge && pi === 0) {
-        nodeG.append("circle")
-          .attr("r", radiusScale(n.citationCount) + 6)
-          .attr("fill", "none")
-          .attr("stroke", "#e74c3c")
-          .attr("stroke-width", 2)
-          .attr("stroke-dasharray", "4,3")
-          .attr("opacity", 0.7);
-
-        nodeG.append("text")
-          .attr("dy", -radiusScale(n.citationCount) - 12)
-          .attr("text-anchor", "middle")
-          .attr("font-size", 9)
-          .attr("font-weight", 600)
-          .attr("fill", "#e74c3c")
-          .text("BRIDGE");
+      .controls label {
+        font-size: 13px;
+        font-weight: 500;
+        color: #555;
       }
-
-      nodeG.append("circle")
-        .attr("r", radiusScale(n.citationCount))
-        .attr("fill", clusterColors[n.cluster])
-        .attr("stroke", pi === 0 ? "#333" : "#ccc")
-        .attr("stroke-width", pi === 0 ? 2 : 1)
-        .attr("opacity", opacity * 0.9);
-
-      // Label
-      nodeG.append("text")
-        .attr("dy", radiusScale(n.citationCount) + 14)
-        .attr("text-anchor", "middle")
-        .attr("font-size", pi === 0 ? 11 : 9)
-        .attr("font-weight", pi === 0 ? 500 : 400)
-        .attr("fill", pi === 0 ? "#333" : "#aaa")
-        .text(n.label);
-
-      // Cluster label (small, under node label)
-      if (pi === 0) {
-        nodeG.append("text")
-          .attr("dy", radiusScale(n.citationCount) + 26)
-          .attr("text-anchor", "middle")
-          .attr("font-size", 9)
-          .attr("fill", clusterColors[n.cluster])
-          .text(n.cluster);
+      .controls select {
+        font-family: "Noto Sans KR", sans-serif;
+        font-size: 13px;
+        padding: 6px 10px;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+        background: #fff;
       }
+      .controls .arrow {
+        font-size: 18px;
+        color: #999;
+      }
+      .path-info {
+        font-size: 13px;
+        color: #666;
+        margin-bottom: 16px;
+        min-height: 20px;
+      }
+      svg {
+        display: block;
+        border: 1px solid #e8e8e4;
+        border-radius: 8px;
+        background: #fff;
+      }
+      .tooltip {
+        position: absolute;
+        pointer-events: none;
+        background: rgba(30, 30, 30, 0.92);
+        color: #fff;
+        padding: 10px 14px;
+        border-radius: 6px;
+        font-size: 12px;
+        line-height: 1.6;
+        max-width: 280px;
+        opacity: 0;
+        transition: opacity 0.15s;
+      }
+      .legend {
+        display: flex;
+        gap: 16px;
+        margin-top: 14px;
+        flex-wrap: wrap;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 12px;
+        color: #666;
+      }
+      .legend-swatch {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>k-Path Visualization</h1>
+    <p class="question">
+      이 시각화가 답하는 질문: "두 클러스터를 잇는 최단 경로는 무엇이며, 그 위의 다리 후보는
+      누구인가?"
+    </p>
+    <p class="rationale">
+      k-path(최단 경로) 시각화는 네트워크 위의 두 지점 사이를 잇는 가장 짧은 경로를 레이어
+      다이어그램으로 펼친다. 클러스터 간 연결이 어떤 중간 논문을 거쳐 형성되는지 직관적으로
+      보여주므로, bridge 후보를 구조적으로 식별할 수 있다. 경로 두께(path weight)는 연결 강도를
+      나타내어 "강한 다리"와 "약한 다리"를 구분할 수 있게 해준다.
+    </p>
 
-      // Tooltip
-      nodeG.on("mouseover", function(event) {
-        tooltip.style("opacity", 1).html(
-          `<strong>${n.label}</strong><br>` +
-          `클러스터: ${n.cluster}<br>` +
-          `인용: ${n.citationCount}<br>` +
-          `Degree: ${n.degree.toFixed(2)}<br>` +
-          `Betweenness: ${n.betweenness.toFixed(3)}<br>` +
-          `Bridge Score: ${n.bridgeScore.toFixed(2)}<br>` +
-          (isBridge ? `<span style="color:#e74c3c">경로상 다리 후보</span>` : `<span style="color:#7aaa7a">클러스터 내부 노드</span>`)
-        );
-      })
-      .on("mousemove", function(event) {
-        tooltip.style("left", (event.pageX + 14) + "px").style("top", (event.pageY - 14) + "px");
-      })
-      .on("mouseout", function() {
-        tooltip.style("opacity", 0);
+    <div class="controls">
+      <label for="cluster-from">출발 클러스터:</label>
+      <select id="cluster-from"></select>
+      <span class="arrow">&rarr;</span>
+      <label for="cluster-to">도착 클러스터:</label>
+      <select id="cluster-to"></select>
+    </div>
+    <div class="path-info" id="path-info"></div>
+
+    <div id="chart"></div>
+    <div class="legend" id="legend"></div>
+    <div class="tooltip" id="tooltip"></div>
+
+    <script>
+      // ─── Shared Data ───
+      const clusterColors = {
+        "외부 메모리": "#7aaa7a",
+        "인지 아키텍처": "#7a7aaa",
+        시뮬레이션: "#aa8a6a",
+        RAG: "#8aaa8a",
+        멀티모달: "#aa7a8a",
+      };
+
+      const clusterNames = Object.keys(clusterColors);
+
+      const nodes = [
+        {
+          id: "P01",
+          label: "MemFormer",
+          cluster: "외부 메모리",
+          degree: 0.57,
+          betweenness: 0.12,
+          bridgeScore: 0.35,
+          citationCount: 142,
+        },
+        {
+          id: "P02",
+          label: "RecallNet",
+          cluster: "외부 메모리",
+          degree: 0.43,
+          betweenness: 0.08,
+          bridgeScore: 0.18,
+          citationCount: 87,
+        },
+        {
+          id: "P03",
+          label: "EpisodicLLM",
+          cluster: "외부 메모리",
+          degree: 0.36,
+          betweenness: 0.05,
+          bridgeScore: 0.12,
+          citationCount: 63,
+        },
+        {
+          id: "P04",
+          label: "CogArch-T",
+          cluster: "인지 아키텍처",
+          degree: 0.5,
+          betweenness: 0.22,
+          bridgeScore: 0.61,
+          citationCount: 210,
+        },
+        {
+          id: "P05",
+          label: "ThinkLoop",
+          cluster: "인지 아키텍처",
+          degree: 0.43,
+          betweenness: 0.15,
+          bridgeScore: 0.42,
+          citationCount: 156,
+        },
+        {
+          id: "P06",
+          label: "MetaCog",
+          cluster: "인지 아키텍처",
+          degree: 0.29,
+          betweenness: 0.04,
+          bridgeScore: 0.09,
+          citationCount: 44,
+        },
+        {
+          id: "P07",
+          label: "SimWorld",
+          cluster: "시뮬레이션",
+          degree: 0.5,
+          betweenness: 0.19,
+          bridgeScore: 0.55,
+          citationCount: 178,
+        },
+        {
+          id: "P08",
+          label: "EnvSim",
+          cluster: "시뮬레이션",
+          degree: 0.36,
+          betweenness: 0.07,
+          bridgeScore: 0.2,
+          citationCount: 91,
+        },
+        {
+          id: "P09",
+          label: "WorldModel-X",
+          cluster: "시뮬레이션",
+          degree: 0.29,
+          betweenness: 0.03,
+          bridgeScore: 0.08,
+          citationCount: 38,
+        },
+        {
+          id: "P10",
+          label: "RAG-Fuse",
+          cluster: "RAG",
+          degree: 0.57,
+          betweenness: 0.25,
+          bridgeScore: 0.68,
+          citationCount: 230,
+        },
+        {
+          id: "P11",
+          label: "HybridRetriever",
+          cluster: "RAG",
+          degree: 0.43,
+          betweenness: 0.1,
+          bridgeScore: 0.3,
+          citationCount: 115,
+        },
+        {
+          id: "P12",
+          label: "ChunkRank",
+          cluster: "RAG",
+          degree: 0.29,
+          betweenness: 0.03,
+          bridgeScore: 0.07,
+          citationCount: 52,
+        },
+        {
+          id: "P13",
+          label: "ViLM-Bridge",
+          cluster: "멀티모달",
+          degree: 0.5,
+          betweenness: 0.18,
+          bridgeScore: 0.52,
+          citationCount: 168,
+        },
+        {
+          id: "P14",
+          label: "AudioCog",
+          cluster: "멀티모달",
+          degree: 0.36,
+          betweenness: 0.06,
+          bridgeScore: 0.15,
+          citationCount: 72,
+        },
+        {
+          id: "P15",
+          label: "SenseNet",
+          cluster: "멀티모달",
+          degree: 0.29,
+          betweenness: 0.02,
+          bridgeScore: 0.05,
+          citationCount: 31,
+        },
+      ];
+
+      const edges = [
+        { source: "P01", target: "P02", weight: 0.8, confidence: 0.9 },
+        { source: "P01", target: "P03", weight: 0.6, confidence: 0.85 },
+        { source: "P01", target: "P04", weight: 0.5, confidence: 0.7 },
+        { source: "P01", target: "P10", weight: 0.4, confidence: 0.65 },
+        { source: "P02", target: "P03", weight: 0.7, confidence: 0.88 },
+        { source: "P02", target: "P11", weight: 0.3, confidence: 0.6 },
+        { source: "P04", target: "P05", weight: 0.9, confidence: 0.95 },
+        { source: "P04", target: "P06", weight: 0.6, confidence: 0.8 },
+        { source: "P04", target: "P07", weight: 0.5, confidence: 0.72 },
+        { source: "P04", target: "P13", weight: 0.45, confidence: 0.68 },
+        { source: "P05", target: "P06", weight: 0.7, confidence: 0.85 },
+        { source: "P05", target: "P07", weight: 0.4, confidence: 0.65 },
+        { source: "P05", target: "P10", weight: 0.35, confidence: 0.6 },
+        { source: "P07", target: "P08", weight: 0.8, confidence: 0.92 },
+        { source: "P07", target: "P09", weight: 0.6, confidence: 0.82 },
+        { source: "P07", target: "P13", weight: 0.5, confidence: 0.7 },
+        { source: "P08", target: "P09", weight: 0.7, confidence: 0.87 },
+        { source: "P10", target: "P11", weight: 0.85, confidence: 0.93 },
+        { source: "P10", target: "P12", weight: 0.65, confidence: 0.84 },
+        { source: "P10", target: "P13", weight: 0.5, confidence: 0.72 },
+        { source: "P10", target: "P01", weight: 0.4, confidence: 0.65 },
+        { source: "P11", target: "P12", weight: 0.7, confidence: 0.86 },
+        { source: "P13", target: "P14", weight: 0.8, confidence: 0.91 },
+        { source: "P13", target: "P15", weight: 0.55, confidence: 0.78 },
+        { source: "P14", target: "P15", weight: 0.6, confidence: 0.82 },
+        { source: "P08", target: "P14", weight: 0.3, confidence: 0.55 },
+      ];
+
+      const tooltip = d3.select("#tooltip");
+      const nodeMap = new Map(nodes.map((n) => [n.id, n]));
+
+      // Build adjacency list
+      const adj = new Map();
+      nodes.forEach((n) => adj.set(n.id, []));
+      edges.forEach((e) => {
+        adj.get(e.source).push({ to: e.target, weight: e.weight, confidence: e.confidence });
+        adj.get(e.target).push({ to: e.source, weight: e.weight, confidence: e.confidence });
       });
-    });
-  });
 
-  // Context: faded full network in background
-  const bgG = g.insert("g", ":first-child").attr("class", "bg-network");
+      // Dijkstra shortest path (cost = 1/weight, so heavier edges = shorter)
+      function dijkstra(sourceId, targetId) {
+        const dist = new Map();
+        const prev = new Map();
+        const prevEdge = new Map();
+        const visited = new Set();
+        nodes.forEach((n) => dist.set(n.id, Infinity));
+        dist.set(sourceId, 0);
 
-  // Simple force layout positions (pre-computed approximate)
-  const clusterPositions = {
-    "외부 메모리": { cx: width * 0.2, cy: height * 0.85 },
-    "인지 아키텍처": { cx: width * 0.35, cy: height * 0.88 },
-    "시뮬레이션": { cx: width * 0.5, cy: height * 0.87 },
-    "RAG": { cx: width * 0.65, cy: height * 0.85 },
-    "멀티모달": { cx: width * 0.8, cy: height * 0.88 }
-  };
+        while (true) {
+          let u = null,
+            minD = Infinity;
+          dist.forEach((d, id) => {
+            if (!visited.has(id) && d < minD) {
+              minD = d;
+              u = id;
+            }
+          });
+          if (u === null || u === targetId) break;
+          visited.add(u);
+          for (const edge of adj.get(u)) {
+            const alt = dist.get(u) + 1 / edge.weight;
+            if (alt < dist.get(edge.to)) {
+              dist.set(edge.to, alt);
+              prev.set(edge.to, u);
+              prevEdge.set(edge.to, edge);
+            }
+          }
+        }
 
-  const bgPositions = new Map();
-  const clusterCounts = {};
-  nodes.forEach(n => {
-    if (!clusterCounts[n.cluster]) clusterCounts[n.cluster] = 0;
-    const idx = clusterCounts[n.cluster]++;
-    const cp = clusterPositions[n.cluster];
-    const angle = (idx / 3) * Math.PI * 2;
-    bgPositions.set(n.id, {
-      x: cp.cx + Math.cos(angle) * 18,
-      y: cp.cy + Math.sin(angle) * 14
-    });
-  });
+        if (!prev.has(targetId) && sourceId !== targetId) return null;
 
-  edges.forEach(e => {
-    const sp = bgPositions.get(e.source);
-    const tp = bgPositions.get(e.target);
-    if (sp && tp) {
-      bgG.append("line")
-        .attr("x1", sp.x).attr("y1", sp.y)
-        .attr("x2", tp.x).attr("y2", tp.y)
-        .attr("stroke", "#ddd")
-        .attr("stroke-width", 0.5)
-        .attr("stroke-opacity", 0.4);
-    }
-  });
+        const path = [];
+        const pathEdges = [];
+        let cur = targetId;
+        while (cur !== undefined) {
+          path.unshift(cur);
+          if (prev.has(cur)) {
+            pathEdges.unshift(prevEdge.get(cur));
+          }
+          cur = prev.get(cur);
+        }
+        return { path, pathEdges, totalCost: dist.get(targetId) };
+      }
 
-  nodes.forEach(n => {
-    const p = bgPositions.get(n.id);
-    bgG.append("circle")
-      .attr("cx", p.x).attr("cy", p.y)
-      .attr("r", 3)
-      .attr("fill", clusterColors[n.cluster])
-      .attr("opacity", 0.3);
-  });
+      // Find all shortest paths between two clusters (pick best pair)
+      function findBestClusterPath(fromCluster, toCluster) {
+        const fromNodes = nodes.filter((n) => n.cluster === fromCluster);
+        const toNodes = nodes.filter((n) => n.cluster === toCluster);
+        let best = null;
+        for (const s of fromNodes) {
+          for (const t of toNodes) {
+            const result = dijkstra(s.id, t.id);
+            if (result && (!best || result.totalCost < best.totalCost)) {
+              best = result;
+            }
+          }
+        }
+        return best;
+      }
 
-  // Mini legend for bg
-  bgG.append("text")
-    .attr("x", width / 2)
-    .attr("y", height - 8)
-    .attr("text-anchor", "middle")
-    .attr("font-size", 9)
-    .attr("fill", "#ccc")
-    .text("(전체 네트워크 축소 미리보기)");
-}
+      // Also find top-k alternative paths
+      function findTopPaths(fromCluster, toCluster, k = 3) {
+        const fromNodes = nodes.filter((n) => n.cluster === fromCluster);
+        const toNodes = nodes.filter((n) => n.cluster === toCluster);
+        const allPaths = [];
+        for (const s of fromNodes) {
+          for (const t of toNodes) {
+            const result = dijkstra(s.id, t.id);
+            if (result) {
+              allPaths.push(result);
+            }
+          }
+        }
+        allPaths.sort((a, b) => a.totalCost - b.totalCost);
+        // Deduplicate by path signature
+        const seen = new Set();
+        const unique = [];
+        for (const p of allPaths) {
+          const sig = p.path.join("-");
+          if (!seen.has(sig)) {
+            seen.add(sig);
+            unique.push(p);
+          }
+          if (unique.length >= k) break;
+        }
+        return unique;
+      }
 
-// Initial draw
-drawPaths(clusterNames[0], clusterNames[2]);
+      // ─── Controls ───
+      const selectFrom = d3.select("#cluster-from");
+      const selectTo = d3.select("#cluster-to");
 
-// Control events
-selectFrom.on("change", () => drawPaths(selectFrom.node().value, selectTo.node().value));
-selectTo.on("change", () => drawPaths(selectFrom.node().value, selectTo.node().value));
-</script>
-</body>
+      clusterNames.forEach((c, i) => {
+        selectFrom
+          .append("option")
+          .attr("value", c)
+          .text(c)
+          .property("selected", i === 0);
+        selectTo
+          .append("option")
+          .attr("value", c)
+          .text(c)
+          .property("selected", i === 2);
+      });
+
+      // Legend
+      const legend = d3.select("#legend");
+      Object.entries(clusterColors).forEach(([name, color]) => {
+        const item = legend.append("div").attr("class", "legend-item");
+        item.append("div").attr("class", "legend-swatch").style("background", color);
+        item.append("span").text(name);
+      });
+
+      // ─── SVG ───
+      const width = 880,
+        height = 500;
+      const svg = d3.select("#chart").append("svg").attr("width", width).attr("height", height);
+      const g = svg.append("g");
+
+      const radiusScale = d3.scaleSqrt().domain([0, 250]).range([6, 24]);
+
+      function drawPaths(fromCluster, toCluster) {
+        g.selectAll("*").remove();
+        const infoEl = d3.select("#path-info");
+
+        if (fromCluster === toCluster) {
+          infoEl.text("같은 클러스터를 선택했습니다. 서로 다른 클러스터를 선택하세요.");
+          return;
+        }
+
+        const paths = findTopPaths(fromCluster, toCluster, 3);
+        if (paths.length === 0) {
+          infoEl.text("경로를 찾을 수 없습니다.");
+          return;
+        }
+
+        const bestPath = paths[0];
+        infoEl.html(
+          `최단 경로: <strong>${bestPath.path.map((id) => nodeMap.get(id).label).join(" → ")}</strong>` +
+            ` (cost: ${bestPath.totalCost.toFixed(2)}, hops: ${bestPath.path.length - 1})` +
+            (paths.length > 1 ? ` &nbsp;|&nbsp; 대안 경로 ${paths.length - 1}개 발견` : ""),
+        );
+
+        // Layout: layered left-to-right for each path
+        const margin = { top: 40, bottom: 40, left: 60, right: 60 };
+        const innerW = width - margin.left - margin.right;
+        const innerH = height - margin.top - margin.bottom;
+
+        // Allocate vertical lanes for each path
+        const pathGap = innerH / Math.max(paths.length, 1);
+
+        // Cluster zone labels
+        const allClusters = new Set();
+        paths.forEach((p) => p.path.forEach((id) => allClusters.add(nodeMap.get(id).cluster)));
+        const clusterList = [...allClusters];
+
+        // Draw background for source and target clusters
+        const srcColor = clusterColors[fromCluster];
+        const tgtColor = clusterColors[toCluster];
+
+        g.append("rect")
+          .attr("x", margin.left - 30)
+          .attr("y", margin.top - 20)
+          .attr("width", 50)
+          .attr("height", innerH + 40)
+          .attr("rx", 8)
+          .attr("fill", srcColor)
+          .attr("opacity", 0.08);
+
+        g.append("rect")
+          .attr("x", width - margin.right - 20)
+          .attr("y", margin.top - 20)
+          .attr("width", 50)
+          .attr("height", innerH + 40)
+          .attr("rx", 8)
+          .attr("fill", tgtColor)
+          .attr("opacity", 0.08);
+
+        g.append("text")
+          .attr("x", margin.left - 5)
+          .attr("y", margin.top - 28)
+          .attr("text-anchor", "middle")
+          .attr("font-size", 11)
+          .attr("font-weight", 500)
+          .attr("fill", srcColor)
+          .text(fromCluster);
+
+        g.append("text")
+          .attr("x", width - margin.right + 5)
+          .attr("y", margin.top - 28)
+          .attr("text-anchor", "middle")
+          .attr("font-size", 11)
+          .attr("font-weight", 500)
+          .attr("fill", tgtColor)
+          .text(toCluster);
+
+        // Draw each path
+        paths.forEach((pathData, pi) => {
+          const yCenter = margin.top + pathGap * pi + pathGap / 2;
+          const pathLen = pathData.path.length;
+          const xStep = innerW / Math.max(pathLen - 1, 1);
+          const opacity = pi === 0 ? 1 : 0.4;
+          const pathWeight = pi === 0 ? 1 : 0.5;
+
+          // Position nodes along the path
+          const positions = pathData.path.map((id, i) => ({
+            id,
+            node: nodeMap.get(id),
+            x: margin.left + i * xStep,
+            y: yCenter,
+          }));
+
+          // Path rank label
+          g.append("text")
+            .attr("x", margin.left - 48)
+            .attr("y", yCenter + 4)
+            .attr("text-anchor", "middle")
+            .attr("font-size", 11)
+            .attr("font-weight", 600)
+            .attr("fill", pi === 0 ? "#333" : "#bbb")
+            .text(`#${pi + 1}`);
+
+          // Draw path edges
+          for (let i = 0; i < positions.length - 1; i++) {
+            const from = positions[i];
+            const to = positions[i + 1];
+            const edge = pathData.pathEdges[i];
+            const edgeWeight = edge ? edge.weight : 0.5;
+
+            // Edge background glow for best path
+            if (pi === 0) {
+              g.append("line")
+                .attr("x1", from.x)
+                .attr("y1", from.y)
+                .attr("x2", to.x)
+                .attr("y2", to.y)
+                .attr("stroke", clusterColors[from.node.cluster])
+                .attr("stroke-width", edgeWeight * 14)
+                .attr("stroke-opacity", 0.08)
+                .attr("stroke-linecap", "round");
+            }
+
+            // Edge line
+            const edgeLine = g
+              .append("line")
+              .attr("x1", from.x)
+              .attr("y1", from.y)
+              .attr("x2", to.x)
+              .attr("y2", to.y)
+              .attr("stroke", pi === 0 ? "#555" : "#ccc")
+              .attr("stroke-width", edgeWeight * 5 * pathWeight)
+              .attr("stroke-opacity", opacity * 0.6)
+              .attr("stroke-linecap", "round");
+
+            // Edge weight label
+            if (edge && pi === 0) {
+              const mx = (from.x + to.x) / 2;
+              const my = (from.y + to.y) / 2 - 14;
+              g.append("text")
+                .attr("x", mx)
+                .attr("y", my)
+                .attr("text-anchor", "middle")
+                .attr("font-size", 10)
+                .attr("fill", "#999")
+                .text(`w=${edgeWeight.toFixed(2)}`);
+            }
+
+            // Arrow
+            const arrowSize = 6;
+            const angle = Math.atan2(to.y - from.y, to.x - from.x);
+            const r = radiusScale(to.node.citationCount) + 4;
+            const ax = to.x - r * Math.cos(angle);
+            const ay = to.y - r * Math.sin(angle);
+
+            if (pi === 0) {
+              g.append("polygon")
+                .attr(
+                  "points",
+                  [
+                    [ax, ay],
+                    [
+                      ax - arrowSize * Math.cos(angle - 0.4),
+                      ay - arrowSize * Math.sin(angle - 0.4),
+                    ],
+                    [
+                      ax - arrowSize * Math.cos(angle + 0.4),
+                      ay - arrowSize * Math.sin(angle + 0.4),
+                    ],
+                  ]
+                    .map((p) => p.join(","))
+                    .join(" "),
+                )
+                .attr("fill", "#555")
+                .attr("opacity", 0.6);
+            }
+          }
+
+          // Draw nodes
+          positions.forEach((pos, i) => {
+            const n = pos.node;
+            const isBridge = n.cluster !== fromCluster && n.cluster !== toCluster;
+
+            const nodeG = g
+              .append("g")
+              .attr("transform", `translate(${pos.x},${pos.y})`)
+              .style("cursor", "pointer");
+
+            // Bridge indicator ring
+            if (isBridge && pi === 0) {
+              nodeG
+                .append("circle")
+                .attr("r", radiusScale(n.citationCount) + 6)
+                .attr("fill", "none")
+                .attr("stroke", "#e74c3c")
+                .attr("stroke-width", 2)
+                .attr("stroke-dasharray", "4,3")
+                .attr("opacity", 0.7);
+
+              nodeG
+                .append("text")
+                .attr("dy", -radiusScale(n.citationCount) - 12)
+                .attr("text-anchor", "middle")
+                .attr("font-size", 9)
+                .attr("font-weight", 600)
+                .attr("fill", "#e74c3c")
+                .text("BRIDGE");
+            }
+
+            nodeG
+              .append("circle")
+              .attr("r", radiusScale(n.citationCount))
+              .attr("fill", clusterColors[n.cluster])
+              .attr("stroke", pi === 0 ? "#333" : "#ccc")
+              .attr("stroke-width", pi === 0 ? 2 : 1)
+              .attr("opacity", opacity * 0.9);
+
+            // Label
+            nodeG
+              .append("text")
+              .attr("dy", radiusScale(n.citationCount) + 14)
+              .attr("text-anchor", "middle")
+              .attr("font-size", pi === 0 ? 11 : 9)
+              .attr("font-weight", pi === 0 ? 500 : 400)
+              .attr("fill", pi === 0 ? "#333" : "#aaa")
+              .text(n.label);
+
+            // Cluster label (small, under node label)
+            if (pi === 0) {
+              nodeG
+                .append("text")
+                .attr("dy", radiusScale(n.citationCount) + 26)
+                .attr("text-anchor", "middle")
+                .attr("font-size", 9)
+                .attr("fill", clusterColors[n.cluster])
+                .text(n.cluster);
+            }
+
+            // Tooltip
+            nodeG
+              .on("mouseover", function (event) {
+                tooltip
+                  .style("opacity", 1)
+                  .html(
+                    `<strong>${n.label}</strong><br>` +
+                      `클러스터: ${n.cluster}<br>` +
+                      `인용: ${n.citationCount}<br>` +
+                      `Degree: ${n.degree.toFixed(2)}<br>` +
+                      `Betweenness: ${n.betweenness.toFixed(3)}<br>` +
+                      `Bridge Score: ${n.bridgeScore.toFixed(2)}<br>` +
+                      (isBridge
+                        ? `<span style="color:#e74c3c">경로상 다리 후보</span>`
+                        : `<span style="color:#7aaa7a">클러스터 내부 노드</span>`),
+                  );
+              })
+              .on("mousemove", function (event) {
+                tooltip
+                  .style("left", event.pageX + 14 + "px")
+                  .style("top", event.pageY - 14 + "px");
+              })
+              .on("mouseout", function () {
+                tooltip.style("opacity", 0);
+              });
+          });
+        });
+
+        // Context: faded full network in background
+        const bgG = g.insert("g", ":first-child").attr("class", "bg-network");
+
+        // Simple force layout positions (pre-computed approximate)
+        const clusterPositions = {
+          "외부 메모리": { cx: width * 0.2, cy: height * 0.85 },
+          "인지 아키텍처": { cx: width * 0.35, cy: height * 0.88 },
+          시뮬레이션: { cx: width * 0.5, cy: height * 0.87 },
+          RAG: { cx: width * 0.65, cy: height * 0.85 },
+          멀티모달: { cx: width * 0.8, cy: height * 0.88 },
+        };
+
+        const bgPositions = new Map();
+        const clusterCounts = {};
+        nodes.forEach((n) => {
+          if (!clusterCounts[n.cluster]) clusterCounts[n.cluster] = 0;
+          const idx = clusterCounts[n.cluster]++;
+          const cp = clusterPositions[n.cluster];
+          const angle = (idx / 3) * Math.PI * 2;
+          bgPositions.set(n.id, {
+            x: cp.cx + Math.cos(angle) * 18,
+            y: cp.cy + Math.sin(angle) * 14,
+          });
+        });
+
+        edges.forEach((e) => {
+          const sp = bgPositions.get(e.source);
+          const tp = bgPositions.get(e.target);
+          if (sp && tp) {
+            bgG
+              .append("line")
+              .attr("x1", sp.x)
+              .attr("y1", sp.y)
+              .attr("x2", tp.x)
+              .attr("y2", tp.y)
+              .attr("stroke", "#ddd")
+              .attr("stroke-width", 0.5)
+              .attr("stroke-opacity", 0.4);
+          }
+        });
+
+        nodes.forEach((n) => {
+          const p = bgPositions.get(n.id);
+          bgG
+            .append("circle")
+            .attr("cx", p.x)
+            .attr("cy", p.y)
+            .attr("r", 3)
+            .attr("fill", clusterColors[n.cluster])
+            .attr("opacity", 0.3);
+        });
+
+        // Mini legend for bg
+        bgG
+          .append("text")
+          .attr("x", width / 2)
+          .attr("y", height - 8)
+          .attr("text-anchor", "middle")
+          .attr("font-size", 9)
+          .attr("fill", "#ccc")
+          .text("(전체 네트워크 축소 미리보기)");
+      }
+
+      // Initial draw
+      drawPaths(clusterNames[0], clusterNames[2]);
+
+      // Control events
+      selectFrom.on("change", () => drawPaths(selectFrom.node().value, selectTo.node().value));
+      selectTo.on("change", () => drawPaths(selectFrom.node().value, selectTo.node().value));
+    </script>
+  </body>
 </html>

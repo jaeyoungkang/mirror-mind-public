@@ -1,302 +1,419 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="ko">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Gap Radar / Spider Chart — Multi-dimensional Gap Profiling</title>
-<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
-<script src="https://d3js.org/d3.v7.min.js"></script>
-<style>
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  body {
-    background: #fafaf8;
-    font-family: 'Noto Sans KR', sans-serif;
-    color: #1a1a1a;
-    padding: 48px 56px;
-  }
-  h1 {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-    margin-bottom: 8px;
-  }
-  .question {
-    font-size: 15px;
-    font-weight: 400;
-    color: #666;
-    margin-bottom: 6px;
-  }
-  .rationale {
-    font-size: 13px;
-    font-weight: 300;
-    color: #888;
-    line-height: 1.7;
-    max-width: 720px;
-    margin-bottom: 32px;
-  }
-  #chart {
-    position: relative;
-    display: flex;
-    flex-wrap: wrap;
-    gap: 16px;
-  }
-  .radar-container {
-    position: relative;
-    display: inline-block;
-  }
-  .tooltip {
-    position: fixed;
-    pointer-events: none;
-    background: #fff;
-    border: 1px solid #e0e0e0;
-    border-radius: 8px;
-    padding: 12px 16px;
-    font-size: 12px;
-    line-height: 1.6;
-    box-shadow: 0 4px 20px rgba(0,0,0,0.08);
-    opacity: 0;
-    transition: opacity 0.15s ease;
-    z-index: 100;
-  }
-  .tooltip .label { font-weight: 700; font-size: 13px; margin-bottom: 4px; }
-  .tooltip .row { display: flex; justify-content: space-between; gap: 16px; }
-  .tooltip .key { color: #888; }
-  .tooltip .val { font-weight: 500; }
-  .pair-title {
-    font-size: 12px;
-    font-weight: 500;
-    text-anchor: middle;
-    font-family: 'Noto Sans KR', sans-serif;
-  }
-  .legend-wrap {
-    margin-top: 24px;
-    font-size: 12px;
-    color: #888;
-    line-height: 1.8;
-  }
-  .legend-wrap strong { color: #555; font-weight: 500; }
-</style>
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Gap Radar / Spider Chart — Multi-dimensional Gap Profiling</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body {
+        background: #fafaf8;
+        font-family: "Noto Sans KR", sans-serif;
+        color: #1a1a1a;
+        padding: 48px 56px;
+      }
+      h1 {
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        margin-bottom: 8px;
+      }
+      .question {
+        font-size: 15px;
+        font-weight: 400;
+        color: #666;
+        margin-bottom: 6px;
+      }
+      .rationale {
+        font-size: 13px;
+        font-weight: 300;
+        color: #888;
+        line-height: 1.7;
+        max-width: 720px;
+        margin-bottom: 32px;
+      }
+      #chart {
+        position: relative;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 16px;
+      }
+      .radar-container {
+        position: relative;
+        display: inline-block;
+      }
+      .tooltip {
+        position: fixed;
+        pointer-events: none;
+        background: #fff;
+        border: 1px solid #e0e0e0;
+        border-radius: 8px;
+        padding: 12px 16px;
+        font-size: 12px;
+        line-height: 1.6;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        opacity: 0;
+        transition: opacity 0.15s ease;
+        z-index: 100;
+      }
+      .tooltip .label {
+        font-weight: 700;
+        font-size: 13px;
+        margin-bottom: 4px;
+      }
+      .tooltip .row {
+        display: flex;
+        justify-content: space-between;
+        gap: 16px;
+      }
+      .tooltip .key {
+        color: #888;
+      }
+      .tooltip .val {
+        font-weight: 500;
+      }
+      .pair-title {
+        font-size: 12px;
+        font-weight: 500;
+        text-anchor: middle;
+        font-family: "Noto Sans KR", sans-serif;
+      }
+      .legend-wrap {
+        margin-top: 24px;
+        font-size: 12px;
+        color: #888;
+        line-height: 1.8;
+      }
+      .legend-wrap strong {
+        color: #555;
+        font-weight: 500;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Gap Radar / Spider Chart</h1>
+    <p class="question">이 시각화가 답하는 질문: 각 구조적 공백 후보는 어떤 성격의 gap인가?</p>
+    <p class="rationale">
+      모든 gap이 같은 이유로 생기지 않는다. 어떤 gap은 희소성(scarcity)이 원인이고, 어떤 gap은 자격
+      요건 불일치(qualification deficit)가 원인이다. Radar chart는 하나의 gap 후보를 6개 축으로
+      프로파일링하여 "이 gap을 해소하려면 어떤 종류의 개입이 필요한가"를 진단한다. 축의 면적이
+      넓을수록 다차원적으로 심각한 gap이며, 특정 축만 돌출되면 단일 원인 gap이다.
+    </p>
 
-<h1>Gap Radar / Spider Chart</h1>
-<p class="question">이 시각화가 답하는 질문: 각 구조적 공백 후보는 어떤 성격의 gap인가?</p>
-<p class="rationale">
-  모든 gap이 같은 이유로 생기지 않는다. 어떤 gap은 희소성(scarcity)이 원인이고, 어떤 gap은 자격 요건 불일치(qualification deficit)가 원인이다.
-  Radar chart는 하나의 gap 후보를 6개 축으로 프로파일링하여 "이 gap을 해소하려면 어떤 종류의 개입이 필요한가"를 진단한다.
-  축의 면적이 넓을수록 다차원적으로 심각한 gap이며, 특정 축만 돌출되면 단일 원인 gap이다.
-</p>
+    <div id="chart"></div>
+    <div class="legend-wrap" id="legend"></div>
 
-<div id="chart"></div>
-<div class="legend-wrap" id="legend"></div>
+    <div class="tooltip" id="tooltip-global"></div>
 
-<div class="tooltip" id="tooltip-global"></div>
+    <script>
+      // ── Shared Dummy Data ──
+      const clusters = ["Reasoning", "Memory", "Planning", "Retrieval", "Generation"];
+      const data = [
+        {
+          source: "Reasoning",
+          target: "Memory",
+          observedStrength: 0.82,
+          expectedStrength: 0.85,
+          gapScore: 0.08,
+          structuralScarcity: 0.15,
+          coverage: 0.9,
+          uncertainty: 0.1,
+        },
+        {
+          source: "Reasoning",
+          target: "Planning",
+          observedStrength: 0.35,
+          expectedStrength: 0.78,
+          gapScore: 0.72,
+          structuralScarcity: 0.8,
+          coverage: 0.25,
+          uncertainty: 0.65,
+        },
+        {
+          source: "Reasoning",
+          target: "Retrieval",
+          observedStrength: 0.6,
+          expectedStrength: 0.7,
+          gapScore: 0.25,
+          structuralScarcity: 0.35,
+          coverage: 0.55,
+          uncertainty: 0.3,
+        },
+        {
+          source: "Memory",
+          target: "Planning",
+          observedStrength: 0.2,
+          expectedStrength: 0.72,
+          gapScore: 0.78,
+          structuralScarcity: 0.85,
+          coverage: 0.18,
+          uncertainty: 0.72,
+        },
+        {
+          source: "Memory",
+          target: "Generation",
+          observedStrength: 0.68,
+          expectedStrength: 0.65,
+          gapScore: 0.05,
+          structuralScarcity: 0.1,
+          coverage: 0.85,
+          uncertainty: 0.08,
+        },
+        {
+          source: "Planning",
+          target: "Retrieval",
+          observedStrength: 0.15,
+          expectedStrength: 0.68,
+          gapScore: 0.82,
+          structuralScarcity: 0.9,
+          coverage: 0.12,
+          uncertainty: 0.78,
+        },
+        {
+          source: "Planning",
+          target: "Generation",
+          observedStrength: 0.45,
+          expectedStrength: 0.6,
+          gapScore: 0.35,
+          structuralScarcity: 0.45,
+          coverage: 0.4,
+          uncertainty: 0.42,
+        },
+        {
+          source: "Retrieval",
+          target: "Generation",
+          observedStrength: 0.72,
+          expectedStrength: 0.75,
+          gapScore: 0.1,
+          structuralScarcity: 0.18,
+          coverage: 0.78,
+          uncertainty: 0.12,
+        },
+        {
+          source: "Reasoning",
+          target: "Generation",
+          observedStrength: 0.28,
+          expectedStrength: 0.74,
+          gapScore: 0.7,
+          structuralScarcity: 0.75,
+          coverage: 0.22,
+          uncertainty: 0.6,
+        },
+        {
+          source: "Memory",
+          target: "Retrieval",
+          observedStrength: 0.55,
+          expectedStrength: 0.62,
+          gapScore: 0.18,
+          structuralScarcity: 0.28,
+          coverage: 0.62,
+          uncertainty: 0.22,
+        },
+      ];
 
-<script>
-// ── Shared Dummy Data ──
-const clusters = ['Reasoning', 'Memory', 'Planning', 'Retrieval', 'Generation'];
-const data = [
-  { source: 'Reasoning',  target: 'Memory',     observedStrength: 0.82, expectedStrength: 0.85, gapScore: 0.08, structuralScarcity: 0.15, coverage: 0.90, uncertainty: 0.10 },
-  { source: 'Reasoning',  target: 'Planning',    observedStrength: 0.35, expectedStrength: 0.78, gapScore: 0.72, structuralScarcity: 0.80, coverage: 0.25, uncertainty: 0.65 },
-  { source: 'Reasoning',  target: 'Retrieval',   observedStrength: 0.60, expectedStrength: 0.70, gapScore: 0.25, structuralScarcity: 0.35, coverage: 0.55, uncertainty: 0.30 },
-  { source: 'Memory',     target: 'Planning',    observedStrength: 0.20, expectedStrength: 0.72, gapScore: 0.78, structuralScarcity: 0.85, coverage: 0.18, uncertainty: 0.72 },
-  { source: 'Memory',     target: 'Generation',  observedStrength: 0.68, expectedStrength: 0.65, gapScore: 0.05, structuralScarcity: 0.10, coverage: 0.85, uncertainty: 0.08 },
-  { source: 'Planning',   target: 'Retrieval',   observedStrength: 0.15, expectedStrength: 0.68, gapScore: 0.82, structuralScarcity: 0.90, coverage: 0.12, uncertainty: 0.78 },
-  { source: 'Planning',   target: 'Generation',  observedStrength: 0.45, expectedStrength: 0.60, gapScore: 0.35, structuralScarcity: 0.45, coverage: 0.40, uncertainty: 0.42 },
-  { source: 'Retrieval',  target: 'Generation',  observedStrength: 0.72, expectedStrength: 0.75, gapScore: 0.10, structuralScarcity: 0.18, coverage: 0.78, uncertainty: 0.12 },
-  { source: 'Reasoning',  target: 'Generation',  observedStrength: 0.28, expectedStrength: 0.74, gapScore: 0.70, structuralScarcity: 0.75, coverage: 0.22, uncertainty: 0.60 },
-  { source: 'Memory',     target: 'Retrieval',   observedStrength: 0.55, expectedStrength: 0.62, gapScore: 0.18, structuralScarcity: 0.28, coverage: 0.62, uncertainty: 0.22 },
-];
+      // ── Radar Axes (6 dimensions) ──
+      const axes = [
+        { key: "structuralScarcity", label: "Structural\nScarcity" },
+        { key: "bridgeValue", label: "Bridge\nValue" },
+        { key: "recencyOpportunity", label: "Recency\nOpportunity" },
+        { key: "claimIsolation", label: "Claim\nIsolation" },
+        { key: "qualificationDeficit", label: "Qualification\nDeficit" },
+        { key: "coverage", label: "Coverage" },
+      ];
 
-// ── Radar Axes (6 dimensions) ──
-const axes = [
-  { key: 'structuralScarcity',    label: 'Structural\nScarcity' },
-  { key: 'bridgeValue',           label: 'Bridge\nValue' },
-  { key: 'recencyOpportunity',    label: 'Recency\nOpportunity' },
-  { key: 'claimIsolation',        label: 'Claim\nIsolation' },
-  { key: 'qualificationDeficit',  label: 'Qualification\nDeficit' },
-  { key: 'coverage',              label: 'Coverage' },
-];
+      // Derive extra dimensions from existing data for each pair
+      const radarData = data.map((d) => ({
+        ...d,
+        bridgeValue: Math.min(1, d.expectedStrength * (1 - d.observedStrength) * 2),
+        recencyOpportunity: Math.min(1, d.uncertainty * 1.2),
+        claimIsolation: Math.min(1, (1 - d.coverage) * 1.1),
+        qualificationDeficit: Math.min(1, d.gapScore * d.structuralScarcity * 1.5),
+      }));
 
-// Derive extra dimensions from existing data for each pair
-const radarData = data.map(d => ({
-  ...d,
-  bridgeValue: Math.min(1, d.expectedStrength * (1 - d.observedStrength) * 2),
-  recencyOpportunity: Math.min(1, d.uncertainty * 1.2),
-  claimIsolation: Math.min(1, (1 - d.coverage) * 1.1),
-  qualificationDeficit: Math.min(1, d.gapScore * d.structuralScarcity * 1.5),
-}));
+      // Only show gap candidates (gapScore > 0.25) to keep it focused
+      const gapCandidates = radarData
+        .filter((d) => d.gapScore > 0.25)
+        .sort((a, b) => b.gapScore - a.gapScore);
 
-// Only show gap candidates (gapScore > 0.25) to keep it focused
-const gapCandidates = radarData
-  .filter(d => d.gapScore > 0.25)
-  .sort((a, b) => b.gapScore - a.gapScore);
+      // ── Dimensions ──
+      const radarSize = 240;
+      const radarRadius = 90;
+      const margin = 40;
+      const cols = Math.min(gapCandidates.length, 3);
 
-// ── Dimensions ──
-const radarSize = 240;
-const radarRadius = 90;
-const margin = 40;
-const cols = Math.min(gapCandidates.length, 3);
+      // ── Colors ──
+      const pairColor = d3.scaleOrdinal(d3.schemeTableau10);
 
-// ── Colors ──
-const pairColor = d3.scaleOrdinal(d3.schemeTableau10);
+      // ── Tooltip ──
+      const tooltip = d3.select("#tooltip-global");
 
-// ── Tooltip ──
-const tooltip = d3.select('#tooltip-global');
+      // ── Draw one radar ──
+      function drawRadar(container, d, idx) {
+        const svgW = radarSize + margin * 2;
+        const svgH = radarSize + margin * 2 + 28;
+        const svg = container.append("svg").attr("width", svgW).attr("height", svgH);
 
-// ── Draw one radar ──
-function drawRadar(container, d, idx) {
-  const svgW = radarSize + margin * 2;
-  const svgH = radarSize + margin * 2 + 28;
-  const svg = container.append('svg')
-    .attr('width', svgW)
-    .attr('height', svgH);
+        const g = svg
+          .append("g")
+          .attr("transform", `translate(${svgW / 2},${margin + radarRadius + 20})`);
 
-  const g = svg.append('g')
-    .attr('transform', `translate(${svgW / 2},${margin + radarRadius + 20})`);
+        const n = axes.length;
+        const angleSlice = (2 * Math.PI) / n;
+        const rScale = d3.scaleLinear().domain([0, 1]).range([0, radarRadius]);
 
-  const n = axes.length;
-  const angleSlice = (2 * Math.PI) / n;
-  const rScale = d3.scaleLinear().domain([0, 1]).range([0, radarRadius]);
+        // Title
+        svg
+          .append("text")
+          .attr("x", svgW / 2)
+          .attr("y", 18)
+          .attr("class", "pair-title")
+          .attr("fill", pairColor(idx))
+          .text(`${d.source} — ${d.target}`);
 
-  // Title
-  svg.append('text')
-    .attr('x', svgW / 2)
-    .attr('y', 18)
-    .attr('class', 'pair-title')
-    .attr('fill', pairColor(idx))
-    .text(`${d.source} — ${d.target}`);
+        svg
+          .append("text")
+          .attr("x", svgW / 2)
+          .attr("y", 33)
+          .attr("text-anchor", "middle")
+          .attr("font-size", "10px")
+          .attr("fill", "#aaa")
+          .attr("font-family", "Noto Sans KR")
+          .text(`gapScore: ${d.gapScore.toFixed(2)}`);
 
-  svg.append('text')
-    .attr('x', svgW / 2)
-    .attr('y', 33)
-    .attr('text-anchor', 'middle')
-    .attr('font-size', '10px')
-    .attr('fill', '#aaa')
-    .attr('font-family', 'Noto Sans KR')
-    .text(`gapScore: ${d.gapScore.toFixed(2)}`);
+        // Grid circles
+        const levels = [0.2, 0.4, 0.6, 0.8, 1.0];
+        levels.forEach((lev) => {
+          g.append("circle")
+            .attr("r", rScale(lev))
+            .attr("fill", "none")
+            .attr("stroke", "#e0e0e0")
+            .attr("stroke-width", 0.5);
 
-  // Grid circles
-  const levels = [0.2, 0.4, 0.6, 0.8, 1.0];
-  levels.forEach(lev => {
-    g.append('circle')
-      .attr('r', rScale(lev))
-      .attr('fill', 'none')
-      .attr('stroke', '#e0e0e0')
-      .attr('stroke-width', 0.5);
+          g.append("text")
+            .attr("x", 3)
+            .attr("y", -rScale(lev) + 3)
+            .attr("font-size", "8px")
+            .attr("fill", "#ccc")
+            .attr("font-family", "Noto Sans KR")
+            .text(lev.toFixed(1));
+        });
 
-    g.append('text')
-      .attr('x', 3)
-      .attr('y', -rScale(lev) + 3)
-      .attr('font-size', '8px')
-      .attr('fill', '#ccc')
-      .attr('font-family', 'Noto Sans KR')
-      .text(lev.toFixed(1));
-  });
+        // Axis lines and labels
+        axes.forEach((axis, i) => {
+          const angle = angleSlice * i - Math.PI / 2;
+          const x2 = radarRadius * Math.cos(angle);
+          const y2 = radarRadius * Math.sin(angle);
 
-  // Axis lines and labels
-  axes.forEach((axis, i) => {
-    const angle = angleSlice * i - Math.PI / 2;
-    const x2 = radarRadius * Math.cos(angle);
-    const y2 = radarRadius * Math.sin(angle);
+          g.append("line")
+            .attr("x1", 0)
+            .attr("y1", 0)
+            .attr("x2", x2)
+            .attr("y2", y2)
+            .attr("stroke", "#ddd")
+            .attr("stroke-width", 0.8);
 
-    g.append('line')
-      .attr('x1', 0).attr('y1', 0)
-      .attr('x2', x2).attr('y2', y2)
-      .attr('stroke', '#ddd')
-      .attr('stroke-width', 0.8);
+          const labelR = radarRadius + 18;
+          const lx = labelR * Math.cos(angle);
+          const ly = labelR * Math.sin(angle);
 
-    const labelR = radarRadius + 18;
-    const lx = labelR * Math.cos(angle);
-    const ly = labelR * Math.sin(angle);
+          const lines = axis.label.split("\n");
+          const labelG = g
+            .append("text")
+            .attr("x", lx)
+            .attr("y", ly)
+            .attr("text-anchor", "middle")
+            .attr("dominant-baseline", "middle")
+            .attr("font-size", "9px")
+            .attr("fill", "#888")
+            .attr("font-family", "Noto Sans KR");
 
-    const lines = axis.label.split('\n');
-    const labelG = g.append('text')
-      .attr('x', lx)
-      .attr('y', ly)
-      .attr('text-anchor', 'middle')
-      .attr('dominant-baseline', 'middle')
-      .attr('font-size', '9px')
-      .attr('fill', '#888')
-      .attr('font-family', 'Noto Sans KR');
+          lines.forEach((line, li) => {
+            labelG
+              .append("tspan")
+              .attr("x", lx)
+              .attr("dy", li === 0 ? (lines.length > 1 ? "-0.4em" : "0") : "1.1em")
+              .text(line);
+          });
+        });
 
-    lines.forEach((line, li) => {
-      labelG.append('tspan')
-        .attr('x', lx)
-        .attr('dy', li === 0 ? (lines.length > 1 ? '-0.4em' : '0') : '1.1em')
-        .text(line);
-    });
-  });
+        // Data polygon
+        const points = axes.map((axis, i) => {
+          const angle = angleSlice * i - Math.PI / 2;
+          const val = d[axis.key] || 0;
+          return {
+            x: rScale(val) * Math.cos(angle),
+            y: rScale(val) * Math.sin(angle),
+            key: axis.key,
+            label: axis.label.replace("\n", " "),
+            value: val,
+          };
+        });
 
-  // Data polygon
-  const points = axes.map((axis, i) => {
-    const angle = angleSlice * i - Math.PI / 2;
-    const val = d[axis.key] || 0;
-    return {
-      x: rScale(val) * Math.cos(angle),
-      y: rScale(val) * Math.sin(angle),
-      key: axis.key,
-      label: axis.label.replace('\n', ' '),
-      value: val,
-    };
-  });
+        const lineGen = d3
+          .lineRadial()
+          .angle((_, i) => angleSlice * i)
+          .radius((_, i) => rScale(axes[i] ? d[axes[i].key] || 0 : 0))
+          .curve(d3.curveLinearClosed);
 
-  const lineGen = d3.lineRadial()
-    .angle((_, i) => angleSlice * i)
-    .radius((_, i) => rScale(axes[i] ? (d[axes[i].key] || 0) : 0))
-    .curve(d3.curveLinearClosed);
+        // Fill area
+        g.append("path")
+          .datum(axes)
+          .attr("d", lineGen)
+          .attr("fill", pairColor(idx))
+          .attr("fill-opacity", 0.15)
+          .attr("stroke", pairColor(idx))
+          .attr("stroke-width", 2)
+          .attr("stroke-opacity", 0.7);
 
-  // Fill area
-  g.append('path')
-    .datum(axes)
-    .attr('d', lineGen)
-    .attr('fill', pairColor(idx))
-    .attr('fill-opacity', 0.15)
-    .attr('stroke', pairColor(idx))
-    .attr('stroke-width', 2)
-    .attr('stroke-opacity', 0.7);
-
-  // Data points with tooltips
-  points.forEach(pt => {
-    g.append('circle')
-      .attr('cx', pt.x)
-      .attr('cy', pt.y)
-      .attr('r', 4)
-      .attr('fill', pairColor(idx))
-      .attr('stroke', '#fff')
-      .attr('stroke-width', 1.5)
-      .attr('cursor', 'pointer')
-      .on('mouseover', function(event) {
-        d3.select(this).attr('r', 7);
-        tooltip.style('opacity', 1)
-          .html(`
+        // Data points with tooltips
+        points.forEach((pt) => {
+          g.append("circle")
+            .attr("cx", pt.x)
+            .attr("cy", pt.y)
+            .attr("r", 4)
+            .attr("fill", pairColor(idx))
+            .attr("stroke", "#fff")
+            .attr("stroke-width", 1.5)
+            .attr("cursor", "pointer")
+            .on("mouseover", function (event) {
+              d3.select(this).attr("r", 7);
+              tooltip.style("opacity", 1).html(`
             <div class="label">${d.source} — ${d.target}</div>
             <div class="row"><span class="key">${pt.label}</span><span class="val">${pt.value.toFixed(2)}</span></div>
           `);
-      })
-      .on('mousemove', function(event) {
-        tooltip
-          .style('left', (event.clientX + 16) + 'px')
-          .style('top', (event.clientY - 10) + 'px');
-      })
-      .on('mouseout', function() {
-        d3.select(this).attr('r', 4);
-        tooltip.style('opacity', 0);
+            })
+            .on("mousemove", function (event) {
+              tooltip
+                .style("left", event.clientX + 16 + "px")
+                .style("top", event.clientY - 10 + "px");
+            })
+            .on("mouseout", function () {
+              d3.select(this).attr("r", 4);
+              tooltip.style("opacity", 0);
+            });
+        });
+      }
+
+      // ── Render all radar charts ──
+      const chartDiv = d3.select("#chart");
+
+      gapCandidates.forEach((d, i) => {
+        const container = chartDiv.append("div").attr("class", "radar-container");
+        drawRadar(container, d, i);
       });
-  });
-}
 
-// ── Render all radar charts ──
-const chartDiv = d3.select('#chart');
-
-gapCandidates.forEach((d, i) => {
-  const container = chartDiv.append('div').attr('class', 'radar-container');
-  drawRadar(container, d, i);
-});
-
-// ── Legend ──
-const legendDiv = d3.select('#legend');
-legendDiv.html(`
+      // ── Legend ──
+      const legendDiv = d3.select("#legend");
+      legendDiv.html(`
   <strong>축 설명</strong><br>
   <strong>Structural Scarcity</strong> — 해당 클러스터 쌍의 기존 연결이 얼마나 희소한가<br>
   <strong>Bridge Value</strong> — 이 연결이 생기면 네트워크 중개 가치가 얼마나 큰가<br>
@@ -305,6 +422,6 @@ legendDiv.html(`
   <strong>Qualification Deficit</strong> — 자격 요건 불일치 정도 (gap * scarcity 기반)<br>
   <strong>Coverage</strong> — 기존 탐색이 이 쌍을 얼마나 커버했는가
 `);
-</script>
-</body>
+    </script>
+  </body>
 </html>
