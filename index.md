@@ -1,9 +1,9 @@
 ---
 layout: default
-title: "기억을 만드는 기억 — mirror-mind 기억 시스템의 여정"
+title: "기억을 만드는 기억 — AI 기억 시스템의 여정"
 ---
 
-# 기억을 만드는 기억 — mirror-mind 기억 시스템의 여정
+# 기억을 만드는 기억 — AI 기억 시스템의 여정
 
 ---
 
