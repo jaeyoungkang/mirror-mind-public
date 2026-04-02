@@ -1,0 +1,864 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>브라우저는 HTML을 어떻게 처리하는가</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">브라우저는 HTML을 어떻게 처리하는가</h1>
+</header>
+<h1 id="브라우저는-html을-어떻게-처리하는가">브라우저는 HTML을 어떻게
+처리하는가</h1>
+<blockquote>
+<p>2026-04-02 세션115. HTML5 시맨틱 교재, Next.js 교재에 이은 3부작.
+핵심 질문: URL을 입력한 순간부터 화면에 픽셀이 그려지기까지, 무슨 일이
+일어나는가. 전제: HTML5 시맨틱 교재의 “의미 vs 표현” 구분, Next.js
+교재의 SSR/hydration 개념을 알고 있다고 가정한다.</p>
+<p><strong>학습 방법: 퀴즈를 먼저 풀고, 해설을 읽는다.</strong></p>
+</blockquote>
+<hr />
+<h2 id="전체-지도-url-픽셀">전체 지도: URL → 픽셀</h2>
+<pre><code>[네트워크]                    [파싱]                    [렌더링]
+DNS → TCP → TLS → HTTP  →  HTML 파싱 → DOM 구축   →  렌더 트리
+                             CSS 파싱 → CSSOM 구축      ↓
+                             JS 실행 (블로킹!)        레이아웃
+                                                       ↓
+                                                     페인트
+                                                       ↓
+                                                     합성(Composite)
+                                                       ↓
+                                                     화면에 픽셀</code></pre>
+<p>이 문서는 왼쪽(네트워크)부터 오른쪽(픽셀)까지 순서대로 따라간다.</p>
+<hr />
+<h2 id="l3-네트워크-요청이-서버에-닿기까지">L3: 네트워크 — 요청이 서버에
+닿기까지</h2>
+<h3 id="퀴즈">퀴즈</h3>
+<p><strong>Q1. 브라우저에 <code>https://lighthouse.corca.ai</code>를
+입력하면, HTML이 도착하기 전에 몇 단계의 네트워크 핸드셰이크가
+일어나는가?</strong></p>
+<details>
+<summary>
+정답 보기
+</summary>
+<p><strong>최소 3단계: DNS → TCP → TLS</strong></p>
+<pre><code>1. DNS 조회     &quot;lighthouse.corca.ai의 IP가 뭐지?&quot;  → 203.0.113.42
+2. TCP 핸드셰이크  클라이언트↔서버 연결 수립 (SYN → SYN-ACK → ACK)
+3. TLS 핸드셰이크  암호화 협상 (HTTPS이므로 필수)
+4. HTTP 요청/응답  GET / HTTP/2 → 200 OK + HTML</code></pre>
+<p>HTML 바이트가 도착하기도 전에 여러 번의 왕복(round-trip)이 일어난다.
+이것이 <strong>첫 바이트까지의 시간(TTFB, Time To First Byte)</strong>에
+영향을 준다.</p>
+</details>
+<p><strong>Q2. <code>preconnect</code>, <code>prefetch</code>,
+<code>preload</code>의 차이는?</strong></p>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">link</span><span class="ot"> rel</span><span class="op">=</span><span class="st">&quot;preconnect&quot;</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;https://fonts.googleapis.com&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">link</span><span class="ot"> rel</span><span class="op">=</span><span class="st">&quot;prefetch&quot;</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;/next-page.html&quot;</span><span class="dt">&gt;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">link</span><span class="ot"> rel</span><span class="op">=</span><span class="st">&quot;preload&quot;</span><span class="ot"> href</span><span class="op">=</span><span class="st">&quot;/critical.css&quot;</span><span class="ot"> as</span><span class="op">=</span><span class="st">&quot;style&quot;</span><span class="dt">&gt;</span></span></code></pre></div>
+<details>
+<summary>
+정답 보기
+</summary>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 15%" />
+<col style="width: 31%" />
+<col style="width: 28%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr>
+<th>힌트</th>
+<th>무엇을 하는가</th>
+<th>언제 쓰는가</th>
+<th>우선순위</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>preconnect</code></td>
+<td>DNS+TCP+TLS만 미리 수립 (다운로드 안 함)</td>
+<td>곧 요청할 외부 도메인이 있을 때</td>
+<td>높음</td>
+</tr>
+<tr>
+<td><code>preload</code></td>
+<td>리소스를 <strong>즉시</strong> 다운로드 (현재 페이지용)</td>
+<td>브라우저가 늦게 발견하는 중요 리소스</td>
+<td>높음 (필수)</td>
+</tr>
+<tr>
+<td><code>prefetch</code></td>
+<td>리소스를 <strong>유휴 시간에</strong> 다운로드 (다음 페이지용)</td>
+<td>사용자가 곧 갈 것 같은 페이지</td>
+<td>낮음</td>
+</tr>
+</tbody>
+</table>
+<p><strong>핵심:</strong> <code>preload</code>는 “지금 당장 필요하다”,
+<code>prefetch</code>는 “나중에 필요할 수 있다”,
+<code>preconnect</code>는 “연결만 미리 열어둬라”.</p>
+<p>Next.js의 <code>&lt;Link&gt;</code>가 뷰포트에 보이면 자동으로
+<strong>prefetch</strong>하는 것이 이 메커니즘이다.</p>
+</details>
+<h3 id="각-단계-상세">각 단계 상세</h3>
+<h4 id="dns-조회-domain-name-system">1. DNS 조회 (Domain Name
+System)</h4>
+<pre><code>브라우저: &quot;lighthouse.corca.ai 의 IP 주소가 뭐지?&quot;
+
+[브라우저 캐시] → 없음
+[OS 캐시]      → 없음  
+[라우터 캐시]   → 없음
+[ISP DNS 서버]  → 있음! → 203.0.113.42</code></pre>
+<p>도메인 이름을 IP 주소로 변환한다. 캐시에 있으면 즉시, 없으면 DNS
+서버까지 왕복한다. 일반적으로 20~120ms.</p>
+<h4 id="tcp-핸드셰이크-3-way">2. TCP 핸드셰이크 (3-way)</h4>
+<pre><code>클라이언트  ──SYN──→        서버
+클라이언트  ←─SYN-ACK──    서버
+클라이언트  ──ACK──→        서버
+            [연결 수립됨]</code></pre>
+<p>신뢰할 수 있는 양방향 연결을 수립한다. 1 왕복(round-trip).</p>
+<h4 id="tls-핸드셰이크">3. TLS 핸드셰이크</h4>
+<pre><code>클라이언트  ──ClientHello──→        서버  (지원하는 암호화 방식 목록)
+클라이언트  ←─ServerHello+인증서──  서버  (선택한 암호화 + 신원 증명)
+클라이언트  ──키 교환──→            서버  (암호화 키 합의)
+            [암호화 채널 수립됨]</code></pre>
+<p>HTTPS이면 필수. TLS 1.3에서는 1 왕복, TLS 1.2에서는 2 왕복.</p>
+<h4 id="http-요청응답">4. HTTP 요청/응답</h4>
+<pre><code>GET / HTTP/2
+Host: lighthouse.corca.ai
+Accept: text/html
+
+→ 200 OK
+Content-Type: text/html; charset=utf-8
+Content-Length: 42381
+
+&lt;!DOCTYPE html&gt;
+&lt;html&gt;...</code></pre>
+<p>드디어 HTML 바이트가 도착하기 시작한다. 여기서부터 파싱이
+시작된다.</p>
+<h4 id="http2와-http3">HTTP/2와 HTTP/3</h4>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 34%" />
+<col style="width: 27%" />
+<col style="width: 27%" />
+</colgroup>
+<thead>
+<tr>
+<th></th>
+<th>HTTP/1.1</th>
+<th>HTTP/2</th>
+<th>HTTP/3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>연결당 요청</td>
+<td>1개씩 순차</td>
+<td><strong>멀티플렉싱</strong> (여러 요청 동시)</td>
+<td>멀티플렉싱</td>
+</tr>
+<tr>
+<td>헤더</td>
+<td>텍스트 (매번 전송)</td>
+<td><strong>압축</strong> (HPACK)</td>
+<td>압축 (QPACK)</td>
+</tr>
+<tr>
+<td>전송 프로토콜</td>
+<td>TCP</td>
+<td>TCP</td>
+<td><strong>QUIC (UDP 기반)</strong></td>
+</tr>
+<tr>
+<td>핸드셰이크</td>
+<td>TCP + TLS 별도</td>
+<td>TCP + TLS 별도</td>
+<td><strong>QUIC이 통합 (0-1 RTT)</strong></td>
+</tr>
+</tbody>
+</table>
+<p>HTTP/2의 멀티플렉싱이 중요한 이유: CSS, JS, 이미지를 <strong>하나의
+연결에서 동시에</strong> 받을 수 있다. HTTP/1.1에서는 파일마다 별도
+연결이 필요했다.</p>
+<h4 id="캐싱">캐싱</h4>
+<pre><code>[첫 방문]
+브라우저 → 서버: GET /style.css
+서버 → 브라우저: 200 OK + Cache-Control: max-age=31536000 + ETag: &quot;abc123&quot;
+                 (1년간 캐시 가능)
+
+[재방문]
+브라우저: 캐시에 있고 만료 안 됨 → 서버에 요청하지 않음 (디스크 캐시 사용)
+
+[캐시 만료 후]
+브라우저 → 서버: GET /style.css + If-None-Match: &quot;abc123&quot;
+서버: 내용 안 바뀜 → 304 Not Modified (본문 없이 응답, 대역폭 절약)</code></pre>
+<p>캐싱은 네트워크 비용을 극적으로 줄인다. Next.js의 SSG가 빠른 이유 중
+하나 — 정적 HTML이 CDN에 캐시된다.</p>
+<hr />
+<h2 id="l1-파싱과-트리-구축-html이-구조가-되기까지">L1: 파싱과 트리 구축
+— HTML이 구조가 되기까지</h2>
+<h3 id="퀴즈-1">퀴즈</h3>
+<p><strong>Q3. 다음 HTML이 브라우저에 도착했을 때, DOM 트리는 어떤
+모양인가?</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">html</span><span class="dt">&gt;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">head</span><span class="dt">&gt;&lt;</span><span class="kw">title</span><span class="dt">&gt;</span>연구 노트<span class="dt">&lt;/</span><span class="kw">title</span><span class="dt">&gt;&lt;/</span><span class="kw">head</span><span class="dt">&gt;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">article</span><span class="dt">&gt;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>제목<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>본문<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">article</span><span class="dt">&gt;</span></span>
+<span id="cb9-8"><a href="#cb9-8" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb9-9"><a href="#cb9-9" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">html</span><span class="dt">&gt;</span></span></code></pre></div>
+<details>
+<summary>
+정답 보기
+</summary>
+<pre><code>Document
+└── html
+    ├── head
+    │   └── title
+    │       └── &quot;연구 노트&quot; (텍스트 노드)
+    └── body
+        └── article
+            ├── h1
+            │   └── &quot;제목&quot; (텍스트 노드)
+            └── p
+                └── &quot;본문&quot; (텍스트 노드)</code></pre>
+<p>DOM(Document Object Model)은 HTML의 <strong>트리 형태 인메모리
+표현</strong>이다. 브라우저가 HTML 바이트를 읽으면서 실시간으로 이
+트리를 구축한다. JavaScript의
+<code>document.querySelector('article')</code>은 이 트리의 노드를 찾는
+것이다.</p>
+<p><strong>HTML5 교재와의 연결:</strong> <code>&lt;article&gt;</code>을
+쓰면 DOM 트리에 <code>article</code> 노드가 생기고, 스크린리더와 검색
+엔진이 이 노드를 의미적으로 해석한다. <code>&lt;div&gt;</code>를 쓰면
+<code>div</code> 노드가 생기지만 의미가 없다. <strong>DOM이 시맨틱의
+실체다.</strong></p>
+</details>
+<p><strong>Q4. CSS는 DOM 구축을 블로킹하는가, 렌더링을
+블로킹하는가?</strong></p>
+<details>
+<summary>
+정답 보기
+</summary>
+<p><strong>렌더링을 블로킹한다.</strong> DOM 구축은 블로킹하지
+않는다.</p>
+<pre><code>HTML 파싱 ──→ DOM 구축 (CSS와 무관하게 진행)
+CSS 파싱  ──→ CSSOM 구축 (병렬로 진행)
+
+DOM 완성 ──┐
+            ├──→ 렌더 트리 생성 (둘 다 필요)
+CSSOM 완성 ┘</code></pre>
+<p>CSS가 아직 로드 중이면: - DOM은 계속 구축된다 (HTML 파싱은 멈추지
+않는다) - 하지만 <strong>화면에 아무것도 그리지 않는다</strong> (CSSOM이
+완성될 때까지)</p>
+<p>이것이 “CSS는 render-blocking”이라고 하는 이유다. CSS 규칙은 뒤에서
+덮어쓸 수 있으므로(<code>h1 { color: red }</code> →
+<code>h1 { color: blue }</code>), 전부 파싱하기 전에는 최종 스타일을
+확정할 수 없다.</p>
+</details>
+<h3 id="html-파싱-dom">HTML 파싱 → DOM</h3>
+<p>브라우저는 HTML 바이트를 <strong>점진적으로</strong> 파싱한다. 전체
+문서가 도착할 때까지 기다리지 않는다.</p>
+<pre><code>바이트 → 문자 → 토큰 → 노드 → DOM 트리
+
+&quot;&lt;article&gt;&quot;  →  시작 토큰 {tag: &quot;article&quot;}  →  Element 노드 생성
+&quot;제목&quot;        →  텍스트 토큰                  →  Text 노드 생성  
+&quot;&lt;/article&gt;&quot; →  종료 토큰                    →  트리 위치 확정</code></pre>
+<p><strong>점진적 파싱이 중요한 이유:</strong> Next.js Streaming은 이
+특성을 활용한다. HTML을 조각씩 보내면, 브라우저는 도착하는 즉시 파싱하고
+DOM에 추가한다. 전체를 기다리지 않아도 사용자에게 콘텐츠를 보여줄 수
+있다.</p>
+<h3 id="css-파싱-cssom">CSS 파싱 → CSSOM</h3>
+<pre><code>바이트 → 문자 → 토큰 → 노드 → CSSOM 트리
+
+CSSOM:
+├── html { font-size: 16px }
+│   ├── body { margin: 0 }
+│   │   ├── article { max-width: 36em }
+│   │   │   ├── h1 { font-size: 2em; font-weight: bold }
+│   │   │   └── p { line-height: 1.6 }</code></pre>
+<p>CSS는 <strong>상속과 캐스케이드</strong> 때문에 점진적으로 적용할 수
+없다. 전체 CSS가 파싱되어야 최종 스타일이 확정된다. 이것이 CSS가
+render-blocking인 이유다.</p>
+<h3 id="렌더-트리-dom-cssom">렌더 트리 = DOM + CSSOM</h3>
+<pre><code>DOM                    CSSOM                   렌더 트리
+├── html               html {font: 16px}       ├── html {font: 16px}
+│   ├── head           head (display: none)    │   └── body {margin: 0}
+│   │   └── title      ...                     │       └── article {max-width: 36em}
+│   └── body           body {margin: 0}        │           ├── h1 {font-size: 2em}
+│       └── article    article {max-width}     │           └── p {line-height: 1.6}
+│           ├── h1     h1 {font-size: 2em}
+│           └── p      p {line-height: 1.6}</code></pre>
+<p>렌더 트리에는 <strong>보이는 요소만</strong> 포함된다: -
+<code>&lt;head&gt;</code>, <code>&lt;title&gt;</code> → 포함 안 됨
+(화면에 안 보임) - <code>display: none</code> 요소 → 포함 안 됨 -
+<code>visibility: hidden</code> 요소 → 포함됨 (공간은 차지)</p>
+<h3 id="레이아웃-reflow">레이아웃 (Reflow)</h3>
+<p>렌더 트리의 각 노드에 <strong>정확한 위치와 크기</strong>를
+계산한다.</p>
+<pre><code>article { max-width: 36em }
+→ 뷰포트 너비 1024px, 폰트 16px이면
+→ 36em = 576px
+→ article 박스: x=224, y=50, width=576, height=?
+
+h1 { font-size: 2em }  
+→ 2em = 32px
+→ &quot;제목&quot; 텍스트가 한 줄에 들어감
+→ h1 박스: x=224, y=50, width=576, height=44
+
+p { line-height: 1.6 }
+→ &quot;본문&quot; 텍스트
+→ p 박스: x=224, y=94, width=576, height=26</code></pre>
+<p><strong>왜 이것이 비용이 큰가:</strong> DOM이 변경될 때마다
+레이아웃을 다시 계산해야 한다(reflow). 이것이 DOM 조작이 “비싸다”고 하는
+이유 중 하나다. React의 Virtual DOM은 실제 DOM 변경을 최소화하여
+reflow를 줄이는 전략이다.</p>
+<h3 id="페인트-paint">페인트 (Paint)</h3>
+<p>레이아웃이 확정되면, 각 노드를 <strong>실제 픽셀로
+그린다.</strong></p>
+<pre><code>h1 &quot;제목&quot; → 폰트 로드 → 글리프 래스터라이즈 → 비트맵 생성
+article 배경 → 배경색 채우기
+border, shadow → 추가 그리기 명령</code></pre>
+<p>페인트는 레이어 단위로 일어난다. <code>transform</code>,
+<code>opacity</code>, <code>will-change</code> 속성이 있는 요소는 별도
+레이어로 승격된다.</p>
+<h3 id="합성-composite">합성 (Composite)</h3>
+<p>여러 레이어를 <strong>최종 화면으로 합친다.</strong> GPU가
+담당한다.</p>
+<pre><code>레이어 1: 배경
+레이어 2: 본문 콘텐츠
+레이어 3: 고정 헤더 (position: fixed)
+레이어 4: 애니메이션 중인 요소
+
+GPU: 레이어들을 z-order대로 겹쳐서 최종 프레임 생성</code></pre>
+<p><strong><code>transform</code>과 <code>opacity</code> 애니메이션이
+빠른 이유:</strong> 레이아웃과 페인트를 건너뛰고 합성만 다시 하면 된다.
+<code>left/top</code> 애니메이션은 매 프레임 레이아웃부터 다시 해야
+한다.</p>
+<hr />
+<h2 id="l2-javascript가-파이프라인을-막는-곳">L2: JavaScript가
+파이프라인을 막는 곳</h2>
+<h3 id="퀴즈-2">퀴즈</h3>
+<p><strong>Q5. 다음 세 가지 <code>&lt;script&gt;</code> 중 DOM 파싱을
+멈추는 것은?</strong></p>
+<div class="sourceCode" id="cb18"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb18-1"><a href="#cb18-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="ot"> src</span><span class="op">=</span><span class="st">&quot;a.js&quot;</span><span class="dt">&gt;&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span>
+<span id="cb18-2"><a href="#cb18-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="ot"> src</span><span class="op">=</span><span class="st">&quot;b.js&quot;</span><span class="ot"> async</span><span class="dt">&gt;&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span>
+<span id="cb18-3"><a href="#cb18-3" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="ot"> src</span><span class="op">=</span><span class="st">&quot;c.js&quot;</span><span class="ot"> defer</span><span class="dt">&gt;&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span></code></pre></div>
+<details>
+<summary>
+정답 보기
+</summary>
+<p><strong><code>a.js</code>만 DOM 파싱을 멈춘다.</strong></p>
+<pre><code>HTML 파싱:  ████████░░░░░░░████████████████
+a.js:               ↓다운로드↓실행↓
+                    파싱 중단!
+
+HTML 파싱:  ████████████████████████████████
+b.js (async):    ↓다운로드↓실행↓  (파싱과 병렬, 다운로드 완료 시 즉시 실행)
+
+HTML 파싱:  ████████████████████████████████
+c.js (defer):    ↓다운로드────↓              ↓실행 (파싱 완료 후)</code></pre>
+<table>
+<thead>
+<tr>
+<th>속성</th>
+<th>다운로드</th>
+<th>실행 시점</th>
+<th>파싱 블로킹</th>
+<th>순서 보장</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>(없음)</td>
+<td>파싱 중단하고 다운로드</td>
+<td>다운로드 완료 즉시</td>
+<td><strong>O</strong></td>
+<td>O</td>
+</tr>
+<tr>
+<td><code>async</code></td>
+<td>병렬 다운로드</td>
+<td>다운로드 완료 즉시</td>
+<td>실행 시에만</td>
+<td><strong>X</strong></td>
+</tr>
+<tr>
+<td><code>defer</code></td>
+<td>병렬 다운로드</td>
+<td>DOM 파싱 완료 후</td>
+<td><strong>X</strong></td>
+<td>O</td>
+</tr>
+</tbody>
+</table>
+<p><strong><code>defer</code>가 가장 안전하다</strong> — 파싱을 안 막고,
+순서도 보장하고, DOMContentLoaded 직전에 실행된다.</p>
+</details>
+<p><strong>Q6. <code>DOMContentLoaded</code>와 <code>load</code>
+이벤트의 차이는?</strong></p>
+<details>
+<summary>
+정답 보기
+</summary>
+<pre><code>HTML 파싱 완료 + defer 스크립트 실행
+        ↓
+  DOMContentLoaded 발생  ← &quot;DOM 준비됨, 이미지는 아직&quot;
+        ↓
+이미지, 폰트, iframe 등 모든 리소스 로드 완료
+        ↓
+      load 발생          ← &quot;페이지 완전히 로드됨&quot;</code></pre>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 26%" />
+<col style="width: 32%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr>
+<th>이벤트</th>
+<th>언제 발생</th>
+<th>기다리는 것</th>
+<th>용도</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>DOMContentLoaded</code></td>
+<td>DOM 파싱 완료 시</td>
+<td>HTML + defer JS</td>
+<td>DOM 조작 시작</td>
+</tr>
+<tr>
+<td><code>load</code></td>
+<td>모든 리소스 로드 완료 시</td>
+<td>이미지, 폰트, CSS 등 전부</td>
+<td>전체 페이지 준비 확인</td>
+</tr>
+</tbody>
+</table>
+<p>대부분의 JS 초기화는 <code>DOMContentLoaded</code>에서 하면 된다.
+<code>load</code>를 기다리면 이미지 로딩 때문에 불필요하게 늦어진다.</p>
+</details>
+<p><strong>Q7. React hydration은 이 파이프라인의 어디에
+위치하는가?</strong></p>
+<details>
+<summary>
+정답 보기
+</summary>
+<pre><code>[서버]
+Server Component 실행 → HTML 생성 → 클라이언트에 전송
+
+[브라우저]
+1. HTML 도착 → DOM 구축 (서버가 보낸 HTML 파싱)
+2. CSS 도착 → CSSOM 구축
+3. 렌더 트리 → 레이아웃 → 페인트 → 화면에 콘텐츠 표시 ← 여기서 &quot;보인다&quot;
+4. JS 번들 도착 → 파싱 + 실행
+5. React hydration 시작                              ← 여기서 &quot;눌린다&quot;
+   - 기존 DOM 트리를 순회
+   - 이벤트 핸들러 연결 (onClick, onChange 등)
+   - 상태 초기화
+6. hydration 완료 → 인터랙션 가능</code></pre>
+<p><strong>3과 5 사이가 “보이는데 안 눌리는” 구간이다.</strong></p>
+<p>이 구간이 존재하는 이유: - 3단계(페인트)는 HTML+CSS만 있으면 된다 →
+빠르다 - 5단계(hydration)는 JS 번들 다운로드 + 파싱 + 실행이 필요 →
+느리다</p>
+<p><strong>Server Component가 이 구간을 줄이는 이유:</strong> Server
+Component는 JS 번들에 포함되지 않으므로, hydration 대상이 아니다. Client
+Component만 hydration하면 되므로 JS 번들이 작아지고, hydration이
+빨라진다.</p>
+</details>
+<h3 id="js가-파싱을-블로킹하는-이유">JS가 파싱을 블로킹하는 이유</h3>
+<p>JavaScript가 DOM 파싱을 중단시키는 이유는 단순하다: <strong>JS가
+DOM을 변경할 수 있기 때문이다.</strong></p>
+<div class="sourceCode" id="cb22"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb22-1"><a href="#cb22-1" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;greeting&quot;</span><span class="dt">&gt;</span>안녕하세요<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span>
+<span id="cb22-2"><a href="#cb22-2" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">script</span><span class="dt">&gt;</span></span>
+<span id="cb22-3"><a href="#cb22-3" aria-hidden="true" tabindex="-1"></a>  <span class="bu">document</span><span class="op">.</span><span class="fu">getElementById</span>(<span class="st">&#39;greeting&#39;</span>)<span class="op">.</span><span class="at">textContent</span> <span class="op">=</span> <span class="st">&#39;반갑습니다&#39;</span></span>
+<span id="cb22-4"><a href="#cb22-4" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">script</span><span class="dt">&gt;</span></span>
+<span id="cb22-5"><a href="#cb22-5" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">p</span><span class="dt">&gt;</span>다음 문단<span class="dt">&lt;/</span><span class="kw">p</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>브라우저는 <code>&lt;script&gt;</code>를 만나면 “이 스크립트가 위의
+DOM을 바꿀 수도 있으니, 실행이 끝날 때까지 아래 HTML 파싱을 멈추자”고
+판단한다. 실제로 위 코드에서 스크립트는 <code>&lt;p&gt;</code>의
+텍스트를 바꾼다.</p>
+<p><strong>CSS도 JS 실행을 블로킹한다:</strong></p>
+<pre><code>HTML 파싱 중 &lt;script&gt; 발견
+→ 위에 아직 로드 안 된 CSS가 있는가?
+→ 있다면: CSS 로드 완료까지 JS 실행도 대기
+→ 이유: JS가 getComputedStyle()로 스타일을 읽을 수 있기 때문</code></pre>
+<p>이것이 <strong>“CSS는 render-blocking이고, JS는 parser-blocking이며,
+CSS는 JS를 간접적으로 parser-blocking한다”</strong>는 연쇄 블로킹의 전체
+그림이다.</p>
+<h3 id="블로킹-해소-전략-요약">블로킹 해소 전략 요약</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 40%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>전략</th>
+<th>무엇을 하는가</th>
+<th>Next.js에서</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;script defer&gt;</code></td>
+<td>JS 다운로드는 병렬, 실행은 파싱 후</td>
+<td>Next.js가 자동 적용</td>
+</tr>
+<tr>
+<td><code>&lt;script async&gt;</code></td>
+<td>다운로드·실행 모두 병렬 (순서 보장 안 됨)</td>
+<td>분석 스크립트 등에 사용</td>
+</tr>
+<tr>
+<td>CSS를 <code>&lt;head&gt;</code>에</td>
+<td>파싱 초반에 CSS 다운로드 시작</td>
+<td>Next.js가 자동 적용</td>
+</tr>
+<tr>
+<td>Critical CSS 인라인</td>
+<td>CSSOM 구축 대기 시간 제거</td>
+<td>선택적 적용</td>
+</tr>
+<tr>
+<td>Server Components</td>
+<td>JS 번들 자체를 안 보냄</td>
+<td>App Router 기본값</td>
+</tr>
+<tr>
+<td>Streaming</td>
+<td>HTML을 점진적으로 보냄</td>
+<td>Suspense와 함께 자동</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="전체-연결-3부작의-관계">전체 연결: 3부작의 관계</h2>
+<pre><code>[1. HTML5 시맨틱 교재]
+   &quot;이 요소가 무엇인가를 말하는가?&quot;
+   → DOM 트리에 의미 있는 노드를 만든다
+   → 스크린리더, 검색 엔진이 이 트리를 해석한다
+
+[2. Next.js와 HTML5 철학]
+   &quot;HTML이 먼저 도착하는가?&quot;
+   → SSR/SC는 서버에서 DOM을 구축하여 HTML로 보낸다
+   → hydration은 기존 DOM에 이벤트를 연결하는 것이다
+
+[3. 이 문서 — 브라우저 렌더링 파이프라인]
+   &quot;HTML이 어떻게 픽셀이 되는가?&quot;
+   → DOM + CSSOM → 렌더 트리 → 레이아웃 → 페인트 → 합성
+   → JS가 이 과정을 어디서 어떻게 블로킹하는가
+   → 네트워크 비용이 왜 중요한가</code></pre>
+<p>이 3편을 관통하는 하나의 질문:</p>
+<blockquote>
+<p><strong>“웹 페이지의 목적은 사용자에게 의미 있는 콘텐츠를 가능한
+빨리, 가능한 안정적으로 전달하는 것이다. HTML5의 시맨틱, Next.js의 서버
+렌더링, 브라우저의 점진적 파싱 — 이 모든 것은 같은 목적을 향한 다른
+계층의 해법이다.”</strong></p>
+</blockquote>
+<hr />
+<h2 id="용어-정리">용어 정리</h2>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 14%" />
+<col style="width: 62%" />
+</colgroup>
+<thead>
+<tr>
+<th>용어</th>
+<th>뜻</th>
+<th>이 문서에서의 맥락</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DOM</td>
+<td>Document Object Model — HTML의 트리 형태 인메모리 표현</td>
+<td>파싱 결과물. JS가 조작하는 대상</td>
+</tr>
+<tr>
+<td>CSSOM</td>
+<td>CSS Object Model — CSS의 트리 형태 표현</td>
+<td>render-blocking의 원인</td>
+</tr>
+<tr>
+<td>렌더 트리</td>
+<td>DOM + CSSOM 결합. 보이는 요소만 포함</td>
+<td>레이아웃의 입력</td>
+</tr>
+<tr>
+<td>레이아웃 (Reflow)</td>
+<td>각 요소의 위치와 크기 계산</td>
+<td>DOM 변경 시 재계산 필요</td>
+</tr>
+<tr>
+<td>페인트</td>
+<td>레이아웃 결과를 픽셀로 변환</td>
+<td>레이어 단위로 수행</td>
+</tr>
+<tr>
+<td>합성 (Composite)</td>
+<td>레이어들을 최종 화면으로 병합</td>
+<td>GPU가 담당</td>
+</tr>
+<tr>
+<td>TTFB</td>
+<td>Time To First Byte — 첫 바이트 도착 시간</td>
+<td>네트워크 성능 지표</td>
+</tr>
+<tr>
+<td>CRP</td>
+<td>Critical Rendering Path — 첫 화면까지의 최소 경로</td>
+<td>최적화 대상</td>
+</tr>
+<tr>
+<td>hydration</td>
+<td>서버 렌더링된 HTML에 JS 이벤트를 연결하는 과정</td>
+<td>“보이는데 안 눌리는” 구간의 원인</td>
+</tr>
+</tbody>
+</table>
+</body>
+</html>
