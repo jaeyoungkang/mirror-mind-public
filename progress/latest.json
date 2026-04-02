@@ -1,0 +1,294 @@
+{
+  "generatedAt": "2026-04-02T06:47:44.881Z",
+  "repoRoot": "/Users/jaeyoungkang/corca/lighthouse",
+  "activeSessionId": "019d3ddb-46cf-72d2-bdb3-9d06104e4d95",
+  "sessions": [
+    {
+      "sessionId": "019d3ddb-46cf-72d2-bdb3-9d06104e4d95",
+      "cwd": "/Users/jaeyoungkang/corca/lighthouse",
+      "updatedAt": "2026-04-02T06:47:39.104Z",
+      "active": true,
+      "lastAssistantMessage": "중복 검사는 통과했고, 지금은 knip 단계입니다.",
+      "progress": {
+        "globalPercent": 95,
+        "globalLabel": "마감 직전",
+        "currentTurnPercent": 88,
+        "currentTurnLabel": "검증 단계"
+      },
+      "milestones": [
+        {
+          "id": "datasets",
+          "title": "렌즈 dataset 저장",
+          "status": "completed",
+          "percent": 100,
+          "evidence": "landscape, pathways, trends, debates, weak-ties 저장 경로 전환이 끝났습니다."
+        },
+        {
+          "id": "report",
+          "title": "graph-as-report 승격",
+          "status": "completed",
+          "percent": 100,
+          "evidence": "graph document를 report-bearing document로 승격하는 구조 변경이 반영됐습니다."
+        },
+        {
+          "id": "runtime",
+          "title": "runtime lens-first 전환",
+          "status": "completed",
+          "percent": 100,
+          "evidence": "stored lens dataset 우선 해석과 fallback 축소가 대부분 끝났습니다."
+        },
+        {
+          "id": "summary",
+          "title": "summary / report / context 정렬",
+          "status": "completed",
+          "percent": 100,
+          "evidence": "summary helper, graph report, focused context 정렬이 완료 상태입니다."
+        },
+        {
+          "id": "quality",
+          "title": "최종 품질 게이트",
+          "status": "in_progress",
+          "percent": 88,
+          "evidence": "typecheck, vitest, specdown은 녹색이고 knip 이후 잔여 게이트만 남았습니다."
+        }
+      ],
+      "currentTurn": {
+        "turnId": "019d4ce4-83b3-70b2-99fe-053163e3ea31",
+        "startedAt": "2026-04-02T06:32:17.591Z",
+        "status": "running",
+        "progressPercent": 88,
+        "progressLabel": "검증 단계",
+        "latestAssistantMessage": "중복 검사는 통과했고, 지금은 knip 단계입니다.",
+        "latestPlan": {
+          "steps": [
+            { "step": "traceability 기대값 정리", "status": "completed" },
+            { "step": "specdown 재실행", "status": "completed" },
+            { "step": "quality:check 끝까지 확인", "status": "in_progress" }
+          ]
+        },
+        "verifications": [
+          {
+            "key": "vitest",
+            "label": "vitest",
+            "status": "passed",
+            "summary": "Test Files 3 passed (3)",
+            "command": "npx vitest run ...graph-map-runtime.test.ts"
+          },
+          {
+            "key": "typecheck",
+            "label": "typecheck",
+            "status": "passed",
+            "summary": "Types generated successfully",
+            "command": "npm run typecheck"
+          },
+          {
+            "key": "specdown",
+            "label": "specdown",
+            "status": "passed",
+            "summary": "339 cases 통과",
+            "command": "npm run specdown"
+          },
+          {
+            "key": "prettier",
+            "label": "prettier",
+            "status": "passed",
+            "summary": "graph-query.mjs 포맷 정리",
+            "command": "npx prettier specs/helpers/graph-query.mjs --write"
+          }
+        ]
+      },
+      "recentTurns": [
+        {
+          "turnId": "019d4ce4-83b3-70b2-99fe-053163e3ea31",
+          "startedAt": "2026-04-02T06:32:17.591Z",
+          "status": "running",
+          "percent": 88,
+          "label": "검증 단계",
+          "headline": "현재 활성 턴",
+          "summary": "중복 검사는 통과했고, 지금은 knip 단계입니다.",
+          "planSteps": [
+            { "step": "traceability 기대값 정리", "status": "completed" },
+            { "step": "specdown 재실행", "status": "completed" },
+            { "step": "quality:check 끝까지 확인", "status": "in_progress" }
+          ],
+          "verifications": [
+            {
+              "key": "vitest",
+              "label": "vitest",
+              "status": "passed",
+              "summary": "Test Files 3 passed (3)",
+              "command": "npx vitest run ...graph-map-runtime.test.ts"
+            },
+            {
+              "key": "typecheck",
+              "label": "typecheck",
+              "status": "passed",
+              "summary": "Types generated successfully",
+              "command": "npm run typecheck"
+            },
+            {
+              "key": "specdown",
+              "label": "specdown",
+              "status": "passed",
+              "summary": "339 cases 통과",
+              "command": "npm run specdown"
+            }
+          ]
+        },
+        {
+          "turnId": "019d4cb2-195d-7b83-8e49-d59567a64a4d",
+          "endedAt": "2026-04-02T06:12:22.464Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "완료",
+          "headline": "MirrorMind 첫 대시보드 구현",
+          "summary": "로컬 세션 로그를 읽는 dev-only 대시보드, parser, route, 검증까지 한 번 닫았습니다.",
+          "verifications": [
+            {
+              "key": "specdown",
+              "label": "specdown",
+              "status": "passed",
+              "summary": "339 cases 통과",
+              "command": "npm run specdown"
+            },
+            {
+              "key": "typecheck",
+              "label": "typecheck",
+              "status": "passed",
+              "summary": "Types generated successfully",
+              "command": "npm run typecheck"
+            }
+          ]
+        },
+        {
+          "turnId": "019d4cae-ebcd-7721-a22e-fd1a121c1eaa",
+          "endedAt": "2026-04-02T05:34:08.709Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "완료",
+          "headline": "글로벌 진행상황 요약 정리",
+          "summary": "렌즈 dataset 전환, graph-as-report 승격, quality gate 잔여 작업을 표 기준으로 정리했습니다.",
+          "verifications": []
+        },
+        {
+          "turnId": "019d4c91-1848-70c2-9b46-e26ac3c38c1a",
+          "endedAt": "2026-04-02T05:02:35.623Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "완료",
+          "headline": "세션 이벤트 타임라인 복원",
+          "summary": "task_started, update_plan, exec_command_end, task_complete 흐름을 실제 세션 기준으로 정리했습니다.",
+          "verifications": []
+        }
+      ]
+    },
+    {
+      "sessionId": "019d4c7b-60b3-78b3-83a2-b7d4f5157c9c",
+      "cwd": "/Users/jaeyoungkang/corca/lighthouse",
+      "updatedAt": "2026-04-02T06:47:39.106Z",
+      "active": true,
+      "lastAssistantMessage": "정적 호스팅에서도 빠르게 보이게 하겠습니다.",
+      "progress": {
+        "globalPercent": 93,
+        "globalLabel": "후반 안정화",
+        "currentTurnPercent": 35,
+        "currentTurnLabel": "탐색 단계"
+      },
+      "milestones": [
+        {
+          "id": "datasets",
+          "title": "렌즈 dataset 저장",
+          "status": "completed",
+          "percent": 100,
+          "evidence": "이전 세션 분석 기준으로 데이터 전환 축은 사실상 완료입니다."
+        },
+        {
+          "id": "report",
+          "title": "graph-as-report 승격",
+          "status": "completed",
+          "percent": 100,
+          "evidence": "그래프 문서를 보고서형 문서로 보는 방향은 이미 굳어졌습니다."
+        },
+        {
+          "id": "runtime",
+          "title": "runtime lens-first 전환",
+          "status": "completed",
+          "percent": 100,
+          "evidence": "major runtime 전환은 완료된 상태로 복원되었습니다."
+        },
+        {
+          "id": "summary",
+          "title": "summary / report / context 정렬",
+          "status": "in_progress",
+          "percent": 55,
+          "evidence": "이번 턴은 GitHub Pages 정적 시각화로 전환하는 탐색 단계입니다."
+        },
+        {
+          "id": "quality",
+          "title": "최종 품질 게이트",
+          "status": "completed",
+          "percent": 100,
+          "evidence": "직전 MirrorMind 구현 턴에서는 lint, vitest, typecheck, specdown이 모두 통과했습니다."
+        }
+      ],
+      "currentTurn": {
+        "turnId": "019d4ce9-9083-75a2-9c46-b7ff8b3dbefb",
+        "startedAt": "2026-04-02T06:37:48.548Z",
+        "status": "running",
+        "progressPercent": 35,
+        "progressLabel": "탐색 단계",
+        "latestAssistantMessage": "GitHub Pages 쪽으로 단순한 progress 페이지를 만들기 위한 데이터 정규화 중입니다.",
+        "latestPlan": {
+          "steps": [
+            { "step": "시각화 범위 단순화", "status": "completed" },
+            { "step": "공개 Pages 저장소 연결", "status": "completed" },
+            { "step": "정적 progress 페이지 구성", "status": "in_progress" }
+          ]
+        },
+        "verifications": []
+      },
+      "recentTurns": [
+        {
+          "turnId": "019d4ce9-9083-75a2-9c46-b7ff8b3dbefb",
+          "startedAt": "2026-04-02T06:37:48.548Z",
+          "status": "running",
+          "percent": 35,
+          "label": "탐색 단계",
+          "headline": "Pages 시각화 턴",
+          "summary": "기존 앱 대신 공개 GitHub Pages 저장소에 간단한 progress 보드를 두는 쪽으로 방향을 바꿨습니다.",
+          "planSteps": [
+            { "step": "시각화 범위 단순화", "status": "completed" },
+            { "step": "공개 Pages 저장소 연결", "status": "completed" },
+            { "step": "정적 progress 페이지 구성", "status": "in_progress" }
+          ],
+          "verifications": []
+        },
+        {
+          "turnId": "019d4cb2-195d-7b83-8e49-d59567a64a4d",
+          "endedAt": "2026-04-02T06:12:22.464Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "완료",
+          "headline": "MirrorMind 앱 대시보드 구현",
+          "summary": "초기 버전은 Lighthouse 앱 내부 dev route로 만들었고, 이후 Pages 방향으로 선회했습니다.",
+          "verifications": [
+            {
+              "key": "vitest",
+              "label": "vitest",
+              "status": "passed",
+              "summary": "Test Files 1 passed (1)",
+              "command": "npx vitest run app/server/__tests__/mirror-mind.test.ts"
+            },
+            {
+              "key": "typecheck",
+              "label": "typecheck",
+              "status": "passed",
+              "summary": "Types generated successfully",
+              "command": "npm run typecheck"
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}
