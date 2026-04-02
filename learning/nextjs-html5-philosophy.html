@@ -1,0 +1,870 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Next.js와 HTML5 철학의 관계</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    html { -webkit-text-size-adjust: 100%; }
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Next.js와 HTML5 철학의 관계</h1>
+</header>
+<h1 id="next.js와-html5-철학의-관계">Next.js와 HTML5 철학의 관계</h1>
+<blockquote>
+<p>2026-04-02 세션115. HTML5 시맨틱
+교재(html5-semantic-elements-study.md) 부록 A에서 분리. 핵심 질문:
+Next.js는 React가 HTML5 철학과 만든 긴장을 얼마나, 어떻게 해소하는가.
+전제: HTML5 시맨틱 교재의 배경(3단계 변천사)과 6개 그룹을 이미 읽었다고
+가정한다.</p>
+<p><strong>학습 방법: 퀴즈를 먼저 풀고, 해설을 읽는다.</strong></p>
+</blockquote>
+<hr />
+<h2 id="배경-긴장은-어디서-왔는가">배경: 긴장은 어디서 왔는가</h2>
+<p>HTML5 교재에서 정리한 핵심 긴장을 다시 짚는다. 이것이 이 문서 전체의
+출발점이다.</p>
+<h3 id="html5의-3층-계약">HTML5의 3층 계약</h3>
+<pre><code>HTML (의미) → CSS (표현) → JS (동작)
+각 층이 실패해도 아래 층은 남는다</code></pre>
+<p>이것이 <strong>점진적 향상(Progressive Enhancement)</strong>이다.
+JS가 로드 안 되어도 콘텐츠는 읽힌다. CSS가 꺼져도 문서 구조는 남는다.
+웹의 복원력(resilience)은 이 계약에서 나온다.</p>
+<h3 id="react-spa가-깬-것">React SPA가 깬 것</h3>
+<pre><code>React SPA:  JS → HTML → CSS
+JS가 실패하면 빈 페이지</code></pre>
+<p>React가 HTML5 철학과 만든 3가지 긴장:</p>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 40%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr>
+<th>#</th>
+<th>긴장</th>
+<th>본질</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>점진적 향상 위반</td>
+<td>JS가 HTML을 생성 — 3층 계약이 뒤집힘</td>
+</tr>
+<tr>
+<td>2</td>
+<td>div soup 문화</td>
+<td>컴포넌트 추상화가 시맨틱을 가림</td>
+</tr>
+<tr>
+<td>3</td>
+<td>브라우저 기본 동작 재구현</td>
+<td><code>&lt;dialog&gt;</code> 대신 Modal 컴포넌트,
+<code>&lt;a&gt;</code> 대신 onClick</td>
+</tr>
+</tbody>
+</table>
+<p><strong>이 3가지 긴장을 기준으로 Next.js를 평가하는 것이 이 문서의
+목적이다.</strong></p>
+<hr />
+<h2 id="퀴즈-next.js와-html5-철학">퀴즈: Next.js와 HTML5 철학</h2>
+<details>
+<summary>
+<strong>Q1. 아래 두 코드 중 어느 것이 HTML5 점진적 향상에 더
+가까운가?</strong>
+</summary>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// A: React SPA (Create React App)</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">// index.html</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;body&gt;</span></span>
+<span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;div</span> <span class="ot">id</span><span class="op">=</span><span class="st">&quot;root&quot;</span><span class="kw">&gt;&lt;/div&gt;</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;script</span> <span class="ot">src</span><span class="op">=</span><span class="st">&quot;bundle.js&quot;</span><span class="kw">&gt;&lt;/script&gt;</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/body&gt;</span></span>
+<span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="co">// B: Next.js App Router</span></span>
+<span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a><span class="co">// app/page.tsx (Server Component)</span></span>
+<span id="cb3-10"><a href="#cb3-10" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="im">default</span> <span class="kw">function</span> <span class="fu">Page</span>() {</span>
+<span id="cb3-11"><a href="#cb3-11" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;article&gt;</span></span>
+<span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;h1&gt;</span>연구 노트<span class="kw">&lt;/h1&gt;</span></span>
+<span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;p&gt;</span>이 문서는 서버에서 HTML로 렌더링된다.<span class="kw">&lt;/p&gt;</span></span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/article&gt;</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p><strong>정답: B.</strong></p>
+<p>A는 JS가 로드되기 전까지 빈 <code>&lt;div&gt;</code>만 존재한다. 검색
+엔진, 스크린리더, 느린 네트워크 사용자가 보는 것은 빈 페이지다.</p>
+<p>B는 서버에서 완성된 HTML이 만들어져서 내려온다. JS가 로드되기 전에도
+<code>&lt;article&gt;</code>, <code>&lt;h1&gt;</code>,
+<code>&lt;p&gt;</code>가 브라우저에 존재한다. HTML5의 3층 계약이
+복원된다.</p>
+</details>
+<details>
+<summary>
+<strong>Q2. Next.js의 Server Component는 왜 HTML5 철학에
+가까운가?</strong>
+</summary>
+<p>Server Component는 <strong>서버에서 실행되고, 클라이언트에 JS를
+보내지 않는다.</strong> 출력은 순수한 HTML이다.</p>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Server Component (기본값)</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="co">// 이 컴포넌트의 JS는 클라이언트 번들에 포함되지 않는다</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="im">default</span> <span class="kw">async</span> <span class="kw">function</span> <span class="fu">ResearchList</span>() {</span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> papers <span class="op">=</span> <span class="cf">await</span> db<span class="op">.</span><span class="at">papers</span><span class="op">.</span><span class="fu">findMany</span>()</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;section&gt;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;h2&gt;</span>최근 논문<span class="kw">&lt;/h2&gt;</span></span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;ul&gt;</span></span>
+<span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a>        <span class="va">{</span>papers<span class="op">.</span><span class="fu">map</span>(p <span class="kw">=&gt; &lt;li</span> <span class="ot">key</span><span class="op">=</span><span class="va">{</span>p<span class="op">.</span><span class="at">id</span><span class="va">}</span><span class="kw">&gt;&lt;a</span> <span class="ot">href</span><span class="op">=</span><span class="va">{</span><span class="vs">`/paper/</span><span class="sc">${</span>p<span class="op">.</span><span class="at">id</span><span class="sc">}</span><span class="vs">`</span><span class="va">}</span><span class="kw">&gt;</span><span class="va">{</span>p<span class="op">.</span><span class="at">title</span><span class="va">}</span><span class="kw">&lt;/a&gt;&lt;/li&gt;</span>)<span class="va">}</span></span>
+<span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;/ul&gt;</span></span>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/section&gt;</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>이 코드는 서버에서 실행된 후 클라이언트에는
+<code>&lt;section&gt;</code>, <code>&lt;h2&gt;</code>,
+<code>&lt;ul&gt;</code>, <code>&lt;li&gt;</code>, <code>&lt;a&gt;</code>
+— 순수한 HTML만 도착한다. React SPA에서는 이 모든 것이 JS 번들 안에
+있었다.</p>
+<p><strong>핵심:</strong> Server Component = HTML-first. JS가 필요한
+곳(이벤트 핸들러, 상태)만 Client Component로 분리한다.</p>
+</details>
+<details>
+<summary>
+<strong>Q3. Next.js <code>&lt;Link&gt;</code>는
+<code>&lt;a&gt;</code>인가 아닌가?</strong>
+</summary>
+<p><strong><code>&lt;a&gt;</code>이다.</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="im">import</span> Link <span class="im">from</span> <span class="st">&#39;next/link&#39;</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-3"><a href="#cb5-3" aria-hidden="true" tabindex="-1"></a><span class="co">// 이것은:</span></span>
+<span id="cb5-4"><a href="#cb5-4" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;Link</span> <span class="ot">href</span><span class="op">=</span><span class="st">&quot;/about&quot;</span><span class="fu">&gt;</span>소개<span class="fu">&lt;/Link&gt;</span></span>
+<span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a><span class="co">// 이렇게 렌더링된다:</span></span>
+<span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;a</span> <span class="ot">href</span><span class="op">=</span><span class="st">&quot;/about&quot;</span><span class="kw">&gt;</span>소개<span class="kw">&lt;/a&gt;</span></span></code></pre></div>
+<p>Next.js의 <code>&lt;Link&gt;</code>는 내부적으로
+<code>&lt;a&gt;</code> 태그를 렌더링한다. 시맨틱이 유지된다.
+스크린리더가 “링크”로 인식하고, 우클릭으로 새 탭에서 열 수 있고, 검색
+엔진이 크롤링할 수 있다.</p>
+<p>React Router의 <code>&lt;Link&gt;</code>도 <code>&lt;a&gt;</code>를
+렌더링하지만, React SPA에서는 그 <code>&lt;a&gt;</code>가 JS 번들 안에
+갇혀 있다. Next.js에서는 서버 렌더링된 HTML에 <code>&lt;a&gt;</code>가
+직접 존재한다.</p>
+</details>
+<details>
+<summary>
+<strong>Q4. hydration 전에 버튼을 클릭하면 어떻게 되는가?</strong>
+</summary>
+<p><strong>보이는데 안 눌린다.</strong></p>
+<pre><code>서버 HTML 도착 (0ms)     → 콘텐츠가 보인다
+                          → 링크(&lt;a&gt;)는 작동한다 (브라우저 기본 동작)
+                          → 버튼(&lt;button onClick&gt;)은 보이지만 반응 없음
+JS 번들 로드 (200ms~)    → hydration 시작
+hydration 완료 (300ms~)  → 버튼 클릭이 작동한다</code></pre>
+<p>이 “보이는데 안 눌리는” 구간이 Next.js에서도 <strong>남아 있는
+긴장</strong>이다. HTML5 점진적 향상의 이상 — “JS 없이도 기본 동작이
+돌아간다” — 과 충돌한다.</p>
+<p><strong>해소 전략:</strong> - <code>&lt;a href&gt;</code>로 충분한
+것은 <code>&lt;Link&gt;</code>를 쓴다 → hydration 불필요 -
+<code>&lt;form action&gt;</code>을 Server Action에 연결한다 → JS 없이도
+폼이 제출된다 - 진짜 JS가 필요한 인터랙션만 Client Component로
+격리한다</p>
+</details>
+<details>
+<summary>
+<strong>Q5. 다음 중 Next.js가 해소하지 못하는 긴장은?</strong>
+</summary>
+<pre><code>A. JS 로드 전 빈 페이지
+B. div soup 문화
+C. 브라우저 기본 동작 재구현 (일부)</code></pre>
+<p><strong>정답: B와 C (일부).</strong></p>
+<ul>
+<li>A는 SSR/SSG/Server Components로 해소됨</li>
+<li>B는 해소되지 않음 — 개발자가 <code>&lt;div&gt;</code>를 쓰면
+<code>&lt;div&gt;</code>가 나온다. Next.js는 시맨틱을 강제하지
+않는다</li>
+<li>C는 부분 해소 — <code>&lt;Link&gt;</code>→<code>&lt;a&gt;</code>,
+<code>&lt;Image&gt;</code>→<code>&lt;img&gt;</code>, Server
+Actions→<code>&lt;form&gt;</code> 등 일부는 해소. 하지만 UI 라이브러리의
+커스텀 모달, 데이트피커 등은 여전히 브라우저 기본 동작을 JS로
+대체한다</li>
+</ul>
+</details>
+<hr />
+<h2 id="긴장별-상세-분석">긴장별 상세 분석</h2>
+<h3 id="긴장-1-점진적-향상-상당히-해소">긴장 1: 점진적 향상 — 상당히
+해소</h3>
+<p>React SPA의 가장 큰 문제는 3층 계약의 역전이었다. Next.js는 이것을
+여러 메커니즘으로 복원한다.</p>
+<h4 id="ssr-server-side-rendering">SSR (Server-Side Rendering)</h4>
+<pre><code>요청 → 서버에서 React 실행 → 완성된 HTML 응답 → 브라우저에 HTML 표시 → JS 로드 → hydration</code></pre>
+<p>JS가 로드되기 전에 HTML이 존재한다. 3층 계약이 복원된다.</p>
+<h4 id="ssg-static-site-generation">SSG (Static Site Generation)</h4>
+<pre><code>빌드 시 → React 실행 → HTML 파일 생성 → CDN 배포 → 브라우저에 HTML 표시 → JS 로드 → hydration</code></pre>
+<p>서버 비용이 없다. HTML 파일이 CDN에 있으므로 가장 빠르고, 가장
+복원력이 높다.</p>
+<h4 id="server-components-react-19-next.js-app-router">Server Components
+(React 19 + Next.js App Router)</h4>
+<pre><code>요청 → 서버에서 Server Component 실행 → HTML 스트리밍 → 
+       Client Component만 JS 번들에 포함 → 부분 hydration</code></pre>
+<p>이것이 가장 HTML5 철학에 가까운 형태다:</p>
+<table>
+<thead>
+<tr>
+<th>특성</th>
+<th>정적 HTML</th>
+<th>Server Component</th>
+<th>Client Component</th>
+<th>React SPA</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>HTML 선행</td>
+<td>O</td>
+<td>O</td>
+<td>O (SSR)</td>
+<td>X</td>
+</tr>
+<tr>
+<td>JS 번들 포함</td>
+<td>X</td>
+<td><strong>X</strong></td>
+<td>O</td>
+<td>O</td>
+</tr>
+<tr>
+<td>서버 자원 접근</td>
+<td>X</td>
+<td><strong>O</strong></td>
+<td>X</td>
+<td>X</td>
+</tr>
+<tr>
+<td>이벤트 핸들러</td>
+<td>X</td>
+<td>X</td>
+<td>O</td>
+<td>O</td>
+</tr>
+</tbody>
+</table>
+<p>Server Component는 <strong>서버에서 실행되고 HTML만 내보내는
+컴포넌트</strong>다. <code>async/await</code>로 DB를 직접 읽고, 결과를
+HTML로 스트리밍한다. 클라이언트에 JS를 안 보내므로 번들 크기가 줄고,
+hydration이 필요 없다.</p>
+<p><strong>핵심 통찰:</strong> Server Component는 “React로 작성하지만
+출력은 정적 HTML”이라는 점에서, HTML5 철학의 현대적 구현이다.</p>
+<h4 id="streaming">Streaming</h4>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode html"><code class="sourceCode html"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- 전통 SSR: 전체 페이지가 준비될 때까지 기다림 --&gt;</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a><span class="co">&lt;!-- Streaming: 준비된 부분부터 보냄 --&gt;</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;</span><span class="kw">html</span><span class="dt">&gt;</span></span>
+<span id="cb11-5"><a href="#cb11-5" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb11-6"><a href="#cb11-6" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">header</span><span class="dt">&gt;</span>사이트 헤더<span class="dt">&lt;/</span><span class="kw">header</span><span class="dt">&gt;</span>           <span class="co">&lt;!-- 즉시 도착 --&gt;</span></span>
+<span id="cb11-7"><a href="#cb11-7" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;</span><span class="kw">main</span><span class="dt">&gt;</span></span>
+<span id="cb11-8"><a href="#cb11-8" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">h1</span><span class="dt">&gt;</span>논문 목록<span class="dt">&lt;/</span><span class="kw">h1</span><span class="dt">&gt;</span>                   <span class="co">&lt;!-- 즉시 도착 --&gt;</span></span>
+<span id="cb11-9"><a href="#cb11-9" aria-hidden="true" tabindex="-1"></a>      <span class="co">&lt;!--$--&gt;</span>                             <span class="co">&lt;!-- Suspense 경계 --&gt;</span></span>
+<span id="cb11-10"><a href="#cb11-10" aria-hidden="true" tabindex="-1"></a>      <span class="dt">&lt;</span><span class="kw">template</span><span class="ot"> id</span><span class="op">=</span><span class="st">&quot;loading&quot;</span><span class="dt">&gt;</span>로딩 중...<span class="dt">&lt;/</span><span class="kw">template</span><span class="dt">&gt;</span>  <span class="co">&lt;!-- 즉시 도착 --&gt;</span></span>
+<span id="cb11-11"><a href="#cb11-11" aria-hidden="true" tabindex="-1"></a>      <span class="co">&lt;!--/$--&gt;</span></span>
+<span id="cb11-12"><a href="#cb11-12" aria-hidden="true" tabindex="-1"></a>      <span class="co">&lt;!-- DB 쿼리 완료 후 실제 콘텐츠가 스트리밍으로 교체 --&gt;</span></span>
+<span id="cb11-13"><a href="#cb11-13" aria-hidden="true" tabindex="-1"></a>    <span class="dt">&lt;/</span><span class="kw">main</span><span class="dt">&gt;</span></span>
+<span id="cb11-14"><a href="#cb11-14" aria-hidden="true" tabindex="-1"></a>  <span class="dt">&lt;/</span><span class="kw">body</span><span class="dt">&gt;</span></span>
+<span id="cb11-15"><a href="#cb11-15" aria-hidden="true" tabindex="-1"></a><span class="dt">&lt;/</span><span class="kw">html</span><span class="dt">&gt;</span></span></code></pre></div>
+<p>Streaming은 <strong>HTML을 점진적으로 보낸다.</strong> 느린 데이터
+소스가 있어도 나머지 페이지는 먼저 도착한다. 이것은 HTML5의 복원력 원칙
+— “가능한 한 복구해서 보여준다” — 과 같은 정신이다.</p>
+<h4 id="server-actions-form의-복권">Server Actions —
+<code>&lt;form&gt;</code>의 복권</h4>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Server Action</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a><span class="kw">async</span> <span class="kw">function</span> <span class="fu">submitPaper</span>(formData<span class="op">:</span> <span class="bu">FormData</span>) {</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>  <span class="st">&#39;use server&#39;</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">const</span> title <span class="op">=</span> formData<span class="op">.</span><span class="fu">get</span>(<span class="st">&#39;title&#39;</span>)</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  <span class="cf">await</span> db<span class="op">.</span><span class="at">papers</span><span class="op">.</span><span class="fu">create</span>({ <span class="dt">data</span><span class="op">:</span> { title } })</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a><span class="co">// Server Component</span></span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a><span class="im">export</span> <span class="im">default</span> <span class="kw">function</span> <span class="fu">NewPaper</span>() {</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>  <span class="cf">return</span> (</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;form</span> <span class="ot">action</span><span class="op">=</span><span class="va">{</span>submitPaper<span class="va">}</span><span class="kw">&gt;</span></span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;label</span> <span class="ot">htmlFor</span><span class="op">=</span><span class="st">&quot;title&quot;</span><span class="kw">&gt;</span>논문 제목<span class="kw">&lt;/label&gt;</span></span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;input</span> <span class="ot">id</span><span class="op">=</span><span class="st">&quot;title&quot;</span> <span class="ot">name</span><span class="op">=</span><span class="st">&quot;title&quot;</span> <span class="ot">type</span><span class="op">=</span><span class="st">&quot;text&quot;</span> <span class="ot">required</span> <span class="kw">/&gt;</span></span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>      <span class="kw">&lt;button</span> <span class="ot">type</span><span class="op">=</span><span class="st">&quot;submit&quot;</span><span class="kw">&gt;</span>등록<span class="kw">&lt;/button&gt;</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/form&gt;</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<p>이 폼은 <strong>JS 없이도 작동한다.</strong>
+<code>&lt;form action&gt;</code>은 브라우저의 기본 동작이다. Server
+Action은 이 기본 동작을 서버 함수에 연결한다.</p>
+<p>React SPA에서는:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 전형적 React SPA 패턴 — HTML5 철학 위반</span></span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;form</span> <span class="ot">onSubmit</span><span class="op">=</span><span class="va">{</span>(e) <span class="kw">=&gt;</span> {</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>  e<span class="op">.</span><span class="fu">preventDefault</span>()  <span class="co">// 브라우저 기본 동작을 막는다!</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">fetch</span>(<span class="st">&#39;/api/papers&#39;</span><span class="op">,</span> { <span class="dt">method</span><span class="op">:</span> <span class="st">&#39;POST&#39;</span><span class="op">,</span> <span class="dt">body</span><span class="op">:</span> <span class="bu">JSON</span><span class="op">.</span><span class="fu">stringify</span>(data) })</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>}<span class="va">}</span><span class="kw">&gt;</span></span></code></pre></div>
+<p><code>e.preventDefault()</code>는 <strong>브라우저가 공짜로 주는 폼
+제출을 JS로 가로채는 것</strong>이다. Server Action은 이 가로채기 없이
+작동한다.</p>
+<h3 id="긴장-2-div-soup-해소되지-않음">긴장 2: div soup — 해소되지
+않음</h3>
+<p>Next.js는 시맨틱을 <strong>가능하게 하지만 강제하지
+않는다.</strong></p>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Next.js에서도 이렇게 쓸 수 있다 (그리고 많이 쓴다)</span></span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;div</span> <span class="ot">className</span><span class="op">=</span><span class="st">&quot;header&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;div</span> <span class="ot">className</span><span class="op">=</span><span class="st">&quot;nav&quot;</span><span class="kw">&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;div</span> <span class="ot">className</span><span class="op">=</span><span class="st">&quot;item&quot;</span> <span class="ot">onClick</span><span class="op">=</span><span class="va">{</span>() <span class="kw">=&gt;</span> router<span class="op">.</span><span class="fu">push</span>(<span class="st">&#39;/&#39;</span>)<span class="va">}</span><span class="kw">&gt;</span>홈<span class="kw">&lt;/div&gt;</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/div&gt;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/div&gt;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a><span class="co">// HTML5 철학에 맞는 코드 (Next.js에서도 똑같이 쓸 수 있다)</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;header&gt;</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;nav&gt;</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;ul&gt;&lt;li&gt;</span><span class="fu">&lt;Link</span> <span class="ot">href</span><span class="op">=</span><span class="st">&quot;/&quot;</span><span class="fu">&gt;</span>홈<span class="fu">&lt;/Link&gt;</span><span class="kw">&lt;/li&gt;&lt;/ul&gt;</span></span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a>  <span class="kw">&lt;/nav&gt;</span></span>
+<span id="cb14-13"><a href="#cb14-13" aria-hidden="true" tabindex="-1"></a><span class="kw">&lt;/header&gt;</span></span></code></pre></div>
+<p><strong>왜 해소되지 않는가:</strong></p>
+<ol type="1">
+<li><p><strong>컴포넌트 추상화가 시맨틱을 가린다.</strong>
+<code>&lt;Card /&gt;</code>가 <code>&lt;div&gt;</code>인지
+<code>&lt;article&gt;</code>인지 사용하는 쪽에서 모른다. UI
+라이브러리(shadcn, Radix, MUI)의 내부 구현에 의존한다.</p></li>
+<li><p><strong>Tailwind CSS 문화의 영향.</strong> Tailwind는 className에
+스타일을 넣는다. 이것 자체는 문제가 아니지만, 요소 선택을 의식하지 않고
+<code>&lt;div className="flex gap-4"&gt;</code>를 기계적으로 쓰는 습관을
+강화한다.</p></li>
+<li><p><strong>Next.js의 자체 컴포넌트도 div를 래핑한다.</strong>
+<code>&lt;Link&gt;</code>와 <code>&lt;Image&gt;</code>는 시맨틱을
+유지하지만, 레이아웃 관련 컴포넌트(<code>layout.tsx</code>의 구조)는
+개발자 판단에 맡긴다.</p></li>
+</ol>
+<p><strong>대응:</strong> 이건 프레임워크가 풀 문제가 아니라
+<strong>개발자의 판단 기준</strong> 문제다. HTML5 시맨틱 교재에서 배운
+“이 요소가 무엇인가를 말하는가” 질문을 Next.js에서도 동일하게 적용해야
+한다.</p>
+<h4 id="실용-지침-next.js에서-시맨틱-유지하기">실용 지침: Next.js에서
+시맨틱 유지하기</h4>
+<table>
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 51%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr>
+<th>상황</th>
+<th>div로 쓰기 쉬운 곳</th>
+<th>시맨틱 대안</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>페이지 상단 영역</td>
+<td><code>&lt;div className="header"&gt;</code></td>
+<td><code>&lt;header&gt;</code></td>
+</tr>
+<tr>
+<td>네비게이션</td>
+<td><code>&lt;div className="nav"&gt;</code></td>
+<td><code>&lt;nav&gt;</code></td>
+</tr>
+<tr>
+<td>글 본문</td>
+<td><code>&lt;div className="post"&gt;</code></td>
+<td><code>&lt;article&gt;</code></td>
+</tr>
+<tr>
+<td>글 섹션</td>
+<td><code>&lt;div className="section"&gt;</code></td>
+<td><code>&lt;section&gt;</code> (제목 필수)</td>
+</tr>
+<tr>
+<td>보조 정보</td>
+<td><code>&lt;div className="sidebar"&gt;</code></td>
+<td><code>&lt;aside&gt;</code></td>
+</tr>
+<tr>
+<td>페이지 하단</td>
+<td><code>&lt;div className="footer"&gt;</code></td>
+<td><code>&lt;footer&gt;</code></td>
+</tr>
+<tr>
+<td>검색 영역</td>
+<td><code>&lt;div className="search"&gt;</code></td>
+<td><code>&lt;search&gt;</code></td>
+</tr>
+<tr>
+<td>순수 레이아웃</td>
+<td><code>&lt;div className="flex"&gt;</code></td>
+<td><code>&lt;div&gt;</code> (의미 없는 레이아웃은 div가 맞다)</td>
+</tr>
+</tbody>
+</table>
+<p>마지막 행이 중요하다. <strong>모든 div가 나쁜 것이 아니다.</strong>
+의미가 없는 순수 레이아웃 래퍼는 <code>&lt;div&gt;</code>가 정답이다.
+“이것이 무엇인가를 말할 수 있는데 div로 쓴 경우”만 문제다.</p>
+<h3 id="긴장-3-브라우저-기본-동작-재구현-부분-해소">긴장 3: 브라우저
+기본 동작 재구현 — 부분 해소</h3>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 23%" />
+<col style="width: 19%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr>
+<th>브라우저 기본 동작</th>
+<th>React SPA</th>
+<th>Next.js</th>
+<th>해소 정도</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>&lt;a href&gt;</code> 네비게이션</td>
+<td>React Router (JS 의존)</td>
+<td><code>&lt;Link&gt;</code> → <code>&lt;a&gt;</code> 렌더링 +
+프리패치</td>
+<td><strong>해소</strong></td>
+</tr>
+<tr>
+<td><code>&lt;img&gt;</code> 이미지</td>
+<td><code>&lt;img&gt;</code> (최적화 없음)</td>
+<td><code>&lt;Image&gt;</code> → <code>&lt;img&gt;</code> + srcset 자동
+생성 + 최적화 래퍼</td>
+<td><strong>해소</strong></td>
+</tr>
+<tr>
+<td><code>&lt;form&gt;</code> 제출</td>
+<td><code>e.preventDefault()</code> + fetch</td>
+<td>Server Actions → <code>&lt;form action&gt;</code></td>
+<td><strong>해소</strong></td>
+</tr>
+<tr>
+<td><code>&lt;meta&gt;</code> 메타데이터</td>
+<td>react-helmet (JS 주입)</td>
+<td><code>metadata</code> export (서버 렌더링)</td>
+<td><strong>해소</strong></td>
+</tr>
+<tr>
+<td><code>&lt;details/summary&gt;</code> 접기</td>
+<td>Accordion 라이브러리</td>
+<td>여전히 라이브러리 의존</td>
+<td><strong>미해소</strong></td>
+</tr>
+<tr>
+<td><code>&lt;dialog&gt;</code> 모달</td>
+<td>Modal 라이브러리</td>
+<td>여전히 라이브러리 의존</td>
+<td><strong>미해소</strong></td>
+</tr>
+<tr>
+<td><code>&lt;input type="date"&gt;</code></td>
+<td>DatePicker 라이브러리</td>
+<td>여전히 라이브러리 의존</td>
+<td><strong>미해소</strong></td>
+</tr>
+</tbody>
+</table>
+<p><strong>패턴:</strong> Next.js가 해소한 것은 <strong>프레임워크
+수준의 기능</strong>(라우팅, 이미지, 폼, 메타데이터)이다. 해소하지 못한
+것은 <strong>UI 컴포넌트 수준의 선택</strong>(모달, 아코디언, 날짜
+선택기)이다. 후자는 개발자가 브라우저 네이티브 요소를 쓸지, 라이브러리를
+쓸지 직접 판단해야 한다.</p>
+<hr />
+<h2 id="스펙트럼-정밀-버전">스펙트럼: 정밀 버전</h2>
+<p>HTML5 시맨틱 교재의 스펙트럼을 더 세밀하게 확장한다.</p>
+<pre><code>HTML5 철학에 가까움 ←──────────────────────────────────→ 멀어짐
+
+정적     Next.js      Next.js      Next.js       React SPA
+HTML     Server       SSR +        Client        (CSR only)
+(순수)   Components   Server       Components    
+         + SSG        Actions      + Hydration   </code></pre>
+<p>각 단계의 특성:</p>
+<table>
+<thead>
+<tr>
+<th>단계</th>
+<th>HTML 선행</th>
+<th>JS 번들</th>
+<th>서버 자원</th>
+<th>인터랙션</th>
+<th>HTML5 철학</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>정적 HTML</td>
+<td>O</td>
+<td>없음</td>
+<td>X</td>
+<td>X</td>
+<td>완전 준수</td>
+</tr>
+<tr>
+<td>SC + SSG</td>
+<td>O</td>
+<td><strong>없음</strong></td>
+<td>O (빌드 시)</td>
+<td>X</td>
+<td>거의 준수</td>
+</tr>
+<tr>
+<td>SSR + SA</td>
+<td>O</td>
+<td>최소</td>
+<td>O (요청 시)</td>
+<td>폼 제출 가능</td>
+<td>상당히 준수</td>
+</tr>
+<tr>
+<td>CC + Hydration</td>
+<td>O</td>
+<td>있음</td>
+<td>X</td>
+<td>O</td>
+<td>부분 준수</td>
+</tr>
+<tr>
+<td>React SPA</td>
+<td>X</td>
+<td>전부</td>
+<td>X</td>
+<td>O</td>
+<td>위반</td>
+</tr>
+</tbody>
+</table>
+<p><strong>핵심 통찰:</strong> Next.js App Router에서 <strong>기본값이
+Server Component</strong>라는 점이 중요하다. 개발자가 의식적으로
+<code>'use client'</code>를 선언해야 Client Component가 된다. 즉,
+<strong>기본 경로가 HTML5 철학에 가까운 쪽</strong>이다. React SPA에서는
+기본 경로가 반대쪽이었다.</p>
+<hr />
+<h2 id="next.js에서도-남는-근본-긴장">Next.js에서도 남는 근본 긴장</h2>
+<p>Next.js가 많은 것을 해소했지만, 웹 프레임워크가 본질적으로 풀 수 없는
+긴장이 있다.</p>
+<h3 id="hydration의-불쾌한-골짜기">1. hydration의 불쾌한 골짜기</h3>
+<pre><code>[HTML 도착] ──── &quot;보이는데 안 눌리는&quot; 구간 ──── [hydration 완료]
+             이 구간에서 사용자는 혼란을 느낀다</code></pre>
+<p>Server Component로 이 구간을 최소화할 수 있지만, Client Component가
+있는 한 완전히 제거할 수 없다. 이것은 “서버에서 HTML을 보내되,
+클라이언트에서 JS로 인터랙션을 붙인다”는 하이브리드 모델의 구조적
+한계다.</p>
+<h3 id="추상화가-시맨틱을-가리는-문제">2. 추상화가 시맨틱을 가리는
+문제</h3>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="co">// 이 코드를 읽는 사람은 최종 HTML을 모른다</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;Card&gt;</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">&lt;CardHeader&gt;</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    <span class="fu">&lt;CardTitle&gt;</span>연구 노트<span class="fu">&lt;/CardTitle&gt;</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">&lt;/CardHeader&gt;</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">&lt;CardContent&gt;</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;p&gt;</span>내용<span class="kw">&lt;/p&gt;</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">&lt;/CardContent&gt;</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a><span class="fu">&lt;/Card&gt;</span></span></code></pre></div>
+<p><code>&lt;Card&gt;</code>가 <code>&lt;article&gt;</code>인지
+<code>&lt;div&gt;</code>인지는 라이브러리 내부 구현에 달려 있다. 이건
+React의 컴포넌트 모델이 HTML 시맨틱과 만드는 구조적 긴장이다. Next.js가
+풀 수 있는 문제가 아니다.</p>
+<h3 id="생태계-관성">3. 생태계 관성</h3>
+<p>Next.js가 시맨틱을 가능하게 해도, npm 생태계의 대부분의 UI
+라이브러리는 여전히 div 기반이다. 개발자가 라이브러리를 선택할 때 시맨틱
+품질을 기준으로 삼는 문화가 형성되지 않으면, 프레임워크 수준의 개선은
+한계가 있다.</p>
+<hr />
+<h2 id="실용-판단-기준-next.js-프로젝트에서-html5-철학-적용">실용 판단
+기준: Next.js 프로젝트에서 HTML5 철학 적용</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr>
+<th>판단</th>
+<th>질문</th>
+<th>행동</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Server vs Client</td>
+<td>이 컴포넌트에 이벤트 핸들러나 상태가 필요한가?</td>
+<td>아니면 Server Component (기본값)</td>
+</tr>
+<tr>
+<td>시맨틱 요소</td>
+<td>이 <code>&lt;div&gt;</code>가 무엇인가를 말할 수 있는가?</td>
+<td>그렇다면 적절한 시맨틱 요소로 교체</td>
+</tr>
+<tr>
+<td>네비게이션</td>
+<td><code>router.push()</code>를 쓰고 있는가?</td>
+<td><code>&lt;Link href&gt;</code>로 교체 — JS 없이도 작동</td>
+</tr>
+<tr>
+<td>폼</td>
+<td><code>e.preventDefault()</code>를 쓰고 있는가?</td>
+<td>Server Action + <code>&lt;form action&gt;</code>으로 교체</td>
+</tr>
+<tr>
+<td>인터랙션</td>
+<td>브라우저 네이티브로 가능한가?</td>
+<td><code>&lt;details&gt;</code>, <code>&lt;dialog&gt;</code> 먼저
+고려</td>
+</tr>
+<tr>
+<td>CSS 끄기 테스트</td>
+<td>CSS를 끄면 구조가 읽히는가?</td>
+<td>Next.js에서도 동일하게 적용</td>
+</tr>
+</tbody>
+</table>
+<hr />
+<h2 id="결론">결론</h2>
+<p>Next.js는 React가 HTML5 철학과 만든 3가지 긴장 중 <strong>가장 큰
+것(점진적 향상 위반)을 구조적으로 해소</strong>했다. Server Components는
+“React로 작성하되 출력은 HTML-first”라는 새로운 균형점을 만들었다.</p>
+<p>하지만 <strong>시맨틱은 프레임워크가 대신해주지 않는다.</strong>
+div를 쓰면 div가 나오고, <code>&lt;article&gt;</code>을 쓰면
+<code>&lt;article&gt;</code>이 나온다. HTML5 시맨틱 교재에서 배운 판단
+기준 — “이것이 무엇인가를 말하는가” — 은 Next.js에서도, 어떤
+프레임워크에서도, 동일하게 적용되어야 한다.</p>
+<pre><code>Next.js가 해결한 것:  HTML이 먼저 도착하는가 (구조)
+개발자가 해결할 것:   그 HTML이 의미를 담고 있는가 (판단)</code></pre>
+</body>
+</html>
