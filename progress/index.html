@@ -5,504 +5,385 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>MirrorMind Progress Board</title>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=Space+Grotesk:wght@400;500;700&display=swap");
-
-      :root {
-        --bg: #f5f0e8;
-        --panel: rgba(255, 252, 246, 0.88);
-        --ink: #161412;
-        --muted: #6f695f;
-        --line: rgba(22, 20, 18, 0.1);
-        --emerald: #0f766e;
-        --emerald-soft: rgba(15, 118, 110, 0.12);
-        --amber: #b45309;
-        --amber-soft: rgba(180, 83, 9, 0.12);
-        --rose: #be123c;
-        --rose-soft: rgba(190, 18, 60, 0.12);
+      html {
+        -webkit-text-size-adjust: 100%;
       }
 
-      * { box-sizing: border-box; }
       body {
-        margin: 0;
-        min-height: 100vh;
-        color: var(--ink);
-        font-family: "Space Grotesk", sans-serif;
-        background:
-          radial-gradient(circle at top left, rgba(15, 118, 110, 0.12), transparent 28%),
-          radial-gradient(circle at top right, rgba(180, 83, 9, 0.12), transparent 24%),
-          linear-gradient(180deg, #f7f3ec 0%, var(--bg) 100%);
-      }
-
-      .shell {
-        max-width: 1200px;
-        margin: 0 auto;
-        padding: 44px 18px 80px;
-      }
-
-      .eyebrow, .mono {
-        font-family: "IBM Plex Mono", monospace;
-      }
-
-      .eyebrow {
-        color: var(--emerald);
-        text-transform: uppercase;
-        font-size: 12px;
-        letter-spacing: 0.16em;
-        margin-bottom: 10px;
+        max-width: 920px;
+        margin: 2rem auto 4rem;
+        padding: 0 1.5rem;
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        line-height: 1.7;
+        color: #1a1a1a;
+        font-size: 16px;
+        background: #ffffff;
       }
 
       h1 {
+        font-size: 1.85rem;
+        border-bottom: 2px solid #333;
+        padding-bottom: 0.35em;
+        margin-bottom: 0.6rem;
+      }
+
+      h2 {
+        font-size: 1.35rem;
+        margin-top: 2.5rem;
+        border-bottom: 1px solid #ddd;
+        padding-bottom: 0.2em;
+      }
+
+      h3 {
+        font-size: 1.1rem;
+        margin-top: 1.5rem;
+        margin-bottom: 0.4rem;
+      }
+
+      p,
+      li,
+      dd,
+      td,
+      th,
+      button {
+        font-size: 0.98rem;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      code,
+      .mono {
+        font-family: "SF Mono", Menlo, Consolas, monospace;
+        font-size: 0.9em;
+      }
+
+      blockquote {
+        border-left: 3px solid #666;
+        margin: 1rem 0;
+        padding: 0.5rem 1rem;
+        background: #f9f9f9;
+      }
+
+      nav ul,
+      .plain-list {
+        list-style: none;
+        padding: 0;
         margin: 0;
-        font-size: clamp(34px, 5vw, 60px);
-        line-height: 0.96;
-        letter-spacing: -0.05em;
       }
 
-      .lead {
-        margin: 14px 0 0;
-        max-width: 760px;
-        color: var(--muted);
-        line-height: 1.75;
-        font-size: 15px;
-      }
-
-      .topbar {
+      nav ul {
         display: flex;
         flex-wrap: wrap;
-        justify-content: space-between;
-        gap: 16px;
-        align-items: flex-start;
-        margin-bottom: 26px;
-      }
-
-      .refresh {
-        border: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.76);
-        border-radius: 999px;
-        padding: 12px 16px;
-        font: inherit;
-        cursor: pointer;
-      }
-
-      .status-note {
-        margin-top: 10px;
-        color: var(--muted);
-        font-size: 12px;
-        text-align: right;
-      }
-
-      .board {
-        display: grid;
-        grid-template-columns: minmax(0, 1.5fr) minmax(280px, 0.9fr);
-        gap: 18px;
-      }
-
-      .panel {
-        background: var(--panel);
-        border: 1px solid rgba(22, 20, 18, 0.08);
-        border-radius: 28px;
-        padding: 22px;
-        box-shadow: 0 28px 80px rgba(22, 20, 18, 0.08);
-        backdrop-filter: blur(12px);
-      }
-
-      .hero {
-        display: grid;
-        grid-template-columns: 210px minmax(0, 1fr);
-        gap: 22px;
-        align-items: center;
-      }
-
-      .ring {
-        width: 210px;
-        height: 210px;
-        border-radius: 50%;
-        position: relative;
-        display: grid;
-        place-items: center;
-        background: conic-gradient(var(--emerald) 0 var(--fill), rgba(22, 20, 18, 0.08) var(--fill) 100%);
-      }
-
-      .ring::after {
-        content: "";
-        position: absolute;
-        inset: 18px;
-        border-radius: 50%;
-        border: 1px solid rgba(22, 20, 18, 0.06);
-        background: rgba(255, 253, 248, 0.96);
-      }
-
-      .ring-copy {
-        position: relative;
-        z-index: 1;
-        text-align: center;
-      }
-
-      .ring-copy strong {
-        display: block;
-        font-size: 52px;
-        line-height: 0.95;
-        letter-spacing: -0.06em;
-      }
-
-      .ring-copy span {
-        display: block;
-        margin-top: 10px;
-        color: var(--muted);
-        font-size: 13px;
-      }
-
-      .headline {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        margin-bottom: 10px;
-      }
-
-      .pill {
-        display: inline-flex;
-        align-items: center;
-        border-radius: 999px;
-        padding: 7px 11px;
-        font-size: 12px;
-      }
-
-      .pill.active { background: var(--emerald-soft); color: var(--emerald); }
-      .pill.warning { background: var(--amber-soft); color: var(--amber); }
-      .pill.danger { background: var(--rose-soft); color: var(--rose); }
-
-      .hero h2 {
-        margin: 0 0 10px;
-        font-size: clamp(24px, 3vw, 36px);
-        letter-spacing: -0.04em;
-      }
-
-      .hero p {
-        margin: 0;
-        color: var(--muted);
-        line-height: 1.8;
-        font-size: 15px;
-      }
-
-      .meta-grid, .milestones {
-        display: grid;
-        gap: 12px;
-      }
-
-      .meta-grid {
-        grid-template-columns: repeat(3, minmax(0, 1fr));
-        margin-top: 16px;
-      }
-
-      .meta-card, .milestone-card, .turn-card, .session-button {
-        border: 1px solid var(--line);
-        background: rgba(255, 255, 255, 0.58);
-        border-radius: 20px;
-      }
-
-      .meta-card { padding: 14px 16px; }
-      .meta-label {
-        color: var(--muted);
-        font-size: 11px;
-        text-transform: uppercase;
-        letter-spacing: 0.14em;
-        margin-bottom: 8px;
-      }
-      .meta-value {
-        font-size: 18px;
-        letter-spacing: -0.03em;
-      }
-
-      .section-title {
-        margin: 0 0 14px;
-        font-size: 24px;
-        letter-spacing: -0.04em;
-      }
-
-      .milestones { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .milestone-card { padding: 18px; }
-      .milestone-head {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-        margin-bottom: 12px;
-      }
-      .milestone-head strong { font-size: 16px; }
-      .milestone-head span { color: var(--muted); font-size: 14px; }
-      .bar {
-        height: 10px;
-        border-radius: 999px;
-        overflow: hidden;
-        background: rgba(22, 20, 18, 0.08);
-      }
-      .bar > span {
-        display: block;
-        width: var(--width);
-        height: 100%;
-        border-radius: 999px;
-        background: linear-gradient(90deg, #0f766e 0%, #34d399 100%);
-      }
-      .milestone-copy {
-        margin: 12px 0 0;
-        color: var(--muted);
-        font-size: 13px;
-        line-height: 1.7;
-      }
-
-      .turns, .session-list, .step-list, .verification-list { display: grid; gap: 12px; }
-      .turn-card { padding: 18px; }
-      .turn-card.active {
-        background:
-          radial-gradient(circle at top right, rgba(15, 118, 110, 0.12), transparent 36%),
-          rgba(255, 255, 255, 0.72);
-      }
-      .turn-top {
-        display: flex;
-        justify-content: space-between;
-        gap: 14px;
-        align-items: flex-start;
-      }
-      .turn-title {
-        margin: 0 0 8px;
-        font-size: 22px;
-        letter-spacing: -0.04em;
-      }
-      .turn-summary {
-        margin: 0;
-        color: var(--muted);
-        font-size: 14px;
-        line-height: 1.75;
-      }
-      .turn-progress {
-        min-width: 92px;
-        text-align: right;
-      }
-      .turn-progress strong {
-        display: block;
-        font-size: 30px;
-        letter-spacing: -0.05em;
-      }
-      .turn-progress span {
-        color: var(--muted);
-        font-size: 12px;
-      }
-      .step-item, .verification-item {
-        border: 1px solid var(--line);
-        border-radius: 16px;
-        background: rgba(255, 255, 255, 0.7);
-        padding: 12px 14px;
-      }
-      .step-row, .verification-row {
-        display: flex;
-        justify-content: space-between;
-        gap: 10px;
-        align-items: center;
-      }
-      .step-copy, .verification-copy, .timeline-meta {
-        margin-top: 8px;
-        color: var(--muted);
-        font-size: 12px;
-        line-height: 1.65;
+        gap: 0.5rem;
+        margin-top: 1rem;
       }
 
       .session-button {
-        width: 100%;
-        padding: 16px;
-        text-align: left;
+        border: 1px solid #ccc;
+        background: #f7f7f7;
+        padding: 0.55rem 0.8rem;
+        border-radius: 4px;
         cursor: pointer;
+        text-align: left;
       }
-      .session-button.active {
-        background: rgba(15, 118, 110, 0.08);
-        border-color: rgba(15, 118, 110, 0.24);
+
+      .session-button:hover {
+        background: #efefef;
       }
-      .session-top {
+
+      .session-button[aria-current="true"] {
+        border-color: #222;
+        background: #ededed;
+        font-weight: 600;
+      }
+
+      .actions {
         display: flex;
         justify-content: space-between;
-        gap: 12px;
+        gap: 1rem;
+        align-items: baseline;
+        flex-wrap: wrap;
       }
-      .session-name { font-size: 14px; line-height: 1.55; }
-      .session-meta {
-        margin-top: 8px;
-        color: var(--muted);
-        font-size: 12px;
-        line-height: 1.6;
+
+      .refresh {
+        border: 1px solid #bbb;
+        background: #f4f4f4;
+        border-radius: 4px;
+        padding: 0.45rem 0.8rem;
+        cursor: pointer;
+      }
+
+      .refresh:hover {
+        background: #ececec;
+      }
+
+      .status-line {
+        color: #666;
+      }
+
+      dl.summary-grid {
+        display: grid;
+        grid-template-columns: 180px 1fr;
+        gap: 0.4rem 1rem;
+        margin: 1rem 0 0;
+      }
+
+      dl.summary-grid dt {
+        font-weight: 600;
+      }
+
+      dl.summary-grid dd {
+        margin: 0;
+      }
+
+      table {
+        border-collapse: collapse;
+        width: 100%;
+        margin: 1rem 0;
+        font-size: 0.94rem;
+      }
+
+      th,
+      td {
+        border: 1px solid #ccc;
+        padding: 0.55rem 0.75rem;
+        text-align: left;
+        vertical-align: top;
+      }
+
+      th {
+        background: #f5f5f5;
+        font-weight: 600;
+      }
+
+      tr:nth-child(even) {
+        background: #fafafa;
+      }
+
+      .status {
+        white-space: nowrap;
+        font-weight: 600;
+      }
+
+      .status.completed,
+      .status.passed {
+        color: #0f5f45;
+      }
+
+      .status.in_progress,
+      .status.running {
+        color: #8a5700;
+      }
+
+      .status.failed,
+      .status.aborted {
+        color: #9b1c1c;
+      }
+
+      article.turn {
+        border-top: 1px solid #ddd;
+        padding-top: 1rem;
+        margin-top: 1rem;
+      }
+
+      article.turn:first-of-type {
+        border-top: none;
+        padding-top: 0;
+        margin-top: 0;
+      }
+
+      .turn-meta {
+        color: #666;
+        font-size: 0.92rem;
+      }
+
+      .turn-summary {
+        margin-top: 0.4rem;
+      }
+
+      .subsection {
+        margin-top: 0.9rem;
+      }
+
+      .subsection h4 {
+        font-size: 0.98rem;
+        margin: 0 0 0.35rem;
+      }
+
+      .step-list li,
+      .note-list li {
+        margin: 0.2rem 0;
       }
 
       .empty {
-        padding: 24px;
-        border-radius: 20px;
-        border: 1px dashed var(--line);
-        color: var(--muted);
-        text-align: center;
+        color: #666;
       }
 
-      @media (max-width: 1024px) {
-        .board { grid-template-columns: 1fr; }
-        .hero { grid-template-columns: 1fr; }
+      footer {
+        margin-top: 3rem;
+        padding-top: 1rem;
+        border-top: 1px solid #ddd;
+        color: #666;
       }
 
-      @media (max-width: 720px) {
-        .meta-grid, .milestones { grid-template-columns: 1fr; }
-        .turn-top { flex-direction: column; }
-        .turn-progress { text-align: left; }
+      @media (max-width: 640px) {
+        body {
+          padding: 0 1rem;
+        }
+
+        dl.summary-grid {
+          grid-template-columns: 1fr;
+        }
       }
     </style>
   </head>
   <body>
-    <main class="shell">
-      <header class="topbar">
+    <header>
+      <p class="mono">MirrorMind Public</p>
+      <h1>Progress Board</h1>
+      <blockquote>
+        <p>
+          핵심 질문: 이 페이지가 “진행상황이 무엇인가”를 스스로 말하는가. 장식보다 구조를
+          앞세우고, CSS를 꺼도 요약과 세부 흐름이 읽히도록 구성한다.
+        </p>
+      </blockquote>
+      <p>
+        글로벌 진평상황과 최근 턴별 세부 진행상황 문서처럼 읽는다. 데이터는
+        <code>progress/latest.json</code>에서 읽고 주기적으로 다시 조회한다.
+      </p>
+      <div class="actions">
+        <nav aria-label="세션 선택">
+          <ul id="sessionNav"></ul>
+        </nav>
         <div>
-          <div class="eyebrow">MirrorMind Public</div>
-          <h1>Progress Board</h1>
-          <p class="lead">
-            글로벌 진행률, 마일스톤, 최근 턴별 세부 진행상황을 한 화면에서 읽는다.
-            이 페이지는 <span class="mono">progress/latest.json</span>을 15초마다 다시 조회한다.
-          </p>
+          <button id="refreshButton" class="refresh" type="button">새로고침</button>
+          <p id="statusLine" class="status-line">불러오는 중...</p>
         </div>
-        <div>
-          <button id="refreshButton" class="refresh" type="button">Refresh</button>
-          <div id="statusNote" class="status-note">Loading…</div>
-        </div>
-      </header>
+      </div>
+    </header>
 
-      <section class="board">
-        <div>
-          <section id="overview" class="panel"></section>
-          <section class="panel" style="margin-top: 18px">
-            <h2 class="section-title">Milestones</h2>
-            <div id="milestones" class="milestones"></div>
-          </section>
-          <section class="panel" style="margin-top: 18px">
-            <h2 class="section-title">Turns</h2>
-            <div id="turns" class="turns"></div>
-          </section>
-        </div>
-        <aside class="panel">
-          <h2 class="section-title">Sessions</h2>
-          <div id="sessions" class="session-list"></div>
-        </aside>
+    <main>
+      <section aria-labelledby="global-heading">
+        <h2 id="global-heading">글로벌 진행상황</h2>
+        <div id="globalSection"></div>
+      </section>
+
+      <section aria-labelledby="milestones-heading">
+        <h2 id="milestones-heading">마일스톤</h2>
+        <div id="milestonesSection"></div>
+      </section>
+
+      <section aria-labelledby="turns-heading">
+        <h2 id="turns-heading">턴별 세부 진행상황</h2>
+        <div id="turnsSection"></div>
       </section>
     </main>
 
+    <footer>
+      <p>
+        이 페이지는 HTML 문서처럼 읽히는 진행상황 보드를 목표로 한다. 상단은 현재 상태,
+        중간은 축별 진척, 하단은 턴별 로그 해설이다.
+      </p>
+    </footer>
+
     <script>
       const REFRESH_MS = 15000;
-      const state = { snapshot: null, selectedSessionId: null };
-      const overview = document.getElementById("overview");
-      const milestones = document.getElementById("milestones");
-      const turns = document.getElementById("turns");
-      const sessions = document.getElementById("sessions");
-      const statusNote = document.getElementById("statusNote");
-      document.getElementById("refreshButton").addEventListener("click", () => void refresh());
+      const state = {
+        snapshot: null,
+        selectedSessionId: null,
+      };
+
+      const sessionNav = document.getElementById("sessionNav");
+      const globalSection = document.getElementById("globalSection");
+      const milestonesSection = document.getElementById("milestonesSection");
+      const turnsSection = document.getElementById("turnsSection");
+      const statusLine = document.getElementById("statusLine");
+      const refreshButton = document.getElementById("refreshButton");
+
+      refreshButton.addEventListener("click", () => {
+        void refresh();
+      });
+
       void refresh();
-      window.setInterval(() => void refresh(false), REFRESH_MS);
+      window.setInterval(() => {
+        void refresh(false);
+      }, REFRESH_MS);
 
       async function refresh(announce = true) {
-        if (announce) statusNote.textContent = "Refreshing…";
+        if (announce) {
+          statusLine.textContent = "다시 불러오는 중...";
+        }
+
         try {
           const response = await fetch(`./latest.json?ts=${Date.now()}`, { cache: "no-store" });
-          if (!response.ok) throw new Error(`fetch failed (${response.status})`);
+          if (!response.ok) {
+            throw new Error(`latest.json fetch failed (${response.status})`);
+          }
+
           const snapshot = await response.json();
           state.snapshot = snapshot;
-          const available = snapshot.sessions ?? [];
-          if (!available.some((item) => item.sessionId === state.selectedSessionId)) {
-            state.selectedSessionId = snapshot.activeSessionId ?? available[0]?.sessionId ?? null;
+
+          const sessions = snapshot.sessions ?? [];
+          if (!sessions.some((session) => session.sessionId === state.selectedSessionId)) {
+            state.selectedSessionId = snapshot.activeSessionId ?? sessions[0]?.sessionId ?? null;
           }
+
           render();
-          statusNote.textContent = `Updated ${formatTimestamp(snapshot.generatedAt)}`;
+          statusLine.textContent = `마지막 갱신: ${formatTimestamp(
+            snapshot.generatedAt ?? snapshot.updatedAt,
+          )}`;
         } catch (error) {
           console.error(error);
-          statusNote.textContent = "latest.json을 읽지 못했습니다.";
+          statusLine.textContent = "데이터를 읽지 못했습니다.";
         }
       }
 
       function render() {
         const snapshot = state.snapshot;
-        const list = snapshot?.sessions ?? [];
-        const session = list.find((item) => item.sessionId === state.selectedSessionId) ?? list[0];
-        renderSessions(list, session?.sessionId ?? null);
+        const sessions = snapshot?.sessions ?? [];
+        const session =
+          sessions.find((item) => item.sessionId === state.selectedSessionId) ?? sessions[0] ?? null;
+
+        renderSessionNav(sessions, session?.sessionId ?? null);
+
         if (!session) {
-          overview.innerHTML = `<div class="empty">표시할 세션 데이터가 없습니다.</div>`;
-          milestones.innerHTML = "";
-          turns.innerHTML = `<div class="empty">표시할 턴 데이터가 없습니다.</div>`;
+          globalSection.innerHTML = `<p class="empty">표시할 세션이 없습니다.</p>`;
+          milestonesSection.innerHTML = `<p class="empty">표시할 마일스톤이 없습니다.</p>`;
+          turnsSection.innerHTML = `<p class="empty">표시할 턴 데이터가 없습니다.</p>`;
           return;
         }
 
-        overview.innerHTML = `
-          <div class="hero">
-            <div class="ring" style="--fill:${clampPercent(session.progress?.globalPercent)}%">
-              <div class="ring-copy">
-                <strong>${session.progress?.globalPercent ?? 0}%</strong>
-                <span>${escapeHtml(session.progress?.globalLabel ?? "진행 중")}</span>
-              </div>
-            </div>
-            <div>
-              <div class="headline">
-                <span class="pill ${session.active ? "active" : "warning"}">${session.active ? "Active session" : "Idle session"}</span>
-                <span class="pill warning">${escapeHtml(session.progress?.currentTurnLabel ?? "대기")}</span>
-              </div>
-              <h2>${escapeHtml(session.progress?.globalLabel ?? "Progress")}</h2>
-              <p>${escapeHtml(session.currentTurn?.latestAssistantMessage || session.lastAssistantMessage || "세션 요약이 없습니다.")}</p>
-              <div class="meta-grid">
-                <div class="meta-card"><div class="meta-label mono">Repo</div><div class="meta-value">${escapeHtml(shorten(snapshot.repoRoot ?? session.cwd, 42))}</div></div>
-                <div class="meta-card"><div class="meta-label mono">Session</div><div class="meta-value">${escapeHtml(shorten(session.sessionId, 16))}</div></div>
-                <div class="meta-card"><div class="meta-label mono">Current Turn</div><div class="meta-value">${session.currentTurn?.progressPercent ?? session.progress?.currentTurnPercent ?? 0}%</div></div>
-              </div>
-            </div>
-          </div>
-        `;
-
-        milestones.innerHTML = (session.milestones ?? []).map((item) => `
-          <article class="milestone-card">
-            <div class="milestone-head"><strong>${escapeHtml(item.title)}</strong><span>${item.percent}%</span></div>
-            <div class="bar" style="--width:${clampPercent(item.percent)}%"><span></span></div>
-            <p class="milestone-copy">${escapeHtml(item.evidence || item.status || "")}</p>
-          </article>
-        `).join("") || `<div class="empty">마일스톤 데이터가 없습니다.</div>`;
-
-        turns.innerHTML = (session.recentTurns ?? []).map((turn) => `
-          <article class="turn-card ${turn.turnId === session.currentTurn?.turnId ? "active" : ""}">
-            <div class="turn-top">
-              <div>
-                <div class="headline">
-                  <span class="pill ${toneClass(turn.status)}">${escapeHtml(turn.status)}</span>
-                  <span class="pill warning">${escapeHtml(turn.label || "turn")}</span>
-                </div>
-                <h3 class="turn-title">${escapeHtml(turn.headline || "턴")}</h3>
-                <p class="turn-summary">${escapeHtml(turn.summary || "")}</p>
-              </div>
-              <div class="turn-progress"><strong>${turn.percent ?? 0}%</strong><span>${escapeHtml(turn.label || "진행도")}</span></div>
-            </div>
-            ${(turn.planSteps ?? []).length ? `<div class="step-list">${turn.planSteps.map((step) => `
-              <div class="step-item">
-                <div class="step-row"><strong>${escapeHtml(step.step)}</strong><span class="pill ${toneClass(step.status)}">${escapeHtml(step.status)}</span></div>
-              </div>
-            `).join("")}</div>` : ""}
-            ${(turn.verifications ?? []).length ? `<div class="verification-list">${turn.verifications.map((item) => `
-              <div class="verification-item">
-                <div class="verification-row"><strong>${escapeHtml(item.label || item.key)}</strong><span class="pill ${toneClass(item.status)}">${escapeHtml(item.status)}</span></div>
-                <div class="verification-copy">${escapeHtml(item.summary || item.command || "")}</div>
-              </div>
-            `).join("")}</div>` : ""}
-            <div class="timeline-meta mono">${turn.startedAt ? `start ${formatTimestamp(turn.startedAt)}` : ""} ${turn.endedAt ? `· end ${formatTimestamp(turn.endedAt)}` : ""} · ${escapeHtml(turn.turnId || "")}</div>
-          </article>
-        `).join("") || `<div class="empty">최근 턴 데이터가 없습니다.</div>`;
+        renderGlobalSection(session, snapshot);
+        renderMilestonesSection(session);
+        renderTurnsSection(session);
       }
 
-      function renderSessions(list, selectedId) {
-        sessions.innerHTML = list.map((session) => `
-          <button type="button" class="session-button ${session.sessionId === selectedId ? "active" : ""}" data-session-id="${escapeAttr(session.sessionId)}">
-            <div class="session-top">
-              <div class="session-name">${escapeHtml(shorten(session.cwd, 42))}</div>
-              <span class="pill ${session.active ? "active" : "warning"}">${session.progress?.globalPercent ?? 0}%</span>
-            </div>
-            <div class="session-meta">
-              <div>${escapeHtml(session.progress?.globalLabel ?? "진행 중")}</div>
-              <div>${escapeHtml(formatTimestamp(session.updatedAt))}</div>
-            </div>
-          </button>
-        `).join("") || `<div class="empty">세션이 없습니다.</div>`;
+      function renderSessionNav(sessions, selectedSessionId) {
+        if (!sessions.length) {
+          sessionNav.innerHTML = "";
+          return;
+        }
 
-        sessions.querySelectorAll("[data-session-id]").forEach((button) => {
+        sessionNav.innerHTML = sessions
+          .map(
+            (session) => `
+              <li>
+                <button
+                  type="button"
+                  class="session-button"
+                  data-session-id="${escapeAttr(session.sessionId)}"
+                  aria-current="${session.sessionId === selectedSessionId ? "true" : "false"}"
+                >
+                  ${escapeHtml(shorten(session.progress?.globalLabel ?? session.sessionId, 28))}
+                </button>
+              </li>
+            `,
+          )
+          .join("");
+
+        sessionNav.querySelectorAll("[data-session-id]").forEach((button) => {
           button.addEventListener("click", () => {
             state.selectedSessionId = button.getAttribute("data-session-id");
             render();
@@ -510,28 +391,185 @@
         });
       }
 
-      function toneClass(status) {
-        if (status === "completed" || status === "passed") return "active";
-        if (status === "failed" || status === "aborted") return "danger";
-        return "warning";
+      function renderGlobalSection(session, snapshot) {
+        const summary = pickSummary(session);
+        globalSection.innerHTML = `
+          <p><strong>${escapeHtml(session.progress?.globalLabel ?? "진행 중")}</strong></p>
+          <p>${escapeHtml(summary)}</p>
+          <dl class="summary-grid">
+            <dt>글로벌 진행률</dt>
+            <dd>${session.progress?.globalPercent ?? 0}%</dd>
+            <dt>현재 턴 상태</dt>
+            <dd>${escapeHtml(session.progress?.currentTurnLabel ?? "대기")}</dd>
+            <dt>세션 상태</dt>
+            <dd>${session.active ? "활성" : "비활성"}</dd>
+            <dt>저장소</dt>
+            <dd class="mono">${escapeHtml(snapshot.repoRoot ?? session.cwd ?? "")}</dd>
+            <dt>세션 ID</dt>
+            <dd class="mono">${escapeHtml(session.sessionId ?? "")}</dd>
+            <dt>업데이트 시각</dt>
+            <dd>${escapeHtml(formatTimestamp(session.updatedAt))}</dd>
+          </dl>
+        `;
       }
-      function clampPercent(value) {
-        const safe = Number(value ?? 0);
-        return Math.max(0, Math.min(100, Number.isFinite(safe) ? safe : 0));
+
+      function renderMilestonesSection(session) {
+        const milestones = session.milestones ?? [];
+        if (!milestones.length) {
+          milestonesSection.innerHTML = `<p class="empty">마일스톤 데이터가 없습니다.</p>`;
+          return;
+        }
+
+        milestonesSection.innerHTML = `
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">항목</th>
+                <th scope="col">상태</th>
+                <th scope="col">진척도</th>
+                <th scope="col">귽거</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${milestones
+                .map(
+                  (item) => `
+                    <tr>
+                      <td>${escapeHtml(item.title)}</td>
+                      <td class="status ${escapeAttr(item.status)}">${escapeHtml(item.status)}</td>
+                      <td>${item.percent}%</td>
+                      <td>${escapeHtml(item.evidence ?? "")}</td>
+                    </tr>
+                  `,
+                )
+                .join("")}
+            </tbody>
+          </table>
+        `;
       }
-      function shorten(value, max = 48) {
+
+      function renderTurnsSection(session) {
+        const turns = session.recentTurns ?? [];
+        if (!turns.length) {
+          turnsSection.innerHTML = `<p class="empty">최근 턴 데이터가 없습니다.</p>`;
+          return;
+        }
+
+        turnsSection.innerHTML = turns
+          .map((turn) => {
+            const stepHtml = renderStepList(turn.planSteps ?? []);
+            const verificationHtml = renderVerificationTable(turn.verifications ?? []);
+            const meta = [
+              turn.status ? `상태: ${turn.status}` : "",
+              turn.percent !== undefined ? `진척도: ${turn.percent}%` : "",
+              turn.startedAt ? `시작: ${formatTimestamp(turn.startedAt)}` : "",
+              turn.endedAt ? `종료: ${formatTimestamp(turn.endedAt)}` : "",
+              turn.turnId ? `ID: ${turn.turnId}` : "",
+            ]
+              .filter(Boolean)
+              .join(" / ");
+
+            return `
+              <article class="turn">
+                <header>
+                  <h3>${escapeHtml(turn.headline ?? "턴")}</h3>
+                  <p class="turn-meta">${escapeHtml(meta)}</p>
+                </header>
+                <p class="turn-summary">${escapeHtml(turn.summary ?? "")}</p>
+                ${stepHtml}
+                ${verificationHtml}
+              </article>
+            `;
+          })
+          .join("");
+      }
+
+      function renderStepList(steps) {
+        if (!steps.length) return "";
+        return `
+          <section class="subsection" aria-label="plan steps">
+            <h4>Plan Steps</h4>
+            <ul class="step-list">
+              ${steps
+                .map(
+                  (step) => `
+                    <li>
+                      <span class="status ${escapeAttr(step.status)}">${escapeHtml(step.status)}</span>
+                      ${escapeHtml(step.step)}
+                    </li>
+                  `,
+                )
+                .join("")}
+            </ul>
+          </section>
+        `;
+      }
+
+      function renderVerificationTable(verifications) {
+        if (!verifications.length) return "";
+        return `
+          <section class="subsection" aria-label="verifications">
+            <h4>Verifications</h4>
+            <table>
+              <thead>
+                <tr>
+                  <th scope="col">검증</th>
+                  <th scope="col">상태</th>
+                  <th scope="col">요약</th>
+                </tr>
+              </thead>
+              <tbody>
+                ${verifications
+                  .map(
+                    (item) => `
+                      <tr>
+                        <td>${escapeHtml(item.label ?? item.key ?? "")}</td>
+                        <td class="status ${escapeAttr(item.status)}">${escapeHtml(item.status)}</td>
+                        <td>${escapeHtml(item.summary ?? item.command ?? "")}</td>
+                      </tr>
+                    `,
+                  )
+                  .join("")}
+              </tbody>
+            </table>
+          </section>
+        `;
+      }
+
+      function pickSummary(session) {
+        return (
+          session.currentTurn?.latestAssistantMessage ||
+          session.lastAssistantMessage ||
+          session.recentTurns?.[0]?.summary ||
+          "요약이 없습니다."
+        );
+      }
+
+      function shorten(value, max) {
         const text = String(value ?? "");
         return text.length > max ? `${text.slice(0, max - 1)}…` : text;
       }
+
       function formatTimestamp(value) {
         if (!value) return "N/A";
         const date = new Date(value);
         if (Number.isNaN(date.getTime())) return String(value);
-        return date.toLocaleString("ko-KR", { month: "2-digit", day: "2-digit", hour: "2-digit", minute: "2-digit" });
+        return date.toLocaleString("ko-KR", {
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        });
       }
+
       function escapeHtml(value) {
-        return String(value ?? "").replaceAll("&", "&amp;").replaceAll("<", "&lt;").replaceAll(">", "&gt;").replaceAll('"', "&quot;");
+        return String(value ?? "")
+          .replaceAll("&", "&amp;")
+          .replaceAll("<", "&lt;")
+          .replaceAll(">", "&gt;")
+          .replaceAll('"', "&quot;");
       }
+
       function escapeAttr(value) {
         return escapeHtml(value).replaceAll("'", "&#39;");
       }
