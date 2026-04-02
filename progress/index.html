@@ -66,6 +66,31 @@
         background: #f9f9f9;
       }
 
+      details {
+        margin: 0.75rem 0;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+      }
+
+      details summary {
+        cursor: pointer;
+        padding: 0.55rem 0.9rem;
+        background: #f7f7f7;
+        font-weight: 500;
+      }
+
+      details summary:hover {
+        background: #efefef;
+      }
+
+      details[open] summary {
+        border-bottom: 1px solid #ddd;
+      }
+
+      details > :not(summary) {
+        padding: 0 0.9rem;
+      }
+
       nav ul,
       .plain-list {
         list-style: none;
@@ -123,11 +148,34 @@
         color: #666;
       }
 
+      progress {
+        width: min(100%, 28rem);
+        height: 0.95rem;
+        vertical-align: middle;
+      }
+
       dl.summary-grid {
         display: grid;
         grid-template-columns: 180px 1fr;
         gap: 0.4rem 1rem;
         margin: 1rem 0 0;
+      }
+
+      .meter-line {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        flex-wrap: wrap;
+        margin: 0.75rem 0 1rem;
+      }
+
+      .message-log dt {
+        font-weight: 600;
+        margin-top: 0.85rem;
+      }
+
+      .message-log dd {
+        margin: 0.25rem 0 0;
       }
 
       dl.summary-grid dt {
@@ -203,6 +251,10 @@
         margin-top: 0.4rem;
       }
 
+      .turn-preview {
+        margin-top: 0.5rem;
+      }
+
       .subsection {
         margin-top: 0.9rem;
       }
@@ -219,6 +271,11 @@
 
       .empty {
         color: #666;
+      }
+
+      .compact {
+        color: #444;
+        font-size: 0.94rem;
       }
 
       footer {
@@ -250,7 +307,7 @@
         </p>
       </blockquote>
       <p>
-        글로벌 진평상황과 최근 턴별 세부 진행상황 문서처럼 읽는다. 데이터는
+        글로벌 진행상황과 최근 턴별 세부 진행상황을 문서처럼 읽는다. 데이터는
         <code>progress/latest.json</code>에서 읽고 주기적으로 다시 조회한다.
       </p>
       <div class="actions">
@@ -270,9 +327,19 @@
         <div id="globalSection"></div>
       </section>
 
+      <section aria-labelledby="current-heading">
+        <h2 id="current-heading">현재 활성 턴</h2>
+        <div id="currentSection"></div>
+      </section>
+
       <section aria-labelledby="milestones-heading">
         <h2 id="milestones-heading">마일스톤</h2>
         <div id="milestonesSection"></div>
+      </section>
+
+      <section aria-labelledby="verification-heading">
+        <h2 id="verification-heading">최근 검증</h2>
+        <div id="verificationSection"></div>
       </section>
 
       <section aria-labelledby="turns-heading">
@@ -297,7 +364,9 @@
 
       const sessionNav = document.getElementById("sessionNav");
       const globalSection = document.getElementById("globalSection");
+      const currentSection = document.getElementById("currentSection");
       const milestonesSection = document.getElementById("milestonesSection");
+      const verificationSection = document.getElementById("verificationSection");
       const turnsSection = document.getElementById("turnsSection");
       const statusLine = document.getElementById("statusLine");
       const refreshButton = document.getElementById("refreshButton");
@@ -350,13 +419,17 @@
 
         if (!session) {
           globalSection.innerHTML = `<p class="empty">표시할 세션이 없습니다.</p>`;
+          currentSection.innerHTML = `<p class="empty">활성 턴 데이터가 없습니다.</p>`;
           milestonesSection.innerHTML = `<p class="empty">표시할 마일스톤이 없습니다.</p>`;
+          verificationSection.innerHTML = `<p class="empty">표시할 검증 데이터가 없습니다.</p>`;
           turnsSection.innerHTML = `<p class="empty">표시할 턴 데이터가 없습니다.</p>`;
           return;
         }
 
         renderGlobalSection(session, snapshot);
+        renderCurrentSection(session, snapshot);
         renderMilestonesSection(session);
+        renderVerificationSection(session);
         renderTurnsSection(session);
       }
 
@@ -376,7 +449,14 @@
                   data-session-id="${escapeAttr(session.sessionId)}"
                   aria-current="${session.sessionId === selectedSessionId ? "true" : "false"}"
                 >
-                  ${escapeHtml(shorten(session.progress?.globalLabel ?? session.sessionId, 28))}
+                  ${escapeHtml(
+                    shorten(
+                      `${session.progress?.globalLabel ?? "세션"} · ${
+                        session.progress?.globalPercent ?? 0
+                      }%`,
+                      28,
+                    ),
+                  )}
                 </button>
               </li>
             `,
@@ -392,15 +472,31 @@
       }
 
       function renderGlobalSection(session, snapshot) {
+        const milestones = session.milestones ?? [];
+        const completedMilestones = milestones.filter((item) => item.status === "completed").length;
+        const verificationStats = collectVerificationStats(session.recentTurns ?? []);
         const summary = pickSummary(session);
+
         globalSection.innerHTML = `
           <p><strong>${escapeHtml(session.progress?.globalLabel ?? "진행 중")}</strong></p>
           <p>${escapeHtml(summary)}</p>
+          <p class="meter-line">
+            <progress value="${session.progress?.globalPercent ?? 0}" max="100">${
+              session.progress?.globalPercent ?? 0
+            }%</progress>
+            <span class="mono">${session.progress?.globalPercent ?? 0}%</span>
+          </p>
           <dl class="summary-grid">
             <dt>글로벌 진행률</dt>
             <dd>${session.progress?.globalPercent ?? 0}%</dd>
+            <dt>현재 턴 진척도</dt>
+            <dd>${session.progress?.currentTurnPercent ?? 0}%</dd>
             <dt>현재 턴 상태</dt>
             <dd>${escapeHtml(session.progress?.currentTurnLabel ?? "대기")}</dd>
+            <dt>완료 마일스톤</dt>
+            <dd>${completedMilestones} / ${milestones.length || 0}</dd>
+            <dt>최근 검증</dt>
+            <dd>통과 ${verificationStats.passed}, 실패 ${verificationStats.failed}, 진행 중 ${verificationStats.running}</dd>
             <dt>세션 상태</dt>
             <dd>${session.active ? "활성" : "비활성"}</dd>
             <dt>저장소</dt>
@@ -410,6 +506,74 @@
             <dt>업데이트 시각</dt>
             <dd>${escapeHtml(formatTimestamp(session.updatedAt))}</dd>
           </dl>
+          <section class="subsection" aria-label="최근 대화">
+            <h3>최근 대화</h3>
+            <dl class="message-log">
+              <dt>최근 사용자 요청</dt>
+              <dd>${renderLongText(session.lastUserMessage, "사용자 요청이 없습니다.")}</dd>
+              <dt>최근 어시스턴트 응답</dt>
+              <dd>${renderLongText(session.lastAssistantMessage, "어시스턴트 응답이 없습니다.")}</dd>
+            </dl>
+          </section>
+        `;
+      }
+
+      function renderCurrentSection(session, snapshot) {
+        const currentTurn = hydrateCurrentTurn(session);
+        if (!currentTurn) {
+          currentSection.innerHTML = `<p class="empty">활성 턴 데이터가 없습니다.</p>`;
+          return;
+        }
+
+        const stepHtml = renderStepList(currentTurn.planSteps ?? []);
+        const verificationHtml = renderVerificationTable(currentTurn.verifications ?? []);
+        const elapsedLabel = formatDuration(
+          currentTurn.startedAt,
+          currentTurn.endedAt ?? snapshot.generatedAt,
+        );
+
+        currentSection.innerHTML = `
+          <article class="turn">
+            <header>
+              <h3>${escapeHtml(currentTurn.headline ?? "현재 활성 턴")}</h3>
+              <p class="turn-meta">
+                ${escapeHtml(
+                  [
+                    currentTurn.status ? `상태: ${currentTurn.status}` : "",
+                    currentTurn.progressPercent !== undefined
+                      ? `진척도: ${currentTurn.progressPercent}%`
+                      : "",
+                    currentTurn.startedAt ? `시작: ${formatTimestamp(currentTurn.startedAt)}` : "",
+                    elapsedLabel ? `경과: ${elapsedLabel}` : "",
+                    currentTurn.turnId ? `ID: ${currentTurn.turnId}` : "",
+                  ]
+                    .filter(Boolean)
+                    .join(" / "),
+                )}
+              </p>
+            </header>
+            <p class="meter-line">
+              <progress value="${currentTurn.progressPercent ?? 0}" max="100">${
+                currentTurn.progressPercent ?? 0
+              }%</progress>
+              <span class="mono">${currentTurn.progressPercent ?? 0}%</span>
+            </p>
+            <p class="turn-summary">${escapeHtml(
+              normalizeText(
+                currentTurn.latestAssistantMessage ?? currentTurn.summary ?? "최근 설명이 없습니다.",
+              ),
+            )}</p>
+            <dl class="summary-grid">
+              <dt>현재 단계</dt>
+              <dd>${escapeHtml(currentTurn.progressLabel ?? currentTurn.label ?? "진행 중")}</dd>
+              <dt>기록된 plan step</dt>
+              <dd>${(currentTurn.planSteps ?? []).length}개</dd>
+              <dt>기록된 검증</dt>
+              <dd>${(currentTurn.verifications ?? []).length}개</dd>
+            </dl>
+            ${stepHtml}
+            ${verificationHtml}
+          </article>
         `;
       }
 
@@ -427,7 +591,7 @@
                 <th scope="col">항목</th>
                 <th scope="col">상태</th>
                 <th scope="col">진척도</th>
-                <th scope="col">귽거</th>
+                <th scope="col">근거</th>
               </tr>
             </thead>
             <tbody>
@@ -437,8 +601,51 @@
                     <tr>
                       <td>${escapeHtml(item.title)}</td>
                       <td class="status ${escapeAttr(item.status)}">${escapeHtml(item.status)}</td>
-                      <td>${item.percent}%</td>
-                      <td>${escapeHtml(item.evidence ?? "")}</td>
+                      <td>
+                        <p class="meter-line">
+                          <progress value="${item.percent ?? 0}" max="100">${item.percent ?? 0}%</progress>
+                          <span class="mono">${item.percent ?? 0}%</span>
+                        </p>
+                      </td>
+                      <td>${renderEvidence(item.evidence)}</td>
+                    </tr>
+                  `,
+                )
+                .join("")}
+            </tbody>
+          </table>
+        `;
+      }
+
+      function renderVerificationSection(session) {
+        const verifications = collectRecentVerifications(session.recentTurns ?? []);
+        if (!verifications.length) {
+          verificationSection.innerHTML = `<p class="empty">최근 검증 기록이 없습니다.</p>`;
+          return;
+        }
+
+        verificationSection.innerHTML = `
+          <p class="compact">최근 턴들에서 기록된 검증만 모아 본다. 같은 검증도 턴이 다르면 별도 기록으로 본다.</p>
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">턴</th>
+                <th scope="col">검증</th>
+                <th scope="col">상태</th>
+                <th scope="col">요약</th>
+                <th scope="col">명령</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${verifications
+                .map(
+                  (item) => `
+                    <tr>
+                      <td>${escapeHtml(item.turnLabel)}</td>
+                      <td>${escapeHtml(item.label ?? item.key ?? "")}</td>
+                      <td class="status ${escapeAttr(item.status)}">${escapeHtml(item.status)}</td>
+                      <td>${escapeHtml(normalizeText(item.summary ?? ""))}</td>
+                      <td class="mono">${escapeHtml(item.command ?? "")}</td>
                     </tr>
                   `,
                 )
@@ -459,11 +666,14 @@
           .map((turn) => {
             const stepHtml = renderStepList(turn.planSteps ?? []);
             const verificationHtml = renderVerificationTable(turn.verifications ?? []);
+            const duration = formatDuration(turn.startedAt, turn.endedAt);
             const meta = [
               turn.status ? `상태: ${turn.status}` : "",
               turn.percent !== undefined ? `진척도: ${turn.percent}%` : "",
+              turn.label ? `단계: ${turn.label}` : "",
               turn.startedAt ? `시작: ${formatTimestamp(turn.startedAt)}` : "",
               turn.endedAt ? `종료: ${formatTimestamp(turn.endedAt)}` : "",
+              duration ? `소요: ${duration}` : "",
               turn.turnId ? `ID: ${turn.turnId}` : "",
             ]
               .filter(Boolean)
@@ -475,7 +685,11 @@
                   <h3>${escapeHtml(turn.headline ?? "턴")}</h3>
                   <p class="turn-meta">${escapeHtml(meta)}</p>
                 </header>
-                <p class="turn-summary">${escapeHtml(turn.summary ?? "")}</p>
+                <p class="meter-line">
+                  <progress value="${turn.percent ?? 0}" max="100">${turn.percent ?? 0}%</progress>
+                  <span class="mono">${turn.percent ?? 0}%</span>
+                </p>
+                <div class="turn-preview">${renderLongText(turn.summary, "요약이 없습니다.")}</div>
                 ${stepHtml}
                 ${verificationHtml}
               </article>
@@ -495,7 +709,7 @@
                   (step) => `
                     <li>
                       <span class="status ${escapeAttr(step.status)}">${escapeHtml(step.status)}</span>
-                      ${escapeHtml(step.step)}
+                      ${escapeHtml(normalizeText(step.step))}
                     </li>
                   `,
                 )
@@ -525,7 +739,10 @@
                       <tr>
                         <td>${escapeHtml(item.label ?? item.key ?? "")}</td>
                         <td class="status ${escapeAttr(item.status)}">${escapeHtml(item.status)}</td>
-                        <td>${escapeHtml(item.summary ?? item.command ?? "")}</td>
+                        <td>
+                          <div>${escapeHtml(normalizeText(item.summary ?? item.command ?? ""))}</div>
+                          ${item.command ? `<div class="mono">${escapeHtml(item.command)}</div>` : ""}
+                        </td>
                       </tr>
                     `,
                   )
@@ -536,13 +753,106 @@
         `;
       }
 
-      function pickSummary(session) {
-        return (
-          session.currentTurn?.latestAssistantMessage ||
-          session.lastAssistantMessage ||
-          session.recentTurns?.[0]?.summary ||
-          "요약이 없습니다."
+      function hydrateCurrentTurn(session) {
+        const currentTurn = session.currentTurn;
+        if (!currentTurn) return null;
+
+        const turnFromList = (session.recentTurns ?? []).find(
+          (item) => item.turnId === currentTurn.turnId,
         );
+
+        return {
+          ...turnFromList,
+          ...currentTurn,
+          headline: turnFromList?.headline ?? "현재 활성 턴",
+          summary: turnFromList?.summary ?? currentTurn.latestAssistantMessage ?? "",
+          planSteps: currentTurn.planSteps ?? turnFromList?.planSteps ?? [],
+          verifications: currentTurn.verifications ?? turnFromList?.verifications ?? [],
+        };
+      }
+
+      function collectVerificationStats(turns) {
+        return turns
+          .flatMap((turn) => turn.verifications ?? [])
+          .reduce(
+            (stats, verification) => {
+              const status = verification.status ?? "";
+              if (status === "passed") {
+                stats.passed += 1;
+              } else if (status === "failed") {
+                stats.failed += 1;
+              } else if (status === "running") {
+                stats.running += 1;
+              } else {
+                stats.other += 1;
+              }
+              return stats;
+            },
+            { passed: 0, failed: 0, running: 0, other: 0 },
+          );
+      }
+
+      function collectRecentVerifications(turns) {
+        return turns.flatMap((turn) =>
+          (turn.verifications ?? []).map((verification) => ({
+            ...verification,
+            turnLabel: `${turn.headline ?? "턴"} (${turn.label ?? turn.status ?? "-"})`,
+          })),
+        );
+      }
+
+      function renderEvidence(value) {
+        const text = normalizeText(value ?? "");
+        if (!text) {
+          return `<span class="empty">근거 없음</span>`;
+        }
+
+        return `
+          <details>
+            <summary>${escapeHtml(shorten(text, 88))}</summary>
+            <p>${escapeHtml(text)}</p>
+          </details>
+        `;
+      }
+
+      function renderLongText(value, emptyMessage) {
+        const text = normalizeText(value ?? "");
+        if (!text) {
+          return `<span class="empty">${escapeHtml(emptyMessage)}</span>`;
+        }
+
+        if (text.length <= 220) {
+          return escapeHtml(text);
+        }
+
+        return `
+          <p>${escapeHtml(shorten(text, 220))}</p>
+          <details>
+            <summary>전체 보기</summary>
+            <p>${escapeHtml(text)}</p>
+          </details>
+        `;
+      }
+
+      function pickSummary(session) {
+        return shorten(
+          normalizeText(
+            session.currentTurn?.latestAssistantMessage ||
+              session.lastAssistantMessage ||
+              session.recentTurns?.[0]?.summary ||
+              "요약이 없습니다.",
+          ),
+          220,
+        );
+      }
+
+      function normalizeText(value) {
+        return String(value ?? "")
+          .replace(/\[([^\]]+)\]\([^)]+\)/g, "$1")
+          .replace(/`([^`]+)`/g, "$1")
+          .replace(/\*\*([^*]+)\*\*/g, "$1")
+          .replace(/\s+/g, " ")
+          .trim();
       }
 
       function shorten(value, max) {
@@ -560,6 +870,34 @@
           hour: "2-digit",
           minute: "2-digit",
         });
+      }
+
+      function formatDuration(startValue, endValue) {
+        if (!startValue || !endValue) return "";
+
+        const start = new Date(startValue);
+        const end = new Date(endValue);
+        const diffMs = end.getTime() - start.getTime();
+
+        if (!Number.isFinite(diffMs) || diffMs <= 0) {
+          return "";
+        }
+
+        const totalMinutes = Math.floor(diffMs / 60000);
+        const totalSeconds = Math.floor(diffMs / 1000);
+        const hours = Math.floor(totalMinutes / 60);
+        const minutes = totalMinutes % 60;
+        const seconds = totalSeconds % 60;
+
+        if (hours > 0) {
+          return `${hours}시간 ${minutes}분`;
+        }
+
+        if (totalMinutes > 0) {
+          return `${totalMinutes}분 ${seconds}초`;
+        }
+
+        return `${seconds}초`;
       }
 
       function escapeHtml(value) {
