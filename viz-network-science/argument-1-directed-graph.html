@@ -10,73 +10,56 @@
     />
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
       body {
         background: #fafaf8;
         font-family: "Noto Sans KR", sans-serif;
         color: #2a2a2a;
         padding: 40px;
       }
-      h1 {
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 8px;
-        color: #1a1a1a;
-      }
-      .question {
-        font-size: 16px;
-        font-weight: 400;
-        color: #666;
-        margin-bottom: 12px;
-      }
+      h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: #1a1a1a; }
+      .question { font-size: 16px; font-weight: 400; color: #666; margin-bottom: 12px; }
       .rationale {
-        font-size: 14px;
-        font-weight: 300;
-        color: #888;
-        line-height: 1.7;
-        margin-bottom: 32px;
-        max-width: 800px;
+        font-size: 14px; font-weight: 300; color: #888;
+        line-height: 1.7; margin-bottom: 32px; max-width: 800px;
+      }
+      .filter-bar {
+        display: flex; gap: 10px; margin-bottom: 16px; align-items: center;
+      }
+      .filter-btn {
+        display: flex; align-items: center; gap: 6px;
+        padding: 6px 14px; border-radius: 20px;
+        border: 2px solid; cursor: pointer;
+        font-size: 13px; font-weight: 500;
+        font-family: "Noto Sans KR", sans-serif;
+        transition: all 0.2s ease;
+        user-select: none;
+      }
+      .filter-btn.active { color: #fff; }
+      .filter-btn:not(.active) { background: #fff; }
+      .filter-btn .dot {
+        width: 10px; height: 10px; border-radius: 50%;
+        display: inline-block;
+      }
+      .hint-text {
+        font-size: 13px; color: #999; margin-bottom: 12px;
+        transition: opacity 0.3s ease;
       }
       #chart {
-        width: 100%;
-        max-width: 960px;
-        height: 640px;
-        border: 1px solid #e0e0dc;
-        border-radius: 8px;
-        background: #fff;
+        width: 100%; max-width: 960px; height: 640px;
+        border: 1px solid #e0e0dc; border-radius: 8px; background: #fff;
       }
       .legend {
-        display: flex;
-        gap: 24px;
-        margin-top: 16px;
-        font-size: 13px;
-        color: #555;
+        display: flex; gap: 24px; margin-top: 16px;
+        font-size: 13px; color: #555;
       }
-      .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .legend-swatch {
-        width: 14px;
-        height: 14px;
-        border-radius: 3px;
-      }
+      .legend-item { display: flex; align-items: center; gap: 6px; }
+      .legend-swatch { width: 14px; height: 14px; border-radius: 3px; }
       .tooltip {
-        position: absolute;
-        background: #fff;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        padding: 10px 14px;
-        font-size: 13px;
-        line-height: 1.6;
-        pointer-events: none;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        max-width: 280px;
+        position: absolute; background: #fff; border: 1px solid #ddd;
+        border-radius: 6px; padding: 10px 14px; font-size: 13px;
+        line-height: 1.6; pointer-events: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 280px;
       }
     </style>
   </head>
@@ -92,31 +75,36 @@
       있다.
     </p>
 
+    <div class="filter-bar">
+      <button class="filter-btn active" data-type="support" style="border-color:#7aaa7a; background:#7aaa7a;">
+        <span class="dot" style="background:#fff;"></span> Support
+      </button>
+      <button class="filter-btn active" data-type="extend" style="border-color:#5a8aba; background:#5a8aba;">
+        <span class="dot" style="background:#fff;"></span> Extend
+      </button>
+      <button class="filter-btn active" data-type="qualify" style="border-color:#c9a84c; background:#c9a84c;">
+        <span class="dot" style="background:#fff;"></span> Qualify
+      </button>
+      <button class="filter-btn active" data-type="refute" style="border-color:#ba5a5a; background:#ba5a5a;">
+        <span class="dot" style="background:#fff;"></span> Refute
+      </button>
+    </div>
+
+    <p class="hint-text" id="hint">Zone을 클릭하면 관계가 보입니다</p>
+
     <div id="chart"></div>
 
     <div class="legend">
-      <div class="legend-item">
-        <div class="legend-swatch" style="background: #7aaa7a"></div>
-        Support
-      </div>
-      <div class="legend-item">
-        <div class="legend-swatch" style="background: #5a8aba"></div>
-        Extend
-      </div>
-      <div class="legend-item">
-        <div class="legend-swatch" style="background: #c9a84c"></div>
-        Qualify
-      </div>
-      <div class="legend-item">
-        <div class="legend-swatch" style="background: #ba5a5a"></div>
-        Refute
-      </div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#7aaa7a"></div>Support</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#5a8aba"></div>Extend</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#c9a84c"></div>Qualify</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#ba5a5a"></div>Refute</div>
     </div>
 
-    <div class="tooltip" id="tooltip" style="display: none"></div>
+    <div class="tooltip" id="tooltip" style="display:none"></div>
 
     <script>
-      // ── Data ──
+      // ── Data (lighthouse 정본) ──
       const zones = [
         {
           id: 0,
@@ -224,6 +212,10 @@
         refute: "#ba5a5a",
       };
 
+      // ── State ──
+      let selectedZoneId = null;
+      const activeFilters = { support: true, extend: true, qualify: true, refute: true };
+
       // ── SVG ──
       const container = document.getElementById("chart");
       const width = container.clientWidth;
@@ -232,99 +224,86 @@
       const svg = d3.select("#chart").append("svg").attr("width", width).attr("height", height);
 
       // Arrow markers per type
+      const defs = svg.append("defs");
       Object.entries(colorMap).forEach(([type, color]) => {
-        svg
-          .append("defs")
-          .append("marker")
+        defs.append("marker")
           .attr("id", `arrow-${type}`)
-          .attr("viewBox", "0 -5 10 10")
-          .attr("refX", 28)
-          .attr("refY", 0)
-          .attr("markerWidth", 8)
-          .attr("markerHeight", 8)
+          .attr("viewBox", "0 -4 10 8")
+          .attr("refX", 10).attr("refY", 0)
+          .attr("markerWidth", 7).attr("markerHeight", 7)
           .attr("orient", "auto")
-          .append("path")
-          .attr("d", "M0,-5L10,0L0,5")
-          .attr("fill", color);
+          .append("path").attr("d", "M0,-4L10,0L0,4").attr("fill", color);
       });
 
-      const totalClaims = (z) => z.support + z.extend + z.qualify + z.refute;
-      const radiusScale = d3
-        .scaleSqrt()
+      function markerForEdge(d) {
+        return `url(#arrow-${d.type})`;
+      }
+
+      const totalClaims = z => z.support + z.extend + z.qualify + z.refute;
+      const radiusScale = d3.scaleSqrt()
         .domain([0, d3.max(zones, totalClaims)])
         .range([24, 52]);
       const strokeScale = d3.scaleLinear().domain([0, 1]).range([1.5, 7]);
-      const edgeWidthScale = d3
-        .scaleLinear()
-        .domain([1, d3.max(relations, (d) => d.count)])
+      const edgeWidthScale = d3.scaleLinear()
+        .domain([1, d3.max(relations, d => d.count)])
         .range([1.5, 6]);
 
-      // ── Simulation ──
-      const simulation = d3
-        .forceSimulation(zones)
-        .force(
-          "link",
-          d3
-            .forceLink(relations)
-            .id((d) => d.id)
-            .distance(180),
-        )
-        .force("charge", d3.forceManyBody().strength(-600))
-        .force("center", d3.forceCenter(width / 2, height / 2))
-        .force(
-          "collision",
-          d3.forceCollide().radius((d) => radiusScale(totalClaims(d)) + 10),
-        );
+      // 양방향 엣지 곡률 계산
+      const edgeSrcId = relations.map(r => typeof r.source === "object" ? r.source.id : r.source);
+      const edgeTgtId = relations.map(r => typeof r.target === "object" ? r.target.id : r.target);
+      const edgeCurve = new Array(relations.length).fill(0);
+      relations.forEach((r, i) => {
+        const si = edgeSrcId[i], ti = edgeTgtId[i];
+        const hasReverse = relations.some((r2, j) => {
+          return i !== j && edgeSrcId[j] === ti && edgeTgtId[j] === si;
+        });
+        if (hasReverse) {
+          edgeCurve[i] = 30;
+        }
+      });
 
-      // ── Edges ──
+      // ── Simulation ──
+      const simulation = d3.forceSimulation(zones)
+        .force("link", d3.forceLink(relations).id(d => d.id).distance(280))
+        .force("charge", d3.forceManyBody().strength(-1200))
+        .force("center", d3.forceCenter(width / 2, height / 2))
+        .force("collision", d3.forceCollide().radius(d => radiusScale(totalClaims(d)) + 30));
+
+      // ── Edges (path curves) ──
       const linkGroup = svg.append("g");
-      const link = linkGroup
-        .selectAll("line")
-        .data(relations)
-        .join("line")
-        .attr("stroke", (d) => colorMap[d.type])
-        .attr("stroke-width", (d) => edgeWidthScale(d.count))
-        .attr("stroke-opacity", 0.7)
-        .attr("marker-end", (d) => `url(#arrow-${d.type})`);
+      const link = linkGroup.selectAll("path").data(relations).join("path")
+        .attr("stroke", d => colorMap[d.type])
+        .attr("stroke-width", d => edgeWidthScale(d.count))
+        .attr("stroke-opacity", 0)
+        .attr("fill", "none")
+        .attr("marker-end", "")
+        .style("pointer-events", "none");
 
       // ── Nodes ──
       const nodeGroup = svg.append("g");
-      const node = nodeGroup
-        .selectAll("g")
-        .data(zones)
-        .join("g")
-        .call(
-          d3
-            .drag()
-            .on("start", (e, d) => {
-              if (!e.active) simulation.alphaTarget(0.3).restart();
-              d.fx = d.x;
-              d.fy = d.y;
-            })
-            .on("drag", (e, d) => {
-              d.fx = e.x;
-              d.fy = e.y;
-            })
-            .on("end", (e, d) => {
-              if (!e.active) simulation.alphaTarget(0);
-              d.fx = null;
-              d.fy = null;
-            }),
+      const node = nodeGroup.selectAll("g").data(zones).join("g")
+        .attr("cursor", "pointer")
+        .call(d3.drag()
+          .on("start", (e, d) => {
+            if (!e.active) simulation.alphaTarget(0.3).restart();
+            d.fx = d.x; d.fy = d.y;
+          })
+          .on("drag", (e, d) => { d.fx = e.x; d.fy = e.y; })
+          .on("end", (e, d) => {
+            if (!e.active) simulation.alphaTarget(0);
+            d.fx = null; d.fy = null;
+          })
         );
 
-      node
-        .append("circle")
-        .attr("r", (d) => radiusScale(totalClaims(d)))
+      node.append("circle")
+        .attr("r", d => radiusScale(totalClaims(d)))
         .attr("fill", "#f5f5f0")
         .attr("stroke", "#3a3a3a")
-        .attr("stroke-width", (d) => strokeScale(d.unresolvedScore));
+        .attr("stroke-width", d => strokeScale(d.unresolvedScore))
+        .style("transition", "filter 0.3s ease, opacity 0.3s ease");
 
-      node
-        .append("text")
-        .text((d) => {
-          const name = d.name;
-          return name.length > 8 ? name.slice(0, 8) + "..." : name;
-        })
+      node.append("text")
+        .text(d => d.name.length > 14 ? d.name.slice(0, 14) + "..." : d.name)
         .attr("text-anchor", "middle")
         .attr("dy", "0.35em")
         .attr("font-size", "11px")
@@ -335,48 +314,177 @@
       // ── Tooltip ──
       const tooltip = d3.select("#tooltip");
 
-      node
-        .on("mouseover", (e, d) => {
-          tooltip.style("display", "block").html(`
-      <strong>${d.name}</strong><br/>
-      Support: ${d.support} / Extend: ${d.extend}<br/>
-      Qualify: ${d.qualify} / Refute: ${d.refute}<br/>
-      총 claim: ${totalClaims(d)}<br/>
-      <span style="color:#ba5a5a">unresolvedScore: ${d.unresolvedScore.toFixed(2)}</span><br/>
-      avgConfidence: ${d.avgConfidence.toFixed(2)}<br/>
-      claimIsolation: ${d.claimIsolation.toFixed(2)}
-    `);
-        })
-        .on("mousemove", (e) => {
-          tooltip.style("left", e.pageX + 14 + "px").style("top", e.pageY - 10 + "px");
-        })
-        .on("mouseout", () => {
-          tooltip.style("display", "none");
-        });
+      node.on("mouseover", (e, d) => {
+        tooltip.style("display", "block").html(`
+          <strong>${d.name}</strong><br/>
+          Support: ${d.support} / Extend: ${d.extend}<br/>
+          Qualify: ${d.qualify} / Refute: ${d.refute}<br/>
+          총 claim: ${totalClaims(d)}<br/>
+          <span style="color:#ba5a5a">unresolvedScore: ${d.unresolvedScore.toFixed(2)}</span><br/>
+          avgConfidence: ${d.avgConfidence.toFixed(2)}<br/>
+          claimIsolation: ${d.claimIsolation.toFixed(2)}
+        `);
+      })
+      .on("mousemove", e => {
+        tooltip.style("left", e.pageX + 14 + "px").style("top", e.pageY - 10 + "px");
+      })
+      .on("mouseout", () => tooltip.style("display", "none"));
 
-      link
-        .on("mouseover", (e, d) => {
-          tooltip.style("display", "block").html(`
-      <strong>${zones[d.source.id || d.source].name}</strong> &rarr; <strong>${zones[d.target.id || d.target].name}</strong><br/>
-      유형: ${d.type}<br/>
-      빈도: ${d.count}
-    `);
-        })
-        .on("mousemove", (e) => {
-          tooltip.style("left", e.pageX + 14 + "px").style("top", e.pageY - 10 + "px");
-        })
-        .on("mouseout", () => {
-          tooltip.style("display", "none");
+      link.on("mouseover", (e, d) => {
+        const srcName = (d.source.name !== undefined) ? d.source.name : zones[d.source].name;
+        const tgtName = (d.target.name !== undefined) ? d.target.name : zones[d.target].name;
+        const typeLabel = d.type.charAt(0).toUpperCase() + d.type.slice(1);
+        tooltip.style("display", "block").html(
+          `<strong>${srcName}</strong> &rarr; <strong>${tgtName}</strong><br/>` +
+          `<span style="color:${colorMap[d.type]}; font-weight:500;">${typeLabel}</span> (${d.count}건)`
+        );
+      })
+      .on("mousemove", e => {
+        tooltip.style("left", e.pageX + 14 + "px").style("top", e.pageY - 10 + "px");
+      })
+      .on("mouseout", () => tooltip.style("display", "none"));
+
+      // ── Zone click: progressive disclosure ──
+      node.on("click", (e, d) => {
+        e.stopPropagation();
+        if (selectedZoneId === d.id) {
+          resetView();
+        } else {
+          selectedZoneId = d.id;
+          applyView();
+        }
+      });
+
+      // Background click resets
+      svg.on("click", () => {
+        resetView();
+      });
+
+      function resetView() {
+        selectedZoneId = null;
+        document.getElementById("hint").style.opacity = "1";
+        applyView();
+      }
+
+      function applyView() {
+        const hintEl = document.getElementById("hint");
+
+        if (selectedZoneId === null) {
+          hintEl.textContent = "Zone을 클릭하면 관계가 보입니다";
+          hintEl.style.opacity = "1";
+
+          link.transition().duration(300)
+            .attr("stroke-opacity", 0)
+            .attr("marker-end", "")
+            .on("end", function() { d3.select(this).style("pointer-events", "none"); });
+
+          node.select("circle")
+            .transition().duration(300)
+            .attr("opacity", 1)
+            .style("filter", "none");
+
+          node.select("text")
+            .transition().duration(300)
+            .attr("opacity", 1);
+
+        } else {
+          hintEl.textContent = "배경을 클릭하면 초기 상태로 돌아갑니다";
+          hintEl.style.opacity = "0.7";
+
+          const connectedZoneIds = new Set([selectedZoneId]);
+          relations.forEach(r => {
+            const srcId = (r.source.id !== undefined) ? r.source.id : r.source;
+            const tgtId = (r.target.id !== undefined) ? r.target.id : r.target;
+            if (srcId === selectedZoneId) connectedZoneIds.add(tgtId);
+            if (tgtId === selectedZoneId) connectedZoneIds.add(srcId);
+          });
+
+          link.transition().duration(300)
+            .attr("stroke-opacity", d => {
+              const srcId = (d.source.id !== undefined) ? d.source.id : d.source;
+              const tgtId = (d.target.id !== undefined) ? d.target.id : d.target;
+              const connected = (srcId === selectedZoneId || tgtId === selectedZoneId);
+              const filtered = activeFilters[d.type];
+              return (connected && filtered) ? 0.8 : 0;
+            })
+            .attr("marker-end", d => {
+              const srcId = (d.source.id !== undefined) ? d.source.id : d.source;
+              const tgtId = (d.target.id !== undefined) ? d.target.id : d.target;
+              const connected = (srcId === selectedZoneId || tgtId === selectedZoneId);
+              const filtered = activeFilters[d.type];
+              return (connected && filtered) ? markerForEdge(d) : "";
+            })
+            .on("end", function() {
+              const d = d3.select(this).datum();
+              const srcId = (d.source.id !== undefined) ? d.source.id : d.source;
+              const tgtId = (d.target.id !== undefined) ? d.target.id : d.target;
+              const connected = (srcId === selectedZoneId || tgtId === selectedZoneId);
+              const filtered = activeFilters[d.type];
+              d3.select(this).style("pointer-events", (connected && filtered) ? "auto" : "none");
+            });
+
+          node.select("circle")
+            .transition().duration(300)
+            .attr("opacity", d => connectedZoneIds.has(d.id) ? 1 : 0.2)
+            .style("filter", d => d.id === selectedZoneId
+              ? "drop-shadow(0 0 8px rgba(58,58,58,0.5))"
+              : "none");
+
+          node.select("text")
+            .transition().duration(300)
+            .attr("opacity", d => connectedZoneIds.has(d.id) ? 1 : 0.15);
+        }
+      }
+
+      // ── Filter buttons ──
+      document.querySelectorAll(".filter-btn").forEach(btn => {
+        btn.addEventListener("click", () => {
+          const type = btn.dataset.type;
+          activeFilters[type] = !activeFilters[type];
+          const color = colorMap[type];
+
+          if (activeFilters[type]) {
+            btn.classList.add("active");
+            btn.style.background = color;
+            btn.style.color = "#fff";
+          } else {
+            btn.classList.remove("active");
+            btn.style.background = "#fff";
+            btn.style.color = color;
+          }
+
+          applyView();
         });
+      });
 
       // ── Tick ──
       simulation.on("tick", () => {
-        link
-          .attr("x1", (d) => d.source.x)
-          .attr("y1", (d) => d.source.y)
-          .attr("x2", (d) => d.target.x)
-          .attr("y2", (d) => d.target.y);
-        node.attr("transform", (d) => `translate(${d.x},${d.y})`);
+        link.attr("d", (d, i) => {
+          const dx = d.target.x - d.source.x;
+          const dy = d.target.y - d.source.y;
+          const len = Math.sqrt(dx * dx + dy * dy) || 1;
+          const ux = dx / len, uy = dy / len;
+
+          // 원 외곽에서 시작/끝
+          const rSrc = radiusScale(totalClaims(d.source)) + 4;
+          const rTgt = radiusScale(totalClaims(d.target)) + 4;
+          const sx = d.source.x + ux * rSrc;
+          const sy = d.source.y + uy * rSrc;
+          const tx = d.target.x - ux * rTgt;
+          const ty = d.target.y - uy * rTgt;
+
+          const curve = edgeCurve[i];
+          if (curve === 0) {
+            return `M${sx},${sy} L${tx},${ty}`;
+          }
+          // 곡선 제어점
+          const nx = -uy * curve;
+          const ny = ux * curve;
+          const mx = (sx + tx) / 2 + nx;
+          const my = (sy + ty) / 2 + ny;
+          return `M${sx},${sy} Q${mx},${my} ${tx},${ty}`;
+        });
+        node.attr("transform", d => `translate(${d.x},${d.y})`);
       });
     </script>
   </body>

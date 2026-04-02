@@ -197,8 +197,7 @@
         <div class="viz-label">Expected vs Observed Scatter</div>
         <div class="viz-why">
           x축은 예상 연결 강도, y축은 실제 연결 강도. 대각선 아래에 놓인 점이 gap 후보다. 대각선에서
-          멀수록 gap이 심각하다. 현재 제품은 이 산점도 옆에 coverage, uncertainty, bridge value를
-          함께 읽는 gap detail 카드도 붙인다.
+          멀수록 gap이 심각하다.
         </div>
         <iframe src="../viz-network-science/gap-1-scatter.html"></iframe>
       </div>
@@ -225,29 +224,8 @@
       <h2>Light House에서의 용도</h2>
       <div class="product-card">
         <p>
-          Light House의 "약한 연결 찾기" 맵이 이 분석에 대응한다. gap-scatter 기본 표현으로 expected
-          vs observed 관점을 먼저 보여 주고, gap-matrix와 force 탐색으로 세부 구조를 더 본다.
-        </p>
-      </div>
-
-      <h2>현재 구현 내역</h2>
-      <div class="card">
-        <p>
-          현재 제품은 gap을 renderer 안에서 임시 계산하지 않고, 서버에서 계산한 정본 signal을 쓴다.
-          핵심 축은 <strong>expectedLinkage</strong>, <strong>observedLinkage</strong>,
-          <strong>coverage</strong>, <strong>uncertainty</strong>,
-          <strong>supportCounterBalance</strong>, <strong>sourceCoverage</strong>,
-          <strong>targetCoverage</strong>다.
-        </p>
-        <p>
-          계산은 <code>app/server/services/gap-detection-service.ts</code>, 표시용 artifact 정리는
-          <code>app/components/documents/graph/graph-map-analytics.ts</code>, 기본 표현은
-          <code>GraphGapScatterRenderer.tsx</code>와 <code>GraphWeakTieMatrixRenderer.tsx</code>,
-          detail은 <code>graph-map-detail-widgets.tsx</code>가 담당한다.
-        </p>
-        <p>
-          현재는 search result와 abstract만 쓰므로, gap 품질은 검색 결과 정제와 concept
-          normalization 품질에 직접 영향을 받는다.
+          Light House의 "약한 연결 찾기" 맵이 이 분석에 대응한다. 기대 연결과 실제 연결의 차이, gap
+          후보, 관련 논문을 함께 읽는 관점이다.
         </p>
       </div>
 

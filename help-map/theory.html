@@ -1501,41 +1501,6 @@
           나왔는지"를 다시 따라갈 수 있는 것이 이 시스템의 기본 설계다.
         </div>
       </div>
-
-      <div class="deep-section">
-        <h2>현재 구현 내역</h2>
-        <div class="impl-box">
-          <p>
-            현재 제품의 지식맵 입력은 <strong>Semantic Scholar 검색 결과와 abstract</strong>로
-            한정된다. PDF 본문과 inlineAnalysis는 지식맵 정본 계산에 쓰지 않는다.
-          </p>
-          <p>
-            LLM이 없으면 지식맵은 생성/표시되지 않는다. 현재 LLM은 query clause 정규화, source paper
-            selection adjudication, concept extraction, 일부 paper-pair relationship 판정에 필수로
-            쓰인다.
-          </p>
-          <p>
-            현재 source selection은 검색 100편을 보존한 뒤, 규칙 기반 signal로 넓게 후보를 잡고
-            LLM이 <strong>dynamic 40~60편</strong>을 판정한 뒤 hard curation한다.
-          </p>
-          <p>
-            핵심 구현 파일:
-            <code>app/server/services/query-clause-normalization-service.ts</code>,
-            <code>app/server/services/source-selection-judgment-service.ts</code>,
-            <code>app/server/services/concept-extraction-service.ts</code>,
-            <code>app/server/services/gap-detection-service.ts</code>,
-            <code>app/server/services/graph-community-service.ts</code>,
-            <code>app/server/services/graph-bridge-service.ts</code>,
-            <code>app/server/services/temporal-graph-service.ts</code>,
-            <code>app/server/services/claim-graph-service.ts</code>.
-          </p>
-          <p>
-            현재 기본 맵은 약한 연결 찾기, 지형 파악, 연결 경로 보기, 최근 변화, 논쟁 구조다. 각
-            하위 페이지 하단의 <strong>현재 구현 내역</strong> 섹션에서 실제 계산 신호와 renderer
-            파일을 따로 적는다.
-          </p>
-        </div>
-      </div>
     </div>
 
     <!-- References -->

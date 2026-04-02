@@ -206,29 +206,9 @@
       <!-- Light House에서의 용도 -->
       <h2>Light House에서의 용도</h2>
       <p class="product-note">
-        Light House의 "연결 경로 보기" 맵이 이 분석에 대응한다. bridge-flow 기본 표현으로 실제 연결
-        경로를 먼저 보고, bridge-ranking과 force 탐색으로 브리지 논문 중심도를 더 본다.
+        Light House의 "연결 경로 보기" 맵이 이 분석에 대응한다. 브리지 논문과 연결 경로를 통해 두
+        흐름이 어떻게 이어지는지 읽는 관점이다.
       </p>
-
-      <h2>현재 구현 내역</h2>
-      <div class="card">
-        <p>
-          현재 제품은 bridge를 단순 순위가 아니라 <strong>candidate k-path</strong>와
-          <strong>anchor pair</strong>를 가진 snapshot으로 저장한다. 각 경로에는
-          <strong>pathStrength</strong>, <strong>diversityScore</strong>,
-          <strong>comparisonScore</strong>, cost, coverage, uncertainty가 붙는다.
-        </p>
-        <p>
-          계산은 <code>app/server/services/graph-bridge-service.ts</code>, 표시용 bridge artifact는
-          <code>app/components/documents/graph/graph-map-analytics.bridges.ts</code>, 기본 표현은
-          <code>GraphBridgeFlowRenderer.tsx</code>, 보조 순위 표현은
-          <code>GraphBridgeRankingRenderer.tsx</code>가 맡는다.
-        </p>
-        <p>
-          현재는 betweenness 기반 메타 진단보다 query-local bridge/path 설명을 우선한다. richer
-          counter-evidence와 path-level 반례 표시는 아직 후속 과제다.
-        </p>
-      </div>
 
       <a class="bottom-back" href="index.html">&larr; 목록으로</a>
     </div>

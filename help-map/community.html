@@ -207,30 +207,9 @@
       <!-- Light House에서의 용도 -->
       <h2>Light House에서의 용도</h2>
       <p class="product-note">
-        Light House의 "지형 파악" 맵이 이 분석에 대응한다. community-matrix 기본 표현으로 군집 내부
-        응집도와 군집 간 연결을 먼저 보고, cluster-treemap·cluster-pack과 force 탐색으로 규모와
-        경계를 더 본다.
+        Light House의 "지형 파악" 맵이 이 분석에 대응한다. 하위 분야의 응집도와 군집 간 연결을 함께
+        읽는 관점이다.
       </p>
-
-      <h2>현재 구현 내역</h2>
-      <div class="card">
-        <p>
-          현재 제품은 weighted label propagation 기반 community snapshot을 정본으로 저장한다. 각
-          커뮤니티에는 <strong>density</strong>, <strong>quality</strong>,
-          <strong>boundaryPaperShare</strong>, <strong>conceptDiversity</strong>,
-          <strong>topConceptShare</strong>, <strong>offTopicShare</strong>가 들어간다.
-        </p>
-        <p>
-          계산은 <code>app/server/services/graph-community-service.ts</code>, 표시용 matrix cell과
-          summary는 <code>app/components/documents/graph/graph-map-analytics.ts</code>, 기본 표현은
-          <code>GraphCommunityMatrixRenderer.tsx</code>가 담당한다. 보조 detail은
-          <code>graph-map-detail-widgets.tsx</code>에서 읽는다.
-        </p>
-        <p>
-          Leiden이나 fuzzy membership은 아직 정본 계산으로 들어가 있지 않다. 현재는 더 가벼운
-          community snapshot을 먼저 제품에 올린 상태다.
-        </p>
-      </div>
 
       <a class="bottom-back" href="index.html">&larr; 목록으로</a>
     </div>

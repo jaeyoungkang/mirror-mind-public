@@ -10,81 +10,37 @@
     />
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <style>
-      * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-      }
+      * { margin: 0; padding: 0; box-sizing: border-box; }
       body {
         background: #fafaf8;
         font-family: "Noto Sans KR", sans-serif;
         color: #2a2a2a;
         padding: 40px;
       }
-      h1 {
-        font-size: 28px;
-        font-weight: 700;
-        margin-bottom: 8px;
-        color: #1a1a1a;
-      }
-      .question {
-        font-size: 16px;
-        font-weight: 400;
-        color: #666;
-        margin-bottom: 12px;
-      }
+      h1 { font-size: 28px; font-weight: 700; margin-bottom: 8px; color: #1a1a1a; }
+      .question { font-size: 16px; font-weight: 400; color: #666; margin-bottom: 12px; }
       .rationale {
-        font-size: 14px;
-        font-weight: 300;
-        color: #888;
-        line-height: 1.7;
-        margin-bottom: 32px;
-        max-width: 800px;
+        font-size: 14px; font-weight: 300; color: #888;
+        line-height: 1.7; margin-bottom: 32px; max-width: 800px;
       }
       #chart {
-        width: 100%;
-        max-width: 1100px;
-        height: 700px;
-        border: 1px solid #e0e0dc;
-        border-radius: 8px;
-        background: #fff;
-        overflow: auto;
+        width: 100%; max-width: 1400px; height: auto; min-height: 700px; overflow: auto;
+        border: 1px solid #e0e0dc; border-radius: 8px;
+        background: #fff; overflow: auto;
       }
       .legend {
-        display: flex;
-        gap: 24px;
-        margin-top: 16px;
-        font-size: 13px;
-        color: #555;
-        flex-wrap: wrap;
+        display: flex; gap: 24px; margin-top: 16px;
+        font-size: 13px; color: #555; flex-wrap: wrap;
       }
-      .legend-item {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-      }
-      .legend-swatch {
-        width: 14px;
-        height: 14px;
-        border-radius: 50%;
-      }
+      .legend-item { display: flex; align-items: center; gap: 6px; }
+      .legend-swatch { width: 14px; height: 14px; border-radius: 50%; }
       .tooltip {
-        position: absolute;
-        background: #fff;
-        border: 1px solid #ddd;
-        border-radius: 6px;
-        padding: 10px 14px;
-        font-size: 13px;
-        line-height: 1.6;
-        pointer-events: none;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-        max-width: 280px;
+        position: absolute; background: #fff; border: 1px solid #ddd;
+        border-radius: 6px; padding: 10px 14px; font-size: 13px;
+        line-height: 1.6; pointer-events: none;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1); max-width: 280px;
       }
-      .frontier-badge {
-        font-size: 10px;
-        fill: #ba5a5a;
-        font-weight: 700;
-      }
+      .frontier-badge { font-size: 10px; fill: #ba5a5a; font-weight: 700; }
     </style>
   </head>
   <body>
@@ -101,42 +57,22 @@
     <div id="chart"></div>
 
     <div class="legend">
-      <div class="legend-item">
-        <div class="legend-swatch" style="background: #6b8e6b"></div>
-        외부 메모리 vs 내부 상태
-      </div>
-      <div class="legend-item">
-        <div class="legend-swatch" style="background: #8b6b8e"></div>
-        망각 곡선 유효성
-      </div>
-      <div class="legend-item">
-        <div class="legend-swatch" style="background: #5a7faa"></div>
-        RAG vs 에이전트 기억
-      </div>
-      <div class="legend-item">
-        <div class="legend-swatch" style="background: #aa7f5a"></div>
-        계획-행동 루프 구조
-      </div>
-      <div class="legend-item">
-        <div class="legend-swatch" style="background: #7aaa9a"></div>
-        시뮬레이션 일반화
-      </div>
-      <div class="legend-item">
-        <div class="legend-swatch" style="background: #aa5a7f"></div>
-        멀티모달 기억 통합
-      </div>
-      <div class="legend-item" style="margin-left: 24px">
-        <div
-          style="width: 14px; height: 14px; border: 2px dashed #ba5a5a; border-radius: 50%"
-        ></div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#6b8e6b"></div>외부 메모리 vs 내부 상태</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#8b6b8e"></div>망각 곡선 유효성</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#5a7faa"></div>RAG vs 에이전트 기억</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#aa7f5a"></div>계획-행동 루프 구조</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#7aaa9a"></div>시뮬레이션 일반화</div>
+      <div class="legend-item"><div class="legend-swatch" style="background:#aa5a7f"></div>멀티모달 기억 통합</div>
+      <div class="legend-item" style="margin-left:24px">
+        <div style="width:14px;height:14px;border:2px dashed #ba5a5a;border-radius:50%"></div>
         프런티어 (확장 가능 공백)
       </div>
     </div>
 
-    <div class="tooltip" id="tooltip" style="display: none"></div>
+    <div class="tooltip" id="tooltip" style="display:none"></div>
 
     <script>
-      // ── Data ──
+      // ── Data (lighthouse 정본) ──
       const zoneNames = [
         "외부 메모리 vs 내부 상태",
         "망각 곡선 유효성",
@@ -238,7 +174,6 @@
       ];
 
       // Build tree hierarchy from extend relations
-      // Roots: zones that are NOT targets of any extend relation
       const targetIds = new Set(extendRelations.map((r) => r.target));
       const sourceIds = new Set(extendRelations.map((r) => r.source));
       const rootIds = [];
@@ -246,8 +181,6 @@
         if (!targetIds.has(i)) rootIds.push(i);
       }
 
-      // Build hierarchical tree data
-      // Each node has sub-claims (fictional but plausible) to create richer tree depth
       function buildTree() {
         const root = {
           name: "논증 계보",
@@ -458,116 +391,103 @@
 
       // ── Layout ──
       const container = document.getElementById("chart");
-      const width = 1080;
-      const height = 680;
-      const margin = { top: 30, right: 180, bottom: 30, left: 60 };
+      const margin = { top: 40, right: 200, bottom: 40, left: 80 };
+
+      const root = d3.hierarchy(treeData);
+      const treeLayout = d3.tree()
+        .nodeSize([50, 220]);
+      treeLayout(root);
+
+      // 트리 크기에 맞게 SVG 자동 조절
+      let minX = Infinity, maxX = -Infinity, maxY = -Infinity;
+      root.each(d => {
+        if (d.x < minX) minX = d.x;
+        if (d.x > maxX) maxX = d.x;
+        if (d.y > maxY) maxY = d.y;
+      });
+      const width = maxY + margin.left + margin.right + 100;
+      const height = (maxX - minX) + margin.top + margin.bottom + 60;
 
       const svg = d3.select("#chart").append("svg").attr("width", width).attr("height", height);
-
-      const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top})`);
-
-      const treeLayout = d3
-        .tree()
-        .size([height - margin.top - margin.bottom, width - margin.left - margin.right - 100]);
-      const root = d3.hierarchy(treeData);
-      treeLayout(root);
+      const g = svg.append("g").attr("transform", `translate(${margin.left},${margin.top + (-minX)})`);
 
       const tooltip = d3.select("#tooltip");
       const supportScale = d3.scaleSqrt().domain([0, 15]).range([6, 22]);
 
       // ── Links ──
       g.selectAll(".link")
-        .data(root.links().filter((d) => d.source.data.zone !== -1))
+        .data(root.links().filter(d => d.source.data.zone !== -1))
         .join("path")
         .attr("class", "link")
-        .attr(
-          "d",
-          d3
-            .linkHorizontal()
-            .x((d) => d.y)
-            .y((d) => d.x),
-        )
+        .attr("d", d3.linkHorizontal().x(d => d.y).y(d => d.x))
         .attr("fill", "none")
-        .attr("stroke", (d) => {
-          const targetZone = d.target.data.zone;
-          return targetZone >= 0 ? zoneColors[targetZone] : "#ccc";
+        .attr("stroke", d => {
+          const tz = d.target.data.zone;
+          return tz >= 0 ? zoneColors[tz] : "#ccc";
         })
         .attr("stroke-width", 2)
         .attr("stroke-opacity", 0.5);
 
       // ── Nodes ──
-      const nodes = g
-        .selectAll(".node")
-        .data(root.descendants().filter((d) => d.data.zone !== -1))
+      const nodes = g.selectAll(".node")
+        .data(root.descendants().filter(d => d.data.zone !== -1))
         .join("g")
         .attr("class", "node")
-        .attr("transform", (d) => `translate(${d.y},${d.x})`);
+        .attr("transform", d => `translate(${d.y},${d.x})`);
 
-      // Node circles
-      nodes
-        .append("circle")
-        .attr("r", (d) => supportScale(d.data.support || 3))
-        .attr("fill", (d) => {
+      nodes.append("circle")
+        .attr("r", d => supportScale(d.data.support || 3))
+        .attr("fill", d => {
           const z = d.data.zone;
           return z >= 0 ? zoneColors[z] : "#ccc";
         })
-        .attr("fill-opacity", (d) => (d.data.isFrontier ? 0.2 : 0.75))
-        .attr("stroke", (d) => {
+        .attr("fill-opacity", d => d.data.isFrontier ? 0.2 : 0.75)
+        .attr("stroke", d => {
           if (d.data.isFrontier) return "#ba5a5a";
           const z = d.data.zone;
           return z >= 0 ? d3.color(zoneColors[z]).darker(0.5) : "#999";
         })
-        .attr("stroke-width", (d) => (d.data.isFrontier ? 2.5 : 1.5))
-        .attr("stroke-dasharray", (d) => (d.data.isFrontier ? "4,3" : "none"));
+        .attr("stroke-width", d => d.data.isFrontier ? 2.5 : 1.5)
+        .attr("stroke-dasharray", d => d.data.isFrontier ? "4,3" : "none");
 
       // Frontier badge
-      nodes
-        .filter((d) => d.data.isFrontier)
-        .append("text")
-        .attr("class", "frontier-badge")
-        .attr("x", (d) => supportScale(d.data.support || 3) + 4)
-        .attr("y", -6)
-        .text("F");
+      nodes.filter(d => d.data.isFrontier)
+        .append("text").attr("class", "frontier-badge")
+        .attr("x", d => supportScale(d.data.support || 3) + 4)
+        .attr("y", -6).text("F");
 
-      // Labels
-      nodes
-        .append("text")
-        .attr("x", (d) =>
-          d.children
-            ? -(supportScale(d.data.support || 3) + 8)
-            : supportScale(d.data.support || 3) + 8,
-        )
-        .attr("dy", "0.35em")
-        .attr("text-anchor", (d) => (d.children ? "end" : "start"))
-        .attr("font-size", (d) => (d.depth === 0 ? "12px" : "11px"))
-        .attr("font-weight", (d) => (d.depth === 0 ? "600" : "400"))
+      // Labels (노드 아래 중앙 정렬)
+      nodes.append("text")
+        .attr("x", 0)
+        .attr("dy", d => supportScale(d.data.support || 3) + 14)
+        .attr("text-anchor", "middle")
+        .attr("font-size", d => d.depth === 0 ? "11px" : "10px")
+        .attr("font-weight", d => d.depth === 0 ? "600" : "400")
         .attr("fill", "#2a2a2a")
-        .text((d) => {
+        .text(d => {
           const name = d.data.name;
-          return name.length > 16 ? name.slice(0, 16) + "..." : name;
+          return name.length > 25 ? name.slice(0, 25) + "..." : name;
         });
 
       // ── Tooltip ──
-      nodes
-        .on("mouseover", (e, d) => {
-          const data = d.data;
-          const zoneName = data.zone >= 0 ? zoneNames[data.zone] : "N/A";
-          tooltip.style("display", "block").html(`
-    <strong>${data.name}</strong><br/>
-    소속 zone: ${zoneName}<br/>
-    support 수: ${data.support || "N/A"}<br/>
-    깊이: ${d.depth}<br/>
-    ${
-      data.isFrontier
-        ? '<span style="color:#ba5a5a;font-weight:600">프런티어 -- 확장 가능 공백</span>'
-        : `하위 가지: ${d.children ? d.children.length : 0}`
-    }
-  `);
-        })
-        .on("mousemove", (e) => {
-          tooltip.style("left", e.pageX + 14 + "px").style("top", e.pageY - 10 + "px");
-        })
-        .on("mouseout", () => tooltip.style("display", "none"));
+      nodes.on("mouseover", (e, d) => {
+        const data = d.data;
+        const zoneName = data.zone >= 0 ? zoneNames[data.zone] : "N/A";
+        tooltip.style("display", "block").html(`
+          <strong>${data.name}</strong><br/>
+          소속 zone: ${zoneName}<br/>
+          support 수: ${data.support || "N/A"}<br/>
+          깊이: ${d.depth}<br/>
+          ${data.isFrontier
+            ? '<span style="color:#ba5a5a;font-weight:600">프런티어 -- 확장 가능 공백</span>'
+            : `하위 가지: ${d.children ? d.children.length : 0}`
+          }
+        `);
+      })
+      .on("mousemove", e => {
+        tooltip.style("left", e.pageX + 14 + "px").style("top", e.pageY - 10 + "px");
+      })
+      .on("mouseout", () => tooltip.style("display", "none"));
     </script>
   </body>
 </html>

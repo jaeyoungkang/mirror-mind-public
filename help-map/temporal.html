@@ -227,29 +227,9 @@
       <!-- Light House에서의 용도 -->
       <h2>Light House에서의 용도</h2>
       <p class="product-note">
-        Light House의 "최근 변화" 맵이 이 분석에 대응한다. trend-stream 기본 표현으로 갈래별 성장
-        흐름을 먼저 보여 주고, trend-timeline으로 연도별 막대와 cluster-pair heatmap을 더 본다.
+        Light House의 "최근 변화" 맵이 이 분석에 대응한다. 시간 흐름 속에서 어떤 연결과 주제가
+        커지고 있는지 읽는 관점이다.
       </p>
-
-      <h2>현재 구현 내역</h2>
-      <div class="card">
-        <p>
-          현재 제품은 발행 연도 기반으로 <strong>edge trend</strong>,
-          <strong>concept trend</strong>, <strong>paper trend</strong>,
-          <strong>pair trend</strong>를 계산한다. pair trend가 없을 때도 temporal map이 완전히 비지
-          않도록 edge/concept trend fallback을 같이 쓴다.
-        </p>
-        <p>
-          계산은 <code>app/server/services/temporal-graph-service.ts</code>, 표시용 정리는
-          <code>app/components/documents/graph/graph-map-analytics.ts</code>, 기본 표현은
-          <code>GraphTrendStreamRenderer.tsx</code>와 <code>GraphTrendTimelineRenderer.tsx</code>가
-          맡는다.
-        </p>
-        <p>
-          현재 temporal 신호는 최근성 기회와 cluster-pair movement를 보여 주는 수준이며, 더 dense한
-          historical comparison mode는 아직 후속 과제다.
-        </p>
-      </div>
 
       <a class="bottom-back" href="index.html">&larr; 목록으로</a>
     </div>
