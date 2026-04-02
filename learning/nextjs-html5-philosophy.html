@@ -296,11 +296,8 @@ JS가 실패하면 빈 페이지</code></pre>
 목적이다.</strong></p>
 <hr />
 <h2 id="퀴즈-next.js와-html5-철학">퀴즈: Next.js와 HTML5 철학</h2>
-<details>
-<summary>
-<strong>Q1. 아래 두 코드 중 어느 것이 HTML5 점진적 향상에 더
-가까운가?</strong>
-</summary>
+<p><strong>Q1. 아래 두 코드 중 어느 것이 HTML5 점진적 향상에 더
+가까운가?</strong></p>
 <div class="sourceCode" id="cb3"><pre
 class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// A: React SPA (Create React App)</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="co">// index.html</span></span>
@@ -319,6 +316,10 @@ class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb3-1"
 <span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a>    <span class="kw">&lt;/article&gt;</span></span>
 <span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a>  )</span>
 <span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a>}</span></code></pre></div>
+<details>
+<summary>
+정답 보기
+</summary>
 <p><strong>정답: B.</strong></p>
 <p>A는 JS가 로드되기 전까지 빈 <code>&lt;div&gt;</code>만 존재한다. 검색
 엔진, 스크린리더, 느린 네트워크 사용자가 보는 것은 빈 페이지다.</p>
@@ -327,10 +328,11 @@ class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb3-1"
 <code>&lt;p&gt;</code>가 브라우저에 존재한다. HTML5의 3층 계약이
 복원된다.</p>
 </details>
+<p><strong>Q2. Next.js의 Server Component는 왜 HTML5 철학에
+가까운가?</strong></p>
 <details>
 <summary>
-<strong>Q2. Next.js의 Server Component는 왜 HTML5 철학에
-가까운가?</strong>
+정답 보기
 </summary>
 <p>Server Component는 <strong>서버에서 실행되고, 클라이언트에 JS를
 보내지 않는다.</strong> 출력은 순수한 HTML이다.</p>
@@ -356,10 +358,11 @@ class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb4-1"
 <p><strong>핵심:</strong> Server Component = HTML-first. JS가 필요한
 곳(이벤트 핸들러, 상태)만 Client Component로 분리한다.</p>
 </details>
+<p><strong>Q3. Next.js <code>&lt;Link&gt;</code>는
+<code>&lt;a&gt;</code>인가 아닌가?</strong></p>
 <details>
 <summary>
-<strong>Q3. Next.js <code>&lt;Link&gt;</code>는
-<code>&lt;a&gt;</code>인가 아닌가?</strong>
+정답 보기
 </summary>
 <p><strong><code>&lt;a&gt;</code>이다.</strong></p>
 <div class="sourceCode" id="cb5"><pre
@@ -379,9 +382,11 @@ class="sourceCode jsx"><code class="sourceCode javascriptreact"><span id="cb5-1"
 갇혀 있다. Next.js에서는 서버 렌더링된 HTML에 <code>&lt;a&gt;</code>가
 직접 존재한다.</p>
 </details>
+<p><strong>Q4. hydration 전에 버튼을 클릭하면 어떻게
+되는가?</strong></p>
 <details>
 <summary>
-<strong>Q4. hydration 전에 버튼을 클릭하면 어떻게 되는가?</strong>
+정답 보기
 </summary>
 <p><strong>보이는데 안 눌린다.</strong></p>
 <pre><code>서버 HTML 도착 (0ms)     → 콘텐츠가 보인다
@@ -398,13 +403,14 @@ hydration 완료 (300ms~)  → 버튼 클릭이 작동한다</code></pre>
 폼이 제출된다 - 진짜 JS가 필요한 인터랙션만 Client Component로
 격리한다</p>
 </details>
-<details>
-<summary>
-<strong>Q5. 다음 중 Next.js가 해소하지 못하는 긴장은?</strong>
-</summary>
+<p><strong>Q5. 다음 중 Next.js가 해소하지 못하는 긴장은?</strong></p>
 <pre><code>A. JS 로드 전 빈 페이지
 B. div soup 문화
 C. 브라우저 기본 동작 재구현 (일부)</code></pre>
+<details>
+<summary>
+정답 보기
+</summary>
 <p><strong>정답: B와 C (일부).</strong></p>
 <ul>
 <li>A는 SSR/SSG/Server Components로 해소됨</li>
