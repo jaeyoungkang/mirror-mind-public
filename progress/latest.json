@@ -1,31 +1,38 @@
 {
-  "generatedAt": "2026-04-03T04:34:40.308532+00:00",
+  "generatedAt": "2026-04-03T05:12:03.026863+00:00",
   "repoRoot": "/Users/jaeyoungkang/corca/lighthouse",
   "activeSessionId": "019d4d6f-4914-7662-92eb-7c6a16463294",
   "sessions": [
     {
       "sessionId": "019d4d6f-4914-7662-92eb-7c6a16463294",
       "cwd": "/Users/jaeyoungkang/corca/lighthouse",
-      "updatedAt": "2026-04-03T04:34:15.434Z",
+      "updatedAt": "2026-04-03T05:11:30.988Z",
       "active": true,
-      "lastAssistantMessage": "공통 로직을 먼저 뽑아내겠습니다. 지금 막힌 부분은 기능 문제가 아니라 A1/B1 분리 과정에서 생긴 중복이어서, 공유 가능한 범위만 추출해 `dup:check`를 통과시키는 쪽으로 정리합니다.",
-      "lastUserMessage": "커밋 푸시하라. 푸시후 b1 작업 진행하라. a1 의 사례처럼 샘플과 같은수준으로 구현하라.",
+      "lastAssistantMessage": "라벨 자체가 어디서 만들어지는지와, 그 논문에 들어간 topic 신호가 무엇인지까지 보겠습니다. 지금은 “요약 topic”과 “cluster 대표 라벨”이 서로 다른 규칙으로 섞였을 가능성이 큽니다.",
+      "lastUserMessage": "'The AI Scientist: Towards Fully Automated Open-Ended Scientific Discovery' 이 논문 주제가 'automated scientific discovery', 'large language models' 로 분류되었는데 a1 지식 맵에서 'Large Language Models & Generative Ai' 카테고리로 분류되었다. 이부분 조정이 필요하다. 어떻게 결정된거지?",
       "progress": {
         "globalPercent": 88,
         "globalLabel": "후반",
-        "currentTurnPercent": 85,
+        "currentTurnPercent": 50,
         "currentTurnLabel": "running"
       },
       "milestones": [],
       "currentTurn": {
-        "turnId": "019d516a-e1c0-7b73-8451-50baa981e20e",
-        "startedAt": "2026-04-03T03:37:32.353Z",
+        "turnId": "019d51c0-7dd3-7c61-ab68-8ff9060d0e18",
+        "startedAt": "2026-04-03T05:11:02.886Z",
         "endedAt": null,
         "status": "running",
-        "progressPercent": 85,
+        "progressPercent": 50,
         "progressLabel": "running",
-        "latestAssistantMessage": "공통 로직을 먼저 뽑아내겠습니다. 지금 막힌 부분은 기능 문제가 아니라 A1/B1 분리 과정에서 생긴 중복이어서, 공유 가능한 범위만 추출해 `dup:check`를 통과시키는 쪽으로 정리합니다.",
+        "latestAssistantMessage": "라벨 자체가 어디서 만들어지는지와, 그 논문에 들어간 topic 신호가 무엇인지까지 보겠습니다. 지금은 “요약 topic”과 “cluster 대표 라벨”이 서로 다른 규칙으로 섞였을 가능성이 큽니다.",
         "verifications": [
+          {
+            "key": "vitest",
+            "label": "vitest",
+            "status": "passed",
+            "summary": "",
+            "command": "/bin/zsh -lc npx vitest run app/components/documents/__tests__/EgoGraphDocument.test.tsx"
+          },
           {
             "key": "typecheck",
             "label": "typecheck",
@@ -41,13 +48,6 @@
             "command": "/bin/zsh -lc npm run lint"
           },
           {
-            "key": "build",
-            "label": "build",
-            "status": "passed",
-            "summary": "",
-            "command": "/bin/zsh -lc npm run build"
-          },
-          {
             "key": "specdown",
             "label": "specdown",
             "status": "passed",
@@ -55,20 +55,9 @@
             "command": "/bin/zsh -lc specdown run"
           }
         ],
-        "commandCount": 231
+        "commandCount": 8
       },
       "recentTurns": [
-        {
-          "turnId": "019d50de-6b0b-79a0-a91d-179c5c4a0651",
-          "startedAt": "2026-04-03T01:04:06.929Z",
-          "endedAt": "2026-04-03T01:06:13.658Z",
-          "status": "completed",
-          "percent": 100,
-          "label": "completed",
-          "headline": "제안별로 현재 구현과 스펙을 대조해서 검토하겠습니다. 특히 검색 시 인라인 분석 파이프라인과 A1 enrich가 실제로 어떻게 연결돼 있는지부터",
-          "summary": "검토 결과, 방향은 대체로 맞습니다. 다만 3번과 4번은 같이 설계해야 합니다.\n\n1. `CCDF 1.5배 확대`\n- 찬성입니다. 지금 inset이 [DegreeDistributionReport.tsx](/Users/jaeyoungkang/corca/lighthouse/app/components/documents/knowledge-map/DegreeDist",
-          "commandCount": 23
-        },
         {
           "turnId": "019d50e6-af97-7421-ba54-21f5ad637a9c",
           "startedAt": "2026-04-03T01:13:08.765Z",
@@ -138,19 +127,30 @@
         {
           "turnId": "019d516a-e1c0-7b73-8451-50baa981e20e",
           "startedAt": "2026-04-03T03:37:32.353Z",
+          "endedAt": "2026-04-03T05:08:57.053Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "현재 변경분을 먼저 정리해 커밋/푸시하고, 그 다음 B1 스펙과 참조 샘플을 대조해 샘플 수준으로 맞추겠습니다. 푸시 전에는 변경 범위와 검증 ",
+          "summary": "원인은 B1 pending 문서가 생성 요청을 시작하지 않고 `status`만 polling하던 버그였습니다. [EgoGraphDocument.tsx](/Users/jaeyoungkang/corca/lighthouse/app/components/documents/EgoGraphDocument.tsx) 에서 `POST /api/documents/ego-net",
+          "commandCount": 303
+        },
+        {
+          "turnId": "019d51c0-7dd3-7c61-ab68-8ff9060d0e18",
+          "startedAt": "2026-04-03T05:11:02.886Z",
           "endedAt": null,
           "status": "running",
-          "percent": 85,
+          "percent": 50,
           "label": "running",
-          "headline": "현재 변경분을 먼저 정리해 커밋/푸시하고, 그 다음 B1 스펙과 참조 샘플을 대조해 샘플 수준으로 맞추겠습니다. 푸시 전에는 변경 범위와 검증 ",
-          "summary": "공통 로직을 먼저 뽑아내겠습니다. 지금 막힌 부분은 기능 문제가 아니라 A1/B1 분리 과정에서 생긴 중복이어서, 공유 가능한 범위만 추출해 `dup:check`를 통과시키는 쪽으로 정리합니다.",
-          "commandCount": 231
+          "headline": "현재 분류가 어떻게 결정되는지, 그리고 왜 그 논문이 `Large Language Models & Generative Ai` 쪽으로 들어갔는지 ",
+          "summary": "라벨 자체가 어디서 만들어지는지와, 그 논문에 들어간 topic 신호가 무엇인지까지 보겠습니다. 지금은 “요약 topic”과 “cluster 대표 라벨”이 서로 다른 규칙으로 섞였을 가능성이 큽니다.",
+          "commandCount": 8
         }
       ],
       "stats": {
-        "totalTurns": 51,
-        "completedTurns": 45,
-        "totalCommands": 1667
+        "totalTurns": 52,
+        "completedTurns": 46,
+        "totalCommands": 1747
       }
     },
     {
