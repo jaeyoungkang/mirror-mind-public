@@ -1,14 +1,14 @@
 {
-  "generatedAt": "2026-04-03T02:17:19.773176+00:00",
+  "generatedAt": "2026-04-03T02:22:00.217122+00:00",
   "repoRoot": "/Users/jaeyoungkang/corca/lighthouse",
-  "activeSessionId": "019d5120-5b74-79f1-9050-f7485d7f2d66",
+  "activeSessionId": "019d4d6f-4914-7662-92eb-7c6a16463294",
   "sessions": [
     {
       "sessionId": "019d4d6f-4914-7662-92eb-7c6a16463294",
       "cwd": "/Users/jaeyoungkang/corca/lighthouse",
-      "updatedAt": "2026-04-03T02:17:16.592Z",
+      "updatedAt": "2026-04-03T02:21:40.458Z",
       "active": true,
-      "lastAssistantMessage": "저장 데이터까지 확인했습니다. 최신 `search` 문서는 아직 영어 문장으로 `claim/method/finding`이 저장되고 있고, 최신 `graph` 문서는 사용자가 본 그 이상한 5개 라벨이 그대로 저장돼 있습니다. 즉 단순 렌더 문제가 아니라 저장 파이프라인 자체를 다시 맞춰야 합니다.",
+      "lastAssistantMessage": "이제 코드 편집에 들어갑니다. 먼저 inline-analysis cache/version과 Korean semantic profile 저장 경로를 정리하고, 그 다음 UI 표시, 마지막으로 Louvain cluster로 바꾸겠습니다.",
       "lastUserMessage": "테스트 해봤는데 엉뚱한 결과가나오네? \"Big Data Analytics & Data-driven Decision Making, Multi-agent Systems & Scientific Discovery, Robotic Process Automation & Predictive Analytics, Large Language Models & Generative AI, Multi-agent Systems & Predictive Analytics\" 이런식으로 분류된다. \n분명 샘플처럼 분석이 되어야하는데 예전이랑 같은것같다 claim 도",
       "progress": {
         "globalPercent": 87,
@@ -24,24 +24,17 @@
         "status": "running",
         "progressPercent": 85,
         "progressLabel": "running",
-        "latestAssistantMessage": "저장 데이터까지 확인했습니다. 최신 `search` 문서는 아직 영어 문장으로 `claim/method/finding`이 저장되고 있고, 최신 `graph` 문서는 사용자가 본 그 이상한 5개 라벨이 그대로 저장돼 있습니다. 즉 단순 렌더 문제가 아니라 저장 파이프라인 자체를 다시 맞춰야 합니다.",
+        "latestAssistantMessage": "이제 코드 편집에 들어갑니다. 먼저 inline-analysis cache/version과 Korean semantic profile 저장 경로를 정리하고, 그 다음 UI 표시, 마지막으로 Louvain cluster로 바꾸겠습니다.",
         "verifications": [
-          {
-            "key": "specdown",
-            "label": "specdown",
-            "status": "passed",
-            "summary": "",
-            "command": "/bin/zsh -lc specdown run"
-          },
           {
             "key": "vitest",
             "label": "vitest",
-            "status": "passed",
+            "status": "failed",
             "summary": "",
-            "command": "/bin/zsh -lc npx vitest run app/components/documents/__tests__/search-document.helpers.test.ts -t \"requeues missing inline analysis results before surfacing an error\" >/dev/null && echo yes"
+            "command": "/bin/zsh -lc npx vitest run app/components/documents/__tests__/search-document.helpers.test.ts app/components/documents/__tests__/search-result-item.test.tsx"
           }
         ],
-        "commandCount": 62
+        "commandCount": 84
       },
       "recentTurns": [
         {
@@ -129,190 +122,286 @@
           "percent": 85,
           "label": "running",
           "headline": "`분석 실패`가 뜨는 조건부터 확인하고, 실제로는 batch 응답 누락 때문에 잘못 실패 처리되는지 보겠습니다. 실패 상태가 과하게 찍히는 경로",
-          "summary": "저장 데이터까지 확인했습니다. 최신 `search` 문서는 아직 영어 문장으로 `claim/method/finding`이 저장되고 있고, 최신 `graph` 문서는 사용자가 본 그 이상한 5개 라벨이 그대로 저장돼 있습니다. 즉 단순 렌더 문제가 아니라 저장 파이프라인 자체를 다시 맞춰야 합니다.",
-          "commandCount": 62
+          "summary": "이제 코드 편집에 들어갑니다. 먼저 inline-analysis cache/version과 Korean semantic profile 저장 경로를 정리하고, 그 다음 UI 표시, 마지막으로 Louvain cluster로 바꾸겠습니다.",
+          "commandCount": 84
         }
       ],
       "stats": {
         "totalTurns": 49,
         "completedTurns": 43,
-        "totalCommands": 1387
+        "totalCommands": 1409
       }
     },
     {
-      "sessionId": "019d5120-9d71-75c2-8fb8-dab2fc505d44",
-      "cwd": "/Users/jaeyoungkang/mirror-mind",
-      "updatedAt": "2026-04-03T02:16:53.945Z",
-      "active": true,
-      "lastAssistantMessage": "agency: doing\nfocus: 로컬 커밋은 있는데 원격 푸시가 빠진 상황인지 먼저 확인해, 다음주 QA와 4월 테스트 준비를 막는 동기화 문제를 바로 해소한다.\ncaution: 사용자의 추측을 사실로 굳히지 말고 브랜치·원격 상태를 검증한 뒤 근거와 대안을 함께 제시한다.",
-      "lastUserMessage": "Co-actor plan 단계. 아래 정보로 이번 턴의 초점과 주의사항을 한 줄씩 결정하라.\n\n사용자: \"아 푸시를 안한거군?\"\n활성 기억: - [의도] 다음주 사내 QA와 4월 비공개 테스트를 통해 lighthouse의 네러티브 품질과 연구 에이전트로서의 성장 루프를 검증하고자 한다. (세션97)\n- [의도] 다중 인덱스(goal, temporal, semantic, entity)를 분리하여 점수 합산 방식으로 활성화 공식을 바꾸기로 했다. (세션53)\n- [의도] 세션 클러스터 점수 방식(같은 세션의 fact와 intention",
+      "sessionId": "019d4c7b-60b3-78b3-83a2-b7d4f5157c9c",
+      "cwd": "/Users/jaeyoungkang/corca/lighthouse",
+      "updatedAt": "2026-04-03T00:15:30.162Z",
+      "active": false,
+      "lastAssistantMessage": "공개 저장소의 잘못 올라간 파일은 정리했습니다. `jaeyoungkang/mirror-mind-public`의 `main`에서 `progress/purpose.md`를 삭제했고, 원격 조회도 404로 확인했습니다.\n\n로컬에서도 같은 공개 파일은 제거했고, 목적 문서는 프로젝트 쪽 [mirror-mind-purpose.md](/Users/jaeyoungkang/corca/lighthouse/docs/mirror-mind-purpose.md)에만 남겨뒀습니다.",
+      "lastUserMessage": "그 원격파일은 정리하라",
       "progress": {
         "globalPercent": 100,
-        "globalLabel": "마감 직전",
+        "globalLabel": "비활성",
         "currentTurnPercent": 100,
         "currentTurnLabel": "completed"
       },
       "milestones": [],
       "currentTurn": {
-        "turnId": "019d5120-9d7f-7a11-b11e-975204e2195e",
-        "startedAt": "2026-04-03T02:16:26.678Z",
-        "endedAt": "2026-04-03T02:16:53.945Z",
+        "turnId": "019d50b0-de91-7403-957e-427aaa0226b2",
+        "startedAt": "2026-04-03T00:14:21.843Z",
+        "endedAt": "2026-04-03T00:15:30.162Z",
         "status": "completed",
         "progressPercent": 100,
         "progressLabel": "completed",
-        "latestAssistantMessage": "agency: doing\nfocus: 로컬 커밋은 있는데 원격 푸시가 빠진 상황인지 먼저 확인해, 다음주 QA와 4월 테스트 준비를 막는 동기화 문제를 바로 해소한다.\ncaution: 사용자의 추측을 사실로 굳히지 말고 브랜치·원격 상태를 검증한 뒤 근거와 대안을 함께 제시한다.",
-        "verifications": [],
-        "commandCount": 0
+        "latestAssistantMessage": "공개 저장소의 잘못 올라간 파일은 정리했습니다. `jaeyoungkang/mirror-mind-public`의 `main`에서 `progress/purpose.md`를 삭제했고, 원격 조회도 404로 확인했습니다.\n\n로컬에서도 같은 공개 파일은 제거했고, 목적 문서는 프로젝트 쪽 [mirror-mind-purpose.md](/Users/jaeyoungkang/corca/lighthouse/docs/mirror-mind-purpose.md)에만 남겨뒀습니다.",
+        "verifications": [
+          {
+            "key": "prettier",
+            "label": "prettier",
+            "status": "passed",
+            "summary": "",
+            "command": "/bin/zsh -lc git -C /Users/jaeyoungkang/corca/mirror-mind-public show -s --format=%T origin/main"
+          }
+        ],
+        "commandCount": 9
       },
       "recentTurns": [
         {
-          "turnId": "019d5120-9d7f-7a11-b11e-975204e2195e",
-          "startedAt": "2026-04-03T02:16:26.678Z",
-          "endedAt": "2026-04-03T02:16:53.945Z",
-          "status": "completed",
-          "percent": 100,
-          "label": "completed",
-          "headline": "이번 턴은 plan 단계 결정이 목적이다. `mirror-mind-principle.md`만 짧게 확인해서, 주어진 발화와 활성 기억을 기준으로",
-          "summary": "agency: doing\nfocus: 로컬 커밋은 있는데 원격 푸시가 빠진 상황인지 먼저 확인해, 다음주 QA와 4월 테스트 준비를 막는 동기화 문제를 바로 해소한다.\ncaution: 사용자의 추측을 사실로 굳히지 말고 브랜치·원격 상태를 검증한 뒤 근거와 대안을 함께 제시한다.",
-          "commandCount": 0
-        }
-      ],
-      "stats": {
-        "totalTurns": 1,
-        "completedTurns": 1,
-        "totalCommands": 0
-      }
-    },
-    {
-      "sessionId": "019d5120-b60f-77c1-92b0-20c99d60c419",
-      "cwd": "/Users/jaeyoungkang/mirror-mind",
-      "updatedAt": "2026-04-03T02:16:48.325Z",
-      "active": true,
-      "lastAssistantMessage": "agency: doing\nfocus: 필요한 스크립트를 내가 직접 실행해 현재 상태를 확인하고, 이번 작업의 목적에 맞는 산출물로 바로 연결한다.\ncaution: Why를 놓치지 말고 스크립트를 기계적으로 돌리지 않으며, 실행 이유와 판단 근거를 함께 드러낸다.",
-      "lastUserMessage": "Co-actor plan 단계. 아래 정보로 이번 턴의 초점과 주의사항을 한 줄씩 결정하라.\n\n사용자: \"스크립트는 니가 직접 돌려라.\"\n활성 기억: - [의도] QA 시나리오 문서를 사내 비연구자 대상에 맞게 5단계 흐름으로 재구성하기로 결정했다. (세션102)\n- [의도] 세션 클러스터 점수 방식(같은 세션의 fact와 intention이 동시에 활성화되면 부스트)을 도입하기로 결정했다. (세션81)\n- [의도] 다중 인덱스(goal, temporal, semantic, entity)를 분리하여 점수 합산 방식으로 활성화 공식을",
-      "progress": {
-        "globalPercent": 100,
-        "globalLabel": "마감 직전",
-        "currentTurnPercent": 100,
-        "currentTurnLabel": "completed"
-      },
-      "milestones": [],
-      "currentTurn": {
-        "turnId": "019d5120-b61c-77d2-b0e9-16340ee7a8d2",
-        "startedAt": "2026-04-03T02:16:33.134Z",
-        "endedAt": "2026-04-03T02:16:48.325Z",
-        "status": "completed",
-        "progressPercent": 100,
-        "progressLabel": "completed",
-        "latestAssistantMessage": "agency: doing\nfocus: 필요한 스크립트를 내가 직접 실행해 현재 상태를 확인하고, 이번 작업의 목적에 맞는 산출물로 바로 연결한다.\ncaution: Why를 놓치지 말고 스크립트를 기계적으로 돌리지 않으며, 실행 이유와 판단 근거를 함께 드러낸다.",
-        "verifications": [],
-        "commandCount": 0
-      },
-      "recentTurns": [
-        {
-          "turnId": "019d5120-b61c-77d2-b0e9-16340ee7a8d2",
-          "startedAt": "2026-04-03T02:16:33.134Z",
-          "endedAt": "2026-04-03T02:16:48.325Z",
-          "status": "completed",
-          "percent": 100,
-          "label": "completed",
-          "headline": "agency: doing\nfocus: 필요한 스크립트를 내가 직접 실행해 현재 상태를 확인하고, 이번 작업의 목적에 맞는 산출물로 바로 연결한다",
-          "summary": "agency: doing\nfocus: 필요한 스크립트를 내가 직접 실행해 현재 상태를 확인하고, 이번 작업의 목적에 맞는 산출물로 바로 연결한다.\ncaution: Why를 놓치지 말고 스크립트를 기계적으로 돌리지 않으며, 실행 이유와 판단 근거를 함께 드러낸다.",
-          "commandCount": 0
-        }
-      ],
-      "stats": {
-        "totalTurns": 1,
-        "completedTurns": 1,
-        "totalCommands": 0
-      }
-    },
-    {
-      "sessionId": "019d5120-581a-7553-9d21-257713a8c2e8",
-      "cwd": "/Users/jaeyoungkang/mirror-mind",
-      "updatedAt": "2026-04-03T02:16:27.050Z",
-      "active": true,
-      "lastAssistantMessage": "agency: suggesting\nfocus: 최신 세션 5개 노출이 사용자의 이어보기 목적을 실제로 푸는지 확인하고, 세션명 오류 교정과 충돌하지 않는 표시 기준을 먼저 정리한다\ncaution: Why를 먼저 확인하고 5개 고정안 외 대안(예: 최근 3개, 최근+고정 핀)도 함께 제시한다",
-      "lastUserMessage": "Co-actor plan 단계. 아래 정보로 이번 턴의 초점과 주의사항을 한 줄씩 결정하라.\n\n사용자: \"최신 세션 5개 보이게해도 될까?\"\n활성 기억: - [의도] 세션명 오류(예: '2026-03-10-세션62'에 세션63 대화가 들어감)를 교정하기로 결정했다. (세션68)\n- [의도] 세션 클러스터 점수 방식(같은 세션의 fact와 intention이 동시에 활성화되면 부스트)을 도입하기로 결정했다. (세션81)\n- [의도] QA 시나리오 문서를 사내 비연구자 대상에 맞게 5단계 흐름으로 재구성하기로 결정했다. (세션102)\n",
-      "progress": {
-        "globalPercent": 100,
-        "globalLabel": "마감 직전",
-        "currentTurnPercent": 100,
-        "currentTurnLabel": "completed"
-      },
-      "milestones": [],
-      "currentTurn": {
-        "turnId": "019d5120-5823-7160-bd01-bb47b35f613a",
-        "startedAt": "2026-04-03T02:16:09.247Z",
-        "endedAt": "2026-04-03T02:16:27.050Z",
-        "status": "completed",
-        "progressPercent": 100,
-        "progressLabel": "completed",
-        "latestAssistantMessage": "agency: suggesting\nfocus: 최신 세션 5개 노출이 사용자의 이어보기 목적을 실제로 푸는지 확인하고, 세션명 오류 교정과 충돌하지 않는 표시 기준을 먼저 정리한다\ncaution: Why를 먼저 확인하고 5개 고정안 외 대안(예: 최근 3개, 최근+고정 핀)도 함께 제시한다",
-        "verifications": [],
-        "commandCount": 0
-      },
-      "recentTurns": [
-        {
-          "turnId": "019d5120-5823-7160-bd01-bb47b35f613a",
-          "startedAt": "2026-04-03T02:16:09.247Z",
-          "endedAt": "2026-04-03T02:16:27.050Z",
-          "status": "completed",
-          "percent": 100,
-          "label": "completed",
-          "headline": "agency: suggesting\nfocus: 최신 세션 5개 노출이 사용자의 이어보기 목적을 실제로 푸는지 확인하고, 세션명 오류 교정과 충돌",
-          "summary": "agency: suggesting\nfocus: 최신 세션 5개 노출이 사용자의 이어보기 목적을 실제로 푸는지 확인하고, 세션명 오류 교정과 충돌하지 않는 표시 기준을 먼저 정리한다\ncaution: Why를 먼저 확인하고 5개 고정안 외 대안(예: 최근 3개, 최근+고정 핀)도 함께 제시한다",
-          "commandCount": 0
-        }
-      ],
-      "stats": {
-        "totalTurns": 1,
-        "completedTurns": 1,
-        "totalCommands": 0
-      }
-    },
-    {
-      "sessionId": "019d5120-5b74-79f1-9050-f7485d7f2d66",
-      "cwd": "/Users/jaeyoungkang/mirror-mind",
-      "updatedAt": "2026-04-03T02:16:11.095Z",
-      "active": true,
-      "lastAssistantMessage": "",
-      "lastUserMessage": "Co-actor plan 단계. 아래 정보로 이번 턴의 초점과 주의사항을 한 줄씩 결정하라.\n\n사용자: \"아 스크립트를 아직 안돌렸구나\"\n활성 기억: - [의도] 다음주 사내 QA와 4월 비공개 테스트를 통해 lighthouse의 네러티브 품질과 연구 에이전트로서의 성장 루프를 검증하고자 한다. (세션97)\n- [의도] 세션명 오류(예: '2026-03-10-세션62'에 세션63 대화가 들어감)를 교정하기로 결정했다. (세션68)\n- [사실] 오늘(3월 17일, W12)의 주요 작업 계획은 lighthouse 문서 생성 및 관리 체",
-      "progress": {
-        "globalPercent": 0,
-        "globalLabel": "시작",
-        "currentTurnPercent": 5,
-        "currentTurnLabel": "running"
-      },
-      "milestones": [],
-      "currentTurn": {
-        "turnId": "019d5120-5b82-7030-a137-3cfb87371ead",
-        "startedAt": "2026-04-03T02:16:09.612Z",
-        "endedAt": null,
-        "status": "running",
-        "progressPercent": 5,
-        "progressLabel": "running",
-        "latestAssistantMessage": "",
-        "verifications": [],
-        "commandCount": 0
-      },
-      "recentTurns": [
-        {
-          "turnId": "019d5120-5b82-7030-a137-3cfb87371ead",
-          "startedAt": "2026-04-03T02:16:09.612Z",
-          "endedAt": null,
-          "status": "running",
-          "percent": 5,
-          "label": "running",
-          "headline": "Co-actor plan 단계. 아래 정보로 이번 턴의 초점과 주의사항을 한 줄씩 결정하라.\n\n사용자: \"아 스크립트를 아직 안돌렸구나\"\n활성 ",
+          "turnId": "019d4d04-68f9-7313-8e59-98d9d88a49a7",
+          "startedAt": "2026-04-02T07:07:07.902Z",
+          "endedAt": "2026-04-02T07:07:50.795Z",
+          "status": "aborted",
+          "percent": 0,
+          "label": "aborted",
+          "headline": "지금 페이지를 더 줄이겠습니다. 먼저 기준이 되는 [HTML5 semantic study] 철학이 실제로 어떤 톤인지 보고, 그에 맞춰 `pro",
           "summary": "",
+          "commandCount": 3
+        },
+        {
+          "turnId": "019d4d05-108c-7de0-ae82-6b922166f3aa",
+          "startedAt": "2026-04-02T07:07:50.797Z",
+          "endedAt": "2026-04-02T07:17:10.316Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "뜻을 좁혀서 이해했습니다. 그 페이지의 “의미가 구조를 이끈다, CSS를 꺼도 읽혀야 한다, 과한 장식보다 문서 구조가 먼저다”라는 철학을 반영",
+          "summary": "반영했습니다.\n\n페이지:\n- `https://jaeyoungkang.github.io/mirror-mind-public/progress/`\n\n핵심 변경은 [progress/index.html](/Users/jaeyoungkang/corca/mirror-mind-public/progress/index.html) 하나입니다. `html5-semantic-ele",
+          "commandCount": 10
+        },
+        {
+          "turnId": "019d4d0e-5578-7ce2-9503-58945495a851",
+          "startedAt": "2026-04-02T07:17:58.271Z",
+          "endedAt": "2026-04-02T07:29:11.119Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "지금 페이지는 문서 구조는 맞지만, 드러내는 데이터가 얕습니다. 페이지는 유지하고 `세션 개요`, `현재 턴`, `최근 검증`, `최근 활동`,",
+          "summary": "세부 정보를 늘린 버전을 배포했습니다. 수정 파일은 [progress/index.html](/Users/jaeyoungkang/corca/mirror-mind-public/progress/index.html)이고, 페이지는 `https://jaeyoungkang.github.io/mirror-mind-public/progress/` 입니다.\n\n지금 페이지에",
+          "commandCount": 18
+        },
+        {
+          "turnId": "019d4d18-fa68-7182-9023-31c2cd23c869",
+          "startedAt": "2026-04-02T07:29:35.857Z",
+          "endedAt": "2026-04-02T07:30:10.778Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "제가 이해한 목적은 하나였습니다. `Codex가 다른 세션에서 무슨 일을 하고 있고, 어디까지 왔는지`를 사람이 바로 읽고 판단할 수 있게 외부",
+          "summary": "제가 이해한 목적은 하나였습니다. `Codex가 다른 세션에서 무슨 일을 하고 있고, 어디까지 왔는지`를 사람이 바로 읽고 판단할 수 있게 외부로 꺼내는 것입니다.\n\n구체적으로는 이 네 가지였습니다.\n\n1. `~/.codex/sessions` 안의 로그를 사람 언어로 번역하는 것\n`update_plan`, `task_complete`, 검증 로그, 최근 메",
+          "commandCount": 0
+        },
+        {
+          "turnId": "019d4d4b-5c5d-7082-a377-d54603cce070",
+          "startedAt": "2026-04-02T08:24:37.729Z",
+          "endedAt": "2026-04-02T08:25:07.001Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "맞습니다. 그러면 목적은 단순한 `progress dashboard`가 아니라 `다중 Codex 운영 상황판`입니다.\n\n핵심은 사용자가 이 다섯",
+          "summary": "맞습니다. 그러면 목적은 단순한 `progress dashboard`가 아니라 `다중 Codex 운영 상황판`입니다.\n\n핵심은 사용자가 이 다섯 가지를 빨리 판단하게 만드는 것입니다.\n\n1. 지금 어떤 에이전트들이 살아 있는가\n2. 각 에이전트가 무엇을 맡고 있는가\n3. 어디까지 끝났고 무엇이 막혔는가\n4. 사용자 응답이나 의사결정이 필요한 지점이 어디인가",
+          "commandCount": 0
+        },
+        {
+          "turnId": "019d50ad-260d-7880-88ef-3eeb92d05009",
+          "startedAt": "2026-04-03T00:10:18.029Z",
+          "endedAt": "2026-04-03T00:11:45.257Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "방금 정리한 목적을 문서로 남기겠습니다. `mirror-mind-public` 쪽에서 읽기 쉬운 Markdown 위치만 확인한 뒤 바로 저장하겠",
+          "summary": "문서로 저장해뒀습니다. 로컬 파일은 [purpose.md](/Users/jaeyoungkang/corca/mirror-mind-public/progress/purpose.md)이고, `jaeyoungkang/mirror-mind-public`의 `main`에도 올렸습니다.\n\n내용은 지금까지 합의한 목적 정의를 정리한 것입니다.\n- 이 페이지는 단순 진척률 ",
+          "commandCount": 5
+        },
+        {
+          "turnId": "019d50af-5b6b-7630-b111-391d7fc60388",
+          "startedAt": "2026-04-03T00:12:42.734Z",
+          "endedAt": "2026-04-03T00:13:47.848Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "문서를 공개 저장소가 아니라 미러마인드 쪽 로컬 프로젝트에 두겠습니다. 먼저 이 작업에 맞는 프로젝트 경로와 문서 위치를 확인한 뒤, 그쪽에만 ",
+          "summary": "로컬 프로젝트 문서로 저장했습니다. 파일은 [mirror-mind-purpose.md](/Users/jaeyoungkang/corca/lighthouse/docs/mirror-mind-purpose.md) 입니다.\n\n이번 턴에는 배포하지 않았고, 원격 변경도 하지 않았습니다. 다만 직전 턴에 제가 실수로 `mirror-mind-public` 쪽에 `prog",
+          "commandCount": 8
+        },
+        {
+          "turnId": "019d50b0-de91-7403-957e-427aaa0226b2",
+          "startedAt": "2026-04-03T00:14:21.843Z",
+          "endedAt": "2026-04-03T00:15:30.162Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "실수로 공개 저장소에 올린 `progress/purpose.md`를 원격에서 제거하고, 로컬 `mirror-mind-public`에서도 같이 지",
+          "summary": "공개 저장소의 잘못 올라간 파일은 정리했습니다. `jaeyoungkang/mirror-mind-public`의 `main`에서 `progress/purpose.md`를 삭제했고, 원격 조회도 404로 확인했습니다.\n\n로컬에서도 같은 공개 파일은 제거했고, 목적 문서는 프로젝트 쪽 [mirror-mind-purpose.md](/Users/jaeyoungkan",
+          "commandCount": 9
+        }
+      ],
+      "stats": {
+        "totalTurns": 27,
+        "completedTurns": 23,
+        "totalCommands": 218
+      }
+    },
+    {
+      "sessionId": "019d3ddb-46cf-72d2-bdb3-9d06104e4d95",
+      "cwd": "/Users/jaeyoungkang/corca/lighthouse",
+      "updatedAt": "2026-04-02T09:01:30.919Z",
+      "active": false,
+      "lastAssistantMessage": "커밋은 더 진행하지 않겠습니다.\n\n현재 상태:\n- `main` 로컬에는 `AGENTS.md` spec-first 변경 커밋이 올라가 있고 `origin/main`보다 `ahead 1`입니다.\n- 원격 push는 아직 안 됐습니다.\n- 후속 작업을 먼저 한 뒤 한 번에 정리하면 됩니다.\n\n다음 지시 주시면 그 기준으로 이어가겠습니다.",
+      "lastUserMessage": "아니다 지금 커밋하지말고 기다려라 후속 작업까지하고 커밋하자",
+      "progress": {
+        "globalPercent": 100,
+        "globalLabel": "비활성",
+        "currentTurnPercent": 100,
+        "currentTurnLabel": "completed"
+      },
+      "milestones": [],
+      "currentTurn": {
+        "turnId": "019d4d6d-0958-7461-a10a-eddce28bf8f6",
+        "startedAt": "2026-04-02T09:01:24.699Z",
+        "endedAt": "2026-04-02T09:01:30.919Z",
+        "status": "completed",
+        "progressPercent": 100,
+        "progressLabel": "completed",
+        "latestAssistantMessage": "커밋은 더 진행하지 않겠습니다.\n\n현재 상태:\n- `main` 로컬에는 `AGENTS.md` spec-first 변경 커밋이 올라가 있고 `origin/main`보다 `ahead 1`입니다.\n- 원격 push는 아직 안 됐습니다.\n- 후속 작업을 먼저 한 뒤 한 번에 정리하면 됩니다.\n\n다음 지시 주시면 그 기준으로 이어가겠습니다.",
+        "verifications": [
+          {
+            "key": "lint",
+            "label": "lint",
+            "status": "passed",
+            "summary": "",
+            "command": "/bin/zsh -lc npm run lint"
+          },
+          {
+            "key": "specdown",
+            "label": "specdown",
+            "status": "passed",
+            "summary": "",
+            "command": "/bin/zsh -lc rg -n \"작업 규칙|코드를 바꾸면|specdown\" AGENTS.md"
+          },
+          {
+            "key": "prettier",
+            "label": "prettier",
+            "status": "passed",
+            "summary": "",
+            "command": "/bin/zsh -lc npx prettier --write app/domain/document.ts"
+          }
+        ],
+        "commandCount": 0
+      },
+      "recentTurns": [
+        {
+          "turnId": "019d4d5b-5a94-7800-a7e2-a76f08c4ae68",
+          "startedAt": "2026-04-02T08:42:05.851Z",
+          "endedAt": "2026-04-02T08:42:59.287Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "로컬 DB를 다시 초기화하겠습니다. 기존 로컬 Supabase 상태를 리셋하고 마이그레이션 적용까지 확인합니다.",
+          "summary": "로컬 DB 리셋 완료했습니다.\n\n실행:\n- `supabase db reset --local --yes`\n\n결과:\n- 로컬 DB 재생성 완료\n- `00001_init.sql` 마이그레이션 적용 완료\n- 컨테이너 재시작 완료\n\n원격 DB는 건드리지 않았습니다.",
+          "commandCount": 1
+        },
+        {
+          "turnId": "019d4d5c-9dac-7bb1-ae12-e8beb4e89e6c",
+          "startedAt": "2026-04-02T08:43:28.560Z",
+          "endedAt": "2026-04-02T08:46:02.300Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "제거 상태와 워킹트리를 확인한 뒤, 현재 변경을 커밋하고 원격 브랜치에 푸시하겠습니다.",
+          "summary": "커밋과 푸시 끝났습니다.\n\n- 브랜치: `codex/knowledge-map-lenses`\n- 커밋: `5665f6b` `remove graph and mirror-mind systems`\n\n상태:\n- 지식맵 관련 제품 코드와 MirrorMind 코드는 제거됐습니다.\n- 로컬 DB도 이미 리셋 완료했습니다.\n- pre-push 훅까지 포함한 `quality",
+          "commandCount": 3
+        },
+        {
+          "turnId": "019d4d63-76e5-76c0-8dc1-e4f1be46d53e",
+          "startedAt": "2026-04-02T08:50:57.389Z",
+          "endedAt": "2026-04-02T08:51:10.189Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "네. 그쪽이 더 깔끔했을 가능성이 큽니다.\n\n지금 한 방식은:\n- 기존 브랜치 위에서 대규모 삭제\n- 그래서 히스토리상 `만들었다가 지운 흔적`",
+          "summary": "네. 그쪽이 더 깔끔했을 가능성이 큽니다.\n\n지금 한 방식은:\n- 기존 브랜치 위에서 대규모 삭제\n- 그래서 히스토리상 `만들었다가 지운 흔적`이 길게 남습니다.\n\n더 깔끔한 방식은:\n1. `main`으로 이동\n2. 지식맵 작업 브랜치를 버리거나 닫고\n3. 필요한 최소 변경만 새 브랜치에서 다시 시작\n\n특히 이번처럼 “실험을 접고 바닥부터 다시”가 목적이면",
+          "commandCount": 0
+        },
+        {
+          "turnId": "019d4d64-2313-7ba0-babf-5ddc92d01e80",
+          "startedAt": "2026-04-02T08:51:41.463Z",
+          "endedAt": "2026-04-02T08:52:33.025Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "`main` 최신 상태를 기준으로 새 브랜치를 만들겠습니다. 현재 워킹트리와 브랜치 상태를 확인한 뒤 `main`으로 맞추고 새 브랜치를 생성합",
+          "summary": "새 브랜치 시작했습니다.\n\n- 기준: 최신 `main`\n- 새 브랜치: `codex/restart-from-main`\n\n이전 작업 브랜치 `codex/knowledge-map-lenses`는 그대로 남겨뒀고, 현재 워킹트리는 깨끗합니다.",
+          "commandCount": 5
+        },
+        {
+          "turnId": "019d4d65-b3dc-72a2-b670-ac7a7dfeede8",
+          "startedAt": "2026-04-02T08:53:24.065Z",
+          "endedAt": "2026-04-02T08:53:54.876Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "작업 규칙 1을 `spec-first`로 고치겠습니다. 현재 [AGENTS.md](/Users/jaeyoungkang/corca/lighthou",
+          "summary": "[AGENTS.md](/Users/jaeyoungkang/corca/lighthouse/AGENTS.md) 작업 규칙 1을 `spec-first`로 바꿨습니다.\n\n바뀐 내용:\n- 코드보다 스펙을 먼저 작성/수정\n- 스펙이 의도적으로 실패하는지 먼저 확인\n- 그다음 그 스펙을 통과시키는 코드 작성\n- 마지막에 `specdown run`으로 전체 검증\n\n테스트",
+          "commandCount": 2
+        },
+        {
+          "turnId": "019d4d66-f279-76c3-8034-be5c8268c381",
+          "startedAt": "2026-04-02T08:54:45.630Z",
+          "endedAt": "2026-04-02T08:55:22.572Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "현재 브랜치와 변경 범위를 확인한 뒤, `AGENTS.md`만 `main`에 올리는 가장 안전한 방법을 정리하겠습니다.",
+          "summary": "지금 상태면 가장 안전한 방법은 `AGENTS.md`만 커밋해서 `main`에 체리픽하는 방식입니다.\n\n현재 상태:\n- 브랜치: `codex/restart-from-main`\n- 변경 파일: `AGENTS.md` 하나\n\n명령:\n```bash\ngit add AGENTS.md\ngit commit -m \"make agent workflow spec-first\"\n",
+          "commandCount": 3
+        },
+        {
+          "turnId": "019d4d6a-8df2-7551-8ad1-409bf835d19e",
+          "startedAt": "2026-04-02T08:58:42.037Z",
+          "endedAt": "2026-04-02T09:01:13.183Z",
+          "status": "aborted",
+          "percent": 0,
+          "label": "aborted",
+          "headline": "`AGENTS.md`만 별도 커밋한 뒤 `main`에 체리픽해서 바로 푸시하겠습니다. `main` 보호 정책에 막히면 그 지점만 보고드리겠습니다",
+          "summary": "원인은 `d3` 통합 import에서 ESLint가 값 타입을 제대로 좇지 못하는 쪽으로 보입니다. 이 파일만 `d3-force / d3-selection / d3-zoom` 서브모듈 import와 명시 타입으로 바꿔서 에러를 정리하겠습니다.",
+          "commandCount": 10
+        },
+        {
+          "turnId": "019d4d6d-0958-7461-a10a-eddce28bf8f6",
+          "startedAt": "2026-04-02T09:01:24.699Z",
+          "endedAt": "2026-04-02T09:01:30.919Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "커밋은 더 진행하지 않겠습니다.\n\n현재 상태:\n- `main` 로컬에는 `AGENTS.md` spec-first 변경 커밋이 올라가 있고 `or",
+          "summary": "커밋은 더 진행하지 않겠습니다.\n\n현재 상태:\n- `main` 로컬에는 `AGENTS.md` spec-first 변경 커밋이 올라가 있고 `origin/main`보다 `ahead 1`입니다.\n- 원격 push는 아직 안 됐습니다.\n- 후속 작업을 먼저 한 뒤 한 번에 정리하면 됩니다.\n\n다음 지시 주시면 그 기준으로 이어가겠습니다.",
           "commandCount": 0
         }
       ],
       "stats": {
-        "totalTurns": 1,
-        "completedTurns": 0,
-        "totalCommands": 0
+        "totalTurns": 180,
+        "completedTurns": 175,
+        "totalCommands": 5079
       }
     }
   ]
