@@ -1,294 +1,319 @@
 {
-  "generatedAt": "2026-04-02T06:47:44.881Z",
+  "generatedAt": "2026-04-03T02:17:19.773176+00:00",
   "repoRoot": "/Users/jaeyoungkang/corca/lighthouse",
-  "activeSessionId": "019d3ddb-46cf-72d2-bdb3-9d06104e4d95",
+  "activeSessionId": "019d5120-5b74-79f1-9050-f7485d7f2d66",
   "sessions": [
     {
-      "sessionId": "019d3ddb-46cf-72d2-bdb3-9d06104e4d95",
+      "sessionId": "019d4d6f-4914-7662-92eb-7c6a16463294",
       "cwd": "/Users/jaeyoungkang/corca/lighthouse",
-      "updatedAt": "2026-04-02T06:47:39.104Z",
+      "updatedAt": "2026-04-03T02:17:16.592Z",
       "active": true,
-      "lastAssistantMessage": "중복 검사는 통과했고, 지금은 knip 단계입니다.",
+      "lastAssistantMessage": "저장 데이터까지 확인했습니다. 최신 `search` 문서는 아직 영어 문장으로 `claim/method/finding`이 저장되고 있고, 최신 `graph` 문서는 사용자가 본 그 이상한 5개 라벨이 그대로 저장돼 있습니다. 즉 단순 렌더 문제가 아니라 저장 파이프라인 자체를 다시 맞춰야 합니다.",
+      "lastUserMessage": "테스트 해봤는데 엉뚱한 결과가나오네? \"Big Data Analytics & Data-driven Decision Making, Multi-agent Systems & Scientific Discovery, Robotic Process Automation & Predictive Analytics, Large Language Models & Generative AI, Multi-agent Systems & Predictive Analytics\" 이런식으로 분류된다. \n분명 샘플처럼 분석이 되어야하는데 예전이랑 같은것같다 claim 도",
       "progress": {
-        "globalPercent": 95,
-        "globalLabel": "마감 직전",
-        "currentTurnPercent": 88,
-        "currentTurnLabel": "검증 단계"
+        "globalPercent": 87,
+        "globalLabel": "후반",
+        "currentTurnPercent": 85,
+        "currentTurnLabel": "running"
       },
-      "milestones": [
-        {
-          "id": "datasets",
-          "title": "렌즈 dataset 저장",
-          "status": "completed",
-          "percent": 100,
-          "evidence": "landscape, pathways, trends, debates, weak-ties 저장 경로 전환이 끝났습니다."
-        },
-        {
-          "id": "report",
-          "title": "graph-as-report 승격",
-          "status": "completed",
-          "percent": 100,
-          "evidence": "graph document를 report-bearing document로 승격하는 구조 변경이 반영됐습니다."
-        },
-        {
-          "id": "runtime",
-          "title": "runtime lens-first 전환",
-          "status": "completed",
-          "percent": 100,
-          "evidence": "stored lens dataset 우선 해석과 fallback 축소가 대부분 끝났습니다."
-        },
-        {
-          "id": "summary",
-          "title": "summary / report / context 정렬",
-          "status": "completed",
-          "percent": 100,
-          "evidence": "summary helper, graph report, focused context 정렬이 완료 상태입니다."
-        },
-        {
-          "id": "quality",
-          "title": "최종 품질 게이트",
-          "status": "in_progress",
-          "percent": 88,
-          "evidence": "typecheck, vitest, specdown은 녹색이고 knip 이후 잔여 게이트만 남았습니다."
-        }
-      ],
+      "milestones": [],
       "currentTurn": {
-        "turnId": "019d4ce4-83b3-70b2-99fe-053163e3ea31",
-        "startedAt": "2026-04-02T06:32:17.591Z",
+        "turnId": "019d5117-4643-7b02-a3b7-39cadcc6e52b",
+        "startedAt": "2026-04-03T02:06:13.080Z",
+        "endedAt": null,
         "status": "running",
-        "progressPercent": 88,
-        "progressLabel": "검증 단계",
-        "latestAssistantMessage": "중복 검사는 통과했고, 지금은 knip 단계입니다.",
-        "latestPlan": {
-          "steps": [
-            { "step": "traceability 기대값 정리", "status": "completed" },
-            { "step": "specdown 재실행", "status": "completed" },
-            { "step": "quality:check 끝까지 확인", "status": "in_progress" }
-          ]
-        },
+        "progressPercent": 85,
+        "progressLabel": "running",
+        "latestAssistantMessage": "저장 데이터까지 확인했습니다. 최신 `search` 문서는 아직 영어 문장으로 `claim/method/finding`이 저장되고 있고, 최신 `graph` 문서는 사용자가 본 그 이상한 5개 라벨이 그대로 저장돼 있습니다. 즉 단순 렌더 문제가 아니라 저장 파이프라인 자체를 다시 맞춰야 합니다.",
         "verifications": [
-          {
-            "key": "vitest",
-            "label": "vitest",
-            "status": "passed",
-            "summary": "Test Files 3 passed (3)",
-            "command": "npx vitest run ...graph-map-runtime.test.ts"
-          },
-          {
-            "key": "typecheck",
-            "label": "typecheck",
-            "status": "passed",
-            "summary": "Types generated successfully",
-            "command": "npm run typecheck"
-          },
           {
             "key": "specdown",
             "label": "specdown",
             "status": "passed",
-            "summary": "339 cases 통과",
-            "command": "npm run specdown"
+            "summary": "",
+            "command": "/bin/zsh -lc specdown run"
           },
           {
-            "key": "prettier",
-            "label": "prettier",
+            "key": "vitest",
+            "label": "vitest",
             "status": "passed",
-            "summary": "graph-query.mjs 포맷 정리",
-            "command": "npx prettier specs/helpers/graph-query.mjs --write"
+            "summary": "",
+            "command": "/bin/zsh -lc npx vitest run app/components/documents/__tests__/search-document.helpers.test.ts -t \"requeues missing inline analysis results before surfacing an error\" >/dev/null && echo yes"
           }
-        ]
+        ],
+        "commandCount": 62
       },
       "recentTurns": [
         {
-          "turnId": "019d4ce4-83b3-70b2-99fe-053163e3ea31",
-          "startedAt": "2026-04-02T06:32:17.591Z",
+          "turnId": "019d50cd-7834-7272-b37b-65bc2f0dda09",
+          "startedAt": "2026-04-03T00:45:36.184Z",
+          "endedAt": "2026-04-03T00:46:30.836Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "완료 시점 기준으로 어디서 시간이 쓰였는지 코드 경로를 다시 확인하겠습니다. A1 진행 문구가 실제 단계와 어긋나는지도 같이 보겠습니다.",
+          "summary": "네. 현재 A1은 느릴 수밖에 있는 구조입니다.\n\n- 실제 병목은 LLM enrich입니다. [llm-paper-profile-service.ts](/Users/jaeyoungkang/corca/lighthouse/app/server/services/knowledge-map/llm-paper-profile-service.ts#L7) 에서 `10편`씩 자르고",
+          "commandCount": 10
+        },
+        {
+          "turnId": "019d50cf-b3f9-7160-a5d2-db0cc608a506",
+          "startedAt": "2026-04-03T00:48:02.556Z",
+          "endedAt": "2026-04-03T00:59:44.629Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "A1 레이아웃을 먼저 바꾸겠습니다. 상단 네트워크를 중심으로 재구성하고, 현재 네트워크 밀집도와 CCDF 배치가 어떻게 구현돼 있는지 확인한 뒤",
+          "summary": "A1 레이아웃을 네트워크 중심으로 바꿨습니다. [DegreeDistributionReport.tsx](/Users/jaeyoungkang/corca/lighthouse/app/components/documents/knowledge-map/DegreeDistributionReport.tsx)는 이제 상단에 full-width 네트워크 캔버스를 먼저 보여주고,",
+          "commandCount": 29
+        },
+        {
+          "turnId": "019d50de-6b0b-79a0-a91d-179c5c4a0651",
+          "startedAt": "2026-04-03T01:04:06.929Z",
+          "endedAt": "2026-04-03T01:06:13.658Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "제안별로 현재 구현과 스펙을 대조해서 검토하겠습니다. 특히 검색 시 인라인 분석 파이프라인과 A1 enrich가 실제로 어떻게 연결돼 있는지부터",
+          "summary": "검토 결과, 방향은 대체로 맞습니다. 다만 3번과 4번은 같이 설계해야 합니다.\n\n1. `CCDF 1.5배 확대`\n- 찬성입니다. 지금 inset이 [DegreeDistributionReport.tsx](/Users/jaeyoungkang/corca/lighthouse/app/components/documents/knowledge-map/DegreeDist",
+          "commandCount": 23
+        },
+        {
+          "turnId": "019d50e6-af97-7421-ba54-21f5ad637a9c",
+          "startedAt": "2026-04-03T01:13:08.765Z",
+          "endedAt": "2026-04-03T01:26:13.640Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "샘플과 동일한 검색결과라면 처리 파이프라인을 샘플 쪽에 맞추는 게 맞습니다. 우선 reference 데이터 구조와 현재 A1/search 파이프",
+          "summary": "샘플과 같은 검색 결과를 쓰는데 A1만 별도 약한 파이프라인을 타던 부분을 정리했습니다. 이제 A1은 검색 단계에서 만든 분석 결과를 그대로 기다렸다가 재사용합니다. 핵심 변경은 [inline-analysis-service.ts](/Users/jaeyoungkang/corca/lighthouse/app/server/services/inline-analysi",
+          "commandCount": 39
+        },
+        {
+          "turnId": "019d50f7-d3fb-7f71-8052-bb5daa302b01",
+          "startedAt": "2026-04-03T01:31:52.192Z",
+          "endedAt": "2026-04-03T01:44:47.411Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "두 문제를 분리해서 보겠습니다. 먼저 검색 결과 문서가 탭 전환 후 왜 재생성되는지 저장 경로를 확인하고, 그 다음 A1 클러스터 라벨이 샘플처",
+          "summary": "**Findings**\n1. 검색 인라인 분석에서 이미 “재료”는 만들고 있습니다. 다만 지금 재료의 형태가 label refinement에 최적화돼 있지 않습니다. 현재 인라인 분석 프롬프트는 `summary / objective / methodology / results / keywords / evidenceMap`을 뽑는 일반 요약형입니다. [inli",
+          "commandCount": 70
+        },
+        {
+          "turnId": "019d5105-b07c-7530-ba99-6f7d6b0f31e2",
+          "startedAt": "2026-04-03T01:47:00.608Z",
+          "endedAt": "2026-04-03T01:47:53.645Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "샘플 파이프라인 기준으로 A1 입력을 다시 맞추겠습니다. 먼저 현재 미검증 변경사항과 관련 스펙 상태를 정리한 뒤, spec-first로 인라인",
+          "summary": "코드상 원인은 잡혔고, 관련 검증도 통과했습니다.\n\n원인은 검색 문서에 `inlineAnalysis`를 `PATCH`로 저장한 뒤, 워크스페이스의 현재 문서 상태를 그 응답으로 교체하지 않던 점이었습니다. 그래서 탭을 벗어났다가 다시 오면 메모리에는 예전 search metadata가 남아 있고, `useInlineAnalysis`가 다시 queue를 잡을",
+          "commandCount": 11
+        },
+        {
+          "turnId": "019d5107-6cce-71b2-a2a7-51b601d2a57f",
+          "startedAt": "2026-04-03T01:48:54.355Z",
+          "endedAt": "2026-04-03T02:04:28.162Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "샘플 기준으로 인라인 분석 출력 형태와 A1 소비 경로를 다시 맞추겠습니다. 먼저 실행 스펙을 샘플 구조에 맞게 고치고, 그 스펙이 실제로 fa",
+          "summary": "샘플 기준으로 A1 파이프라인을 다시 맞췄습니다.\n\n핵심은 세 가지입니다. 검색 인라인 분석은 이제 [inline-analysis-service.ts](/Users/jaeyoungkang/corca/lighthouse/app/server/services/inline-analysis-service.ts) 에서 `claim / topics / method / ",
+          "commandCount": 56
+        },
+        {
+          "turnId": "019d5117-4643-7b02-a3b7-39cadcc6e52b",
+          "startedAt": "2026-04-03T02:06:13.080Z",
+          "endedAt": null,
           "status": "running",
-          "percent": 88,
-          "label": "검증 단계",
-          "headline": "현재 활성 턴",
-          "summary": "중복 검사는 통과했고, 지금은 knip 단계입니다.",
-          "planSteps": [
-            { "step": "traceability 기대값 정리", "status": "completed" },
-            { "step": "specdown 재실행", "status": "completed" },
-            { "step": "quality:check 끝까지 확인", "status": "in_progress" }
-          ],
-          "verifications": [
-            {
-              "key": "vitest",
-              "label": "vitest",
-              "status": "passed",
-              "summary": "Test Files 3 passed (3)",
-              "command": "npx vitest run ...graph-map-runtime.test.ts"
-            },
-            {
-              "key": "typecheck",
-              "label": "typecheck",
-              "status": "passed",
-              "summary": "Types generated successfully",
-              "command": "npm run typecheck"
-            },
-            {
-              "key": "specdown",
-              "label": "specdown",
-              "status": "passed",
-              "summary": "339 cases 통과",
-              "command": "npm run specdown"
-            }
-          ]
-        },
-        {
-          "turnId": "019d4cb2-195d-7b83-8e49-d59567a64a4d",
-          "endedAt": "2026-04-02T06:12:22.464Z",
-          "status": "completed",
-          "percent": 100,
-          "label": "완료",
-          "headline": "MirrorMind 첫 대시보드 구현",
-          "summary": "로컬 세션 로그를 읽는 dev-only 대시보드, parser, route, 검증까지 한 번 닫았습니다.",
-          "verifications": [
-            {
-              "key": "specdown",
-              "label": "specdown",
-              "status": "passed",
-              "summary": "339 cases 통과",
-              "command": "npm run specdown"
-            },
-            {
-              "key": "typecheck",
-              "label": "typecheck",
-              "status": "passed",
-              "summary": "Types generated successfully",
-              "command": "npm run typecheck"
-            }
-          ]
-        },
-        {
-          "turnId": "019d4cae-ebcd-7721-a22e-fd1a121c1eaa",
-          "endedAt": "2026-04-02T05:34:08.709Z",
-          "status": "completed",
-          "percent": 100,
-          "label": "완료",
-          "headline": "글로벌 진행상황 요약 정리",
-          "summary": "렌즈 dataset 전환, graph-as-report 승격, quality gate 잔여 작업을 표 기준으로 정리했습니다.",
-          "verifications": []
-        },
-        {
-          "turnId": "019d4c91-1848-70c2-9b46-e26ac3c38c1a",
-          "endedAt": "2026-04-02T05:02:35.623Z",
-          "status": "completed",
-          "percent": 100,
-          "label": "완료",
-          "headline": "세션 이벤트 타임라인 복원",
-          "summary": "task_started, update_plan, exec_command_end, task_complete 흐름을 실제 세션 기준으로 정리했습니다.",
-          "verifications": []
-        }
-      ]
-    },
-    {
-      "sessionId": "019d4c7b-60b3-78b3-83a2-b7d4f5157c9c",
-      "cwd": "/Users/jaeyoungkang/corca/lighthouse",
-      "updatedAt": "2026-04-02T06:47:39.106Z",
-      "active": true,
-      "lastAssistantMessage": "정적 호스팅에서도 빠르게 보이게 하겠습니다.",
-      "progress": {
-        "globalPercent": 93,
-        "globalLabel": "후반 안정화",
-        "currentTurnPercent": 35,
-        "currentTurnLabel": "탐색 단계"
-      },
-      "milestones": [
-        {
-          "id": "datasets",
-          "title": "렌즈 dataset 저장",
-          "status": "completed",
-          "percent": 100,
-          "evidence": "이전 세션 분석 기준으로 데이터 전환 축은 사실상 완료입니다."
-        },
-        {
-          "id": "report",
-          "title": "graph-as-report 승격",
-          "status": "completed",
-          "percent": 100,
-          "evidence": "그래프 문서를 보고서형 문서로 보는 방향은 이미 굳어졌습니다."
-        },
-        {
-          "id": "runtime",
-          "title": "runtime lens-first 전환",
-          "status": "completed",
-          "percent": 100,
-          "evidence": "major runtime 전환은 완료된 상태로 복원되었습니다."
-        },
-        {
-          "id": "summary",
-          "title": "summary / report / context 정렬",
-          "status": "in_progress",
-          "percent": 55,
-          "evidence": "이번 턴은 GitHub Pages 정적 시각화로 전환하는 탐색 단계입니다."
-        },
-        {
-          "id": "quality",
-          "title": "최종 품질 게이트",
-          "status": "completed",
-          "percent": 100,
-          "evidence": "직전 MirrorMind 구현 턴에서는 lint, vitest, typecheck, specdown이 모두 통과했습니다."
+          "percent": 85,
+          "label": "running",
+          "headline": "`분석 실패`가 뜨는 조건부터 확인하고, 실제로는 batch 응답 누락 때문에 잘못 실패 처리되는지 보겠습니다. 실패 상태가 과하게 찍히는 경로",
+          "summary": "저장 데이터까지 확인했습니다. 최신 `search` 문서는 아직 영어 문장으로 `claim/method/finding`이 저장되고 있고, 최신 `graph` 문서는 사용자가 본 그 이상한 5개 라벨이 그대로 저장돼 있습니다. 즉 단순 렌더 문제가 아니라 저장 파이프라인 자체를 다시 맞춰야 합니다.",
+          "commandCount": 62
         }
       ],
+      "stats": {
+        "totalTurns": 49,
+        "completedTurns": 43,
+        "totalCommands": 1387
+      }
+    },
+    {
+      "sessionId": "019d5120-9d71-75c2-8fb8-dab2fc505d44",
+      "cwd": "/Users/jaeyoungkang/mirror-mind",
+      "updatedAt": "2026-04-03T02:16:53.945Z",
+      "active": true,
+      "lastAssistantMessage": "agency: doing\nfocus: 로컬 커밋은 있는데 원격 푸시가 빠진 상황인지 먼저 확인해, 다음주 QA와 4월 테스트 준비를 막는 동기화 문제를 바로 해소한다.\ncaution: 사용자의 추측을 사실로 굳히지 말고 브랜치·원격 상태를 검증한 뒤 근거와 대안을 함께 제시한다.",
+      "lastUserMessage": "Co-actor plan 단계. 아래 정보로 이번 턴의 초점과 주의사항을 한 줄씩 결정하라.\n\n사용자: \"아 푸시를 안한거군?\"\n활성 기억: - [의도] 다음주 사내 QA와 4월 비공개 테스트를 통해 lighthouse의 네러티브 품질과 연구 에이전트로서의 성장 루프를 검증하고자 한다. (세션97)\n- [의도] 다중 인덱스(goal, temporal, semantic, entity)를 분리하여 점수 합산 방식으로 활성화 공식을 바꾸기로 했다. (세션53)\n- [의도] 세션 클러스터 점수 방식(같은 세션의 fact와 intention",
+      "progress": {
+        "globalPercent": 100,
+        "globalLabel": "마감 직전",
+        "currentTurnPercent": 100,
+        "currentTurnLabel": "completed"
+      },
+      "milestones": [],
       "currentTurn": {
-        "turnId": "019d4ce9-9083-75a2-9c46-b7ff8b3dbefb",
-        "startedAt": "2026-04-02T06:37:48.548Z",
-        "status": "running",
-        "progressPercent": 35,
-        "progressLabel": "탐색 단계",
-        "latestAssistantMessage": "GitHub Pages 쪽으로 단순한 progress 페이지를 만들기 위한 데이터 정규화 중입니다.",
-        "latestPlan": {
-          "steps": [
-            { "step": "시각화 범위 단순화", "status": "completed" },
-            { "step": "공개 Pages 저장소 연결", "status": "completed" },
-            { "step": "정적 progress 페이지 구성", "status": "in_progress" }
-          ]
-        },
-        "verifications": []
+        "turnId": "019d5120-9d7f-7a11-b11e-975204e2195e",
+        "startedAt": "2026-04-03T02:16:26.678Z",
+        "endedAt": "2026-04-03T02:16:53.945Z",
+        "status": "completed",
+        "progressPercent": 100,
+        "progressLabel": "completed",
+        "latestAssistantMessage": "agency: doing\nfocus: 로컬 커밋은 있는데 원격 푸시가 빠진 상황인지 먼저 확인해, 다음주 QA와 4월 테스트 준비를 막는 동기화 문제를 바로 해소한다.\ncaution: 사용자의 추측을 사실로 굳히지 말고 브랜치·원격 상태를 검증한 뒤 근거와 대안을 함께 제시한다.",
+        "verifications": [],
+        "commandCount": 0
       },
       "recentTurns": [
         {
-          "turnId": "019d4ce9-9083-75a2-9c46-b7ff8b3dbefb",
-          "startedAt": "2026-04-02T06:37:48.548Z",
-          "status": "running",
-          "percent": 35,
-          "label": "탐색 단계",
-          "headline": "Pages 시각화 턴",
-          "summary": "기존 앱 대신 공개 GitHub Pages 저장소에 간단한 progress 보드를 두는 쪽으로 방향을 바꿨습니다.",
-          "planSteps": [
-            { "step": "시각화 범위 단순화", "status": "completed" },
-            { "step": "공개 Pages 저장소 연결", "status": "completed" },
-            { "step": "정적 progress 페이지 구성", "status": "in_progress" }
-          ],
-          "verifications": []
-        },
-        {
-          "turnId": "019d4cb2-195d-7b83-8e49-d59567a64a4d",
-          "endedAt": "2026-04-02T06:12:22.464Z",
+          "turnId": "019d5120-9d7f-7a11-b11e-975204e2195e",
+          "startedAt": "2026-04-03T02:16:26.678Z",
+          "endedAt": "2026-04-03T02:16:53.945Z",
           "status": "completed",
           "percent": 100,
-          "label": "완료",
-          "headline": "MirrorMind 앱 대시보드 구현",
-          "summary": "초기 버전은 Lighthouse 앱 내부 dev route로 만들었고, 이후 Pages 방향으로 선회했습니다.",
-          "verifications": [
-            {
-              "key": "vitest",
-              "label": "vitest",
-              "status": "passed",
-              "summary": "Test Files 1 passed (1)",
-              "command": "npx vitest run app/server/__tests__/mirror-mind.test.ts"
-            },
-            {
-              "key": "typecheck",
-              "label": "typecheck",
-              "status": "passed",
-              "summary": "Types generated successfully",
-              "command": "npm run typecheck"
-            }
-          ]
+          "label": "completed",
+          "headline": "이번 턴은 plan 단계 결정이 목적이다. `mirror-mind-principle.md`만 짧게 확인해서, 주어진 발화와 활성 기억을 기준으로",
+          "summary": "agency: doing\nfocus: 로컬 커밋은 있는데 원격 푸시가 빠진 상황인지 먼저 확인해, 다음주 QA와 4월 테스트 준비를 막는 동기화 문제를 바로 해소한다.\ncaution: 사용자의 추측을 사실로 굳히지 말고 브랜치·원격 상태를 검증한 뒤 근거와 대안을 함께 제시한다.",
+          "commandCount": 0
         }
-      ]
+      ],
+      "stats": {
+        "totalTurns": 1,
+        "completedTurns": 1,
+        "totalCommands": 0
+      }
+    },
+    {
+      "sessionId": "019d5120-b60f-77c1-92b0-20c99d60c419",
+      "cwd": "/Users/jaeyoungkang/mirror-mind",
+      "updatedAt": "2026-04-03T02:16:48.325Z",
+      "active": true,
+      "lastAssistantMessage": "agency: doing\nfocus: 필요한 스크립트를 내가 직접 실행해 현재 상태를 확인하고, 이번 작업의 목적에 맞는 산출물로 바로 연결한다.\ncaution: Why를 놓치지 말고 스크립트를 기계적으로 돌리지 않으며, 실행 이유와 판단 근거를 함께 드러낸다.",
+      "lastUserMessage": "Co-actor plan 단계. 아래 정보로 이번 턴의 초점과 주의사항을 한 줄씩 결정하라.\n\n사용자: \"스크립트는 니가 직접 돌려라.\"\n활성 기억: - [의도] QA 시나리오 문서를 사내 비연구자 대상에 맞게 5단계 흐름으로 재구성하기로 결정했다. (세션102)\n- [의도] 세션 클러스터 점수 방식(같은 세션의 fact와 intention이 동시에 활성화되면 부스트)을 도입하기로 결정했다. (세션81)\n- [의도] 다중 인덱스(goal, temporal, semantic, entity)를 분리하여 점수 합산 방식으로 활성화 공식을",
+      "progress": {
+        "globalPercent": 100,
+        "globalLabel": "마감 직전",
+        "currentTurnPercent": 100,
+        "currentTurnLabel": "completed"
+      },
+      "milestones": [],
+      "currentTurn": {
+        "turnId": "019d5120-b61c-77d2-b0e9-16340ee7a8d2",
+        "startedAt": "2026-04-03T02:16:33.134Z",
+        "endedAt": "2026-04-03T02:16:48.325Z",
+        "status": "completed",
+        "progressPercent": 100,
+        "progressLabel": "completed",
+        "latestAssistantMessage": "agency: doing\nfocus: 필요한 스크립트를 내가 직접 실행해 현재 상태를 확인하고, 이번 작업의 목적에 맞는 산출물로 바로 연결한다.\ncaution: Why를 놓치지 말고 스크립트를 기계적으로 돌리지 않으며, 실행 이유와 판단 근거를 함께 드러낸다.",
+        "verifications": [],
+        "commandCount": 0
+      },
+      "recentTurns": [
+        {
+          "turnId": "019d5120-b61c-77d2-b0e9-16340ee7a8d2",
+          "startedAt": "2026-04-03T02:16:33.134Z",
+          "endedAt": "2026-04-03T02:16:48.325Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "agency: doing\nfocus: 필요한 스크립트를 내가 직접 실행해 현재 상태를 확인하고, 이번 작업의 목적에 맞는 산출물로 바로 연결한다",
+          "summary": "agency: doing\nfocus: 필요한 스크립트를 내가 직접 실행해 현재 상태를 확인하고, 이번 작업의 목적에 맞는 산출물로 바로 연결한다.\ncaution: Why를 놓치지 말고 스크립트를 기계적으로 돌리지 않으며, 실행 이유와 판단 근거를 함께 드러낸다.",
+          "commandCount": 0
+        }
+      ],
+      "stats": {
+        "totalTurns": 1,
+        "completedTurns": 1,
+        "totalCommands": 0
+      }
+    },
+    {
+      "sessionId": "019d5120-581a-7553-9d21-257713a8c2e8",
+      "cwd": "/Users/jaeyoungkang/mirror-mind",
+      "updatedAt": "2026-04-03T02:16:27.050Z",
+      "active": true,
+      "lastAssistantMessage": "agency: suggesting\nfocus: 최신 세션 5개 노출이 사용자의 이어보기 목적을 실제로 푸는지 확인하고, 세션명 오류 교정과 충돌하지 않는 표시 기준을 먼저 정리한다\ncaution: Why를 먼저 확인하고 5개 고정안 외 대안(예: 최근 3개, 최근+고정 핀)도 함께 제시한다",
+      "lastUserMessage": "Co-actor plan 단계. 아래 정보로 이번 턴의 초점과 주의사항을 한 줄씩 결정하라.\n\n사용자: \"최신 세션 5개 보이게해도 될까?\"\n활성 기억: - [의도] 세션명 오류(예: '2026-03-10-세션62'에 세션63 대화가 들어감)를 교정하기로 결정했다. (세션68)\n- [의도] 세션 클러스터 점수 방식(같은 세션의 fact와 intention이 동시에 활성화되면 부스트)을 도입하기로 결정했다. (세션81)\n- [의도] QA 시나리오 문서를 사내 비연구자 대상에 맞게 5단계 흐름으로 재구성하기로 결정했다. (세션102)\n",
+      "progress": {
+        "globalPercent": 100,
+        "globalLabel": "마감 직전",
+        "currentTurnPercent": 100,
+        "currentTurnLabel": "completed"
+      },
+      "milestones": [],
+      "currentTurn": {
+        "turnId": "019d5120-5823-7160-bd01-bb47b35f613a",
+        "startedAt": "2026-04-03T02:16:09.247Z",
+        "endedAt": "2026-04-03T02:16:27.050Z",
+        "status": "completed",
+        "progressPercent": 100,
+        "progressLabel": "completed",
+        "latestAssistantMessage": "agency: suggesting\nfocus: 최신 세션 5개 노출이 사용자의 이어보기 목적을 실제로 푸는지 확인하고, 세션명 오류 교정과 충돌하지 않는 표시 기준을 먼저 정리한다\ncaution: Why를 먼저 확인하고 5개 고정안 외 대안(예: 최근 3개, 최근+고정 핀)도 함께 제시한다",
+        "verifications": [],
+        "commandCount": 0
+      },
+      "recentTurns": [
+        {
+          "turnId": "019d5120-5823-7160-bd01-bb47b35f613a",
+          "startedAt": "2026-04-03T02:16:09.247Z",
+          "endedAt": "2026-04-03T02:16:27.050Z",
+          "status": "completed",
+          "percent": 100,
+          "label": "completed",
+          "headline": "agency: suggesting\nfocus: 최신 세션 5개 노출이 사용자의 이어보기 목적을 실제로 푸는지 확인하고, 세션명 오류 교정과 충돌",
+          "summary": "agency: suggesting\nfocus: 최신 세션 5개 노출이 사용자의 이어보기 목적을 실제로 푸는지 확인하고, 세션명 오류 교정과 충돌하지 않는 표시 기준을 먼저 정리한다\ncaution: Why를 먼저 확인하고 5개 고정안 외 대안(예: 최근 3개, 최근+고정 핀)도 함께 제시한다",
+          "commandCount": 0
+        }
+      ],
+      "stats": {
+        "totalTurns": 1,
+        "completedTurns": 1,
+        "totalCommands": 0
+      }
+    },
+    {
+      "sessionId": "019d5120-5b74-79f1-9050-f7485d7f2d66",
+      "cwd": "/Users/jaeyoungkang/mirror-mind",
+      "updatedAt": "2026-04-03T02:16:11.095Z",
+      "active": true,
+      "lastAssistantMessage": "",
+      "lastUserMessage": "Co-actor plan 단계. 아래 정보로 이번 턴의 초점과 주의사항을 한 줄씩 결정하라.\n\n사용자: \"아 스크립트를 아직 안돌렸구나\"\n활성 기억: - [의도] 다음주 사내 QA와 4월 비공개 테스트를 통해 lighthouse의 네러티브 품질과 연구 에이전트로서의 성장 루프를 검증하고자 한다. (세션97)\n- [의도] 세션명 오류(예: '2026-03-10-세션62'에 세션63 대화가 들어감)를 교정하기로 결정했다. (세션68)\n- [사실] 오늘(3월 17일, W12)의 주요 작업 계획은 lighthouse 문서 생성 및 관리 체",
+      "progress": {
+        "globalPercent": 0,
+        "globalLabel": "시작",
+        "currentTurnPercent": 5,
+        "currentTurnLabel": "running"
+      },
+      "milestones": [],
+      "currentTurn": {
+        "turnId": "019d5120-5b82-7030-a137-3cfb87371ead",
+        "startedAt": "2026-04-03T02:16:09.612Z",
+        "endedAt": null,
+        "status": "running",
+        "progressPercent": 5,
+        "progressLabel": "running",
+        "latestAssistantMessage": "",
+        "verifications": [],
+        "commandCount": 0
+      },
+      "recentTurns": [
+        {
+          "turnId": "019d5120-5b82-7030-a137-3cfb87371ead",
+          "startedAt": "2026-04-03T02:16:09.612Z",
+          "endedAt": null,
+          "status": "running",
+          "percent": 5,
+          "label": "running",
+          "headline": "Co-actor plan 단계. 아래 정보로 이번 턴의 초점과 주의사항을 한 줄씩 결정하라.\n\n사용자: \"아 스크립트를 아직 안돌렸구나\"\n활성 ",
+          "summary": "",
+          "commandCount": 0
+        }
+      ],
+      "stats": {
+        "totalTurns": 1,
+        "completedTurns": 0,
+        "totalCommands": 0
+      }
     }
   ]
 }
