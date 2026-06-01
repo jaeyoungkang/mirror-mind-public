@@ -19,3 +19,9 @@ title: Mirror Mind — Public Pages
   - [② 증강 시스템 설계 조건·조립](learning/engelbart/02-augmentation-conditions)
   - [③ 한계·비판·실패한 이유](learning/engelbart/03-limits-and-critique)
   - [④ Engelbart와 mirror-mind의 직접 접점](learning/engelbart/04-mirror-mind-connections)
+
+## 에디톨로지 리서치 (2026-06)
+
+- [에디톨로지 — 창조는 편집이다, AI 시대의 재독해](learning/editology/)
+  - [① 종합 리포트 — 개념·계보·비평·AI 재독해](learning/editology/report)
+  - [② 에이전트 제품군 적용안 — 편집 주체의 근력 복원](learning/editology/agent-applications)
