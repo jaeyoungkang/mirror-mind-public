@@ -25,3 +25,7 @@ title: Mirror Mind — Public Pages
 - [에디톨로지 — 창조는 편집이다, AI 시대의 재독해](learning/editology/)
   - [① 종합 리포트 — 개념·계보·비평·AI 재독해](learning/editology/report)
   - [② 에이전트 제품군 적용안 — 편집 주체의 근력 복원](learning/editology/agent-applications)
+
+## AI 동향 리서치 (2026-06)
+
+- [2026 에이전트 플랫폼 경쟁 — 축, 스택, 성숙도](learning/ai-trends-2026/)
