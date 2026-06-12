@@ -11,6 +11,7 @@ title: Mirror Mind — Public Pages
 - [브라우저는 HTML을 어떻게 처리하는가](learning/browser-rendering-pipeline.html)
 - [Help Map — 논문 네트워크 탐색 렌즈](help-map/index.html)
 - [MirrorMind Progress Board](progress/index.html)
+- [교원 코칭 자료](learning/kyowon-coaching/)
 
 ## Engelbart 리서치 (2026-05, W19)
 
