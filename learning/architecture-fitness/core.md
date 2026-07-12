@@ -16,7 +16,7 @@ title: Architecture Fitness 핵심 판단 퀴즈
 
 **지금 증명된 것과 아직 증명되지 않은 것을 하나씩 적어라.**
 
-<details>
+<details markdown="1">
 <summary>정답·판단 기준</summary>
 
 검색 기능이 선언한 구현 계약을 충족했다는 사실은 증명됐다. 연구자가 유용한 논문을 더 잘 또는 더
@@ -36,7 +36,7 @@ PDF 열기와 라이브러리 추가는 강도가 다른 proxy다. 검색부터 
 
 **상황 A와 B를 각각 `unknown` 또는 `degraded`로 판정하라.**
 
-<details>
+<details markdown="1">
 <summary>정답·판단 기준</summary>
 
 - A: `unknown` — desired policy는 있지만 observed evidence가 없다.
@@ -52,7 +52,7 @@ State owner는 담당 개발자가 아니라 값이 충돌할 때 따를 최종 
 
 **URL이 검색 조건의 owner라는 결정이 깨진 것인가? 정확히 같은 결과를 복원하려면 무엇이 필요한가?**
 
-<details>
+<details markdown="1">
 <summary>정답·판단 기준</summary>
 
 결정이 깨진 것은 아니다. URL은 재실행할 condition을 식별하지 과거 result snapshot의 동일성을
@@ -68,7 +68,7 @@ State owner는 담당 개발자가 아니라 값이 충돌할 때 따를 최종 
 
 **선언과 harness의 일치 여부는 무엇인가? 운영 기준 자체의 적절성도 이 정보만으로 판정할 수 있는가?**
 
-<details>
+<details markdown="1">
 <summary>정답·판단 기준</summary>
 
 선언과 harness의 불일치는 재현됐으므로 `degraded`다. “결과가 하나 이상이어야 한다”는 기준 자체는
@@ -83,7 +83,7 @@ State owner는 담당 개발자가 아니라 값이 충돌할 때 따를 최종 
 
 **왜 Architecture Fitness 원칙에 어긋나는가?**
 
-<details>
+<details markdown="1">
 <summary>정답·판단 기준</summary>
 
 평균은 Q2의 확인된 불일치와 Q3의 evidence 부재를 다른 healthy 항목으로 상쇄해 가린다. Lens별 verdict,
