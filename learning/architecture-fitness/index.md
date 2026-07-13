@@ -14,6 +14,7 @@ Lighthouse는 질문을 구체화하는 사례일 뿐이며, 특정 서비스의
 1. [핵심 판단 퀴즈](core) — evidence, owner, condition과 snapshot, 단일 점수 금지
 2. [Q1: 제품과 기술의 정합](q1) — Promise, outcome, architecture decision
 3. [Q2: 거시 구조](q2) — 책임 있는 경계, topology, 핵심 실행 경로
+4. [Q3: 확장성과 부하](q3) — workload envelope, SLO break point, queue, 입력 amplification
 
 각 문제는 먼저 자신의 말로 답한 뒤 `정답·판단 기준`을 연다. 틀린 문제가 있으면 전체 내용을 다시
 읽기보다 해당 개념 하나만 복습한다.
