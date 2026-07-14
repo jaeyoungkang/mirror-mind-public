@@ -5,3 +5,7 @@ markdown: kramdown
 exclude:
   - AGENTS.md
   - shared-skills
+header_pages:
+  - learning/architecture-fitness/index.md
+  - learning/ai-trends-2026/index.md
+  - learning/kyowon-coaching/index.md
