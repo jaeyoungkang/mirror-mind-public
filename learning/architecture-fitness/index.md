@@ -1,13 +1,12 @@
 ---
 layout: default
-title: Architecture Fitness 학습 퀴즈
+title: Architecture Fitness 학습
 ---
 
-# Architecture Fitness 학습 퀴즈
+# Architecture Fitness 학습
 
-앞으로 만드는 어떤 서비스에서도 구조와 성능의 적합성을 스스로 판단하기 위한 복습 자료다.
-Lighthouse는 질문을 구체화하는 사례일 뿐이며, 특정 서비스의 코드나 용어를 암기하는 것이 목표가
-아니다.
+앞으로 만드는 서비스에서 구조와 성능의 적합성을 판단하기 위한 학습 자료다. Lighthouse 사례는 각
+질문을 구체적으로 보여 준다. 여기서 익힌 판단 기준을 다른 서비스에 적용하는 데 초점을 둔다.
 
 ## 학습 순서
 
@@ -17,9 +16,13 @@ Lighthouse는 질문을 구체화하는 사례일 뿐이며, 특정 서비스의
 4. [Q3: 확장성과 부하](q3) — workload envelope, SLO break point, queue, 입력 amplification
 5. [Q4: 기술 단위와 변경 결](q4) — 책임 있는 hop, chokepoint, change propagation
 6. [Q5: 캐시 전략](q5) — owner, key scope, freshness, invalidation, stampede control
+7. [종합: Architecture Fitness 전문성 모델](professional-model) — Q1–Q5 통합, 설계와 지속 관리
 
 각 문제는 먼저 자신의 말로 답한 뒤 `정답·판단 기준`을 연다. 틀린 문제가 있으면 전체 내용을 다시
 읽기보다 해당 개념 하나만 복습한다.
+
+전문성 모델은 Q1부터 Q5까지의 관계를 설명한다. 퀴즈 학습을 마친 뒤 설계자와 관리자의 실무 기준을
+정리할 때 사용한다.
 
 ## 반복해서 사용할 질문
 

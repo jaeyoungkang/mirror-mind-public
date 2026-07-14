@@ -12,7 +12,7 @@ title: Mirror Mind — Public Pages
 - [Help Map — 논문 네트워크 탐색 렌즈](help-map/index.html)
 - [MirrorMind Progress Board](progress/index.html)
 - [교원 코칭 자료](learning/kyowon-coaching/)
-- [Architecture Fitness 학습 퀴즈](learning/architecture-fitness/)
+- [Architecture Fitness 학습](learning/architecture-fitness/)
 
 ## Engelbart 리서치 (2026-05, W19)
 
