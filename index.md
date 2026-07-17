@@ -13,6 +13,7 @@ title: Mirror Mind — Public Pages
 - [MirrorMind Progress Board](progress/index.html)
 - [교원 코칭 자료](learning/kyowon-coaching/)
 - [Architecture Fitness 학습](learning/architecture-fitness/)
+- [맘 테스트 연습장 — 고객 대화 판별 훈련](learning/mom-test-practice.html)
 
 ## Engelbart 리서치 (2026-05, W19)
 
