@@ -479,6 +479,67 @@ Episteme queue는 process-local이고 core 요청용 슬롯을 남긴다. Gap의
 build 1개 제한은 #417에서 DB 기준으로 추적한다. 평균 시간뿐 아니라 p95·p99, 5xx,
 queue, token 비용과 load shedding을 본다. Process-local 상한은 fleet 전체 상한이 아니다.
 
+### 검색 1회가 만드는 LLM workload
+
+사용자가 검색 버튼을 한 번 눌렀다고 provider 호출도 한 번만 발생하는 것은 아니다.
+Lighthouse에서는 검색 결과를 받은 뒤 여러 LLM 기능이 함께 실행될 수 있다.
+
+| 기능                    | 현재 정상 경로의 호출                    |
+| ----------------------- | ---------------------------------------- |
+| Inline analysis         | 최대 5편을 Gemini Flash batch 1회로 분석 |
+| Route AI comment        | Gemini Lite 1회                          |
+| Research-term discovery | Gemini Lite 1회                          |
+| Spelling correction     | 조건을 충족할 때 Gemini Lite 최대 1회    |
+
+모든 기능이 실행되면 검색 1건은 정상 경로에서 최대 약 4회의 provider 호출을
+만든다. 따라서 20개 검색이 같은 시기에 들어오면 약 80회의 호출 시도가 생긴다.
+
+현재 inline analysis는 batch 호출이 실패하면 같은 provider에 논문별 최대 5회를
+추가로 시도한다. 이 fallback이 20개 검색에서 모두 발생하면 cohort 전체의 호출
+시도는 최대 약 180회까지 증가할 수 있다.
+
+여기서 **동시 실행 수**와 **총 호출 시도 수**를 구분해야 한다. 180회가 같은
+순간에 실행된다는 뜻은 아니다. 첫 batch가 실패한 뒤 개별 호출이 이어지기
+때문이다. 그러나 장애 중 provider 부하, 비용과 대기열을 증폭한다는 점은 같다.
+
+전문가는 route 하나의 평균 호출 수보다 **workload amplification**을 먼저
+계산한다. Fan-out과 retry가 결합하면 사용자 요청 수보다 내부 작업이 더 빠르게
+증가한다. 포화 상태에서는 timeout이 retry를 만들고, retry가 다시 timeout을
+늘리는 악순환도 생긴다.
+
+Lighthouse는 다음 초기 admission 정책을 승인했다.
+
+| 보호 경계                         | 동시 실행 상한 |
+| --------------------------------- | -------------- |
+| 한 server process의 전체 LLM 실행 | 200            |
+| Gemini Flash inline-analysis pool | 100            |
+| Gemini Lite 기타 기능 pool        | 100            |
+| OpenAI secondary provider pool    | 50             |
+
+Admission control은 새 작업을 지금 실행할지, 기다리게 할지, 거부할지 결정하는
+입구 제어다. Semaphore는 동시에 실행 중인 작업 수를 세는 구현 방법이다. 위에서
+전체 200은 상위 hard cap이고 각 pool은 기능별 하위 cap이다. 하위 상한의 합을
+동시에 모두 사용할 수 있다는 뜻은 아니다.
+
+기능별 pool은 **bulkhead** 역할을 한다. Bulkhead는 한 기능의 포화가 다른 기능의
+실행 자리까지 모두 차지하지 못하게 자원을 나누는 경계다. 초기 우선순위는
+사용자가 기다리는 AI comment, inline analysis, background research-term
+discovery, best-effort spelling correction 순이다. 포화되면 background와
+best-effort 작업부터 지연하거나 생략한다.
+
+이 숫자는 provider 계정 quota를 복제하지 않는다. 한 process의 메모리, socket,
+비용과 장애 전파 범위를 제한한다. 여러 server instance가 있으면 process-local
+200은 fleet 전체 200을 보장하지 않는다. Provider 429나 fleet 포화가 실제로
+관측될 때 shared admission이 필요한지 다시 판단한다.
+
+현재 공통 structured-generation gateway는 timeout, 입력 byte와 출력 token
+상한을 적용하지만 서비스 전체 동시 실행을 제한하지 않는다. 승인된 cap과
+batch failure 증폭 제거는
+[#435](https://github.com/corca-ai/lighthouse/issues/435)에서 추적한다.
+아직 구현과 20개 동시 검색 부하 증거가 없으므로 Architecture Fitness 판정은
+`unknown`이다. 정책 상수만 추가해도 처리량과 failure isolation이 증명되지는
+않는다.
+
 ### 계측과 관측 가능성
 
 로그를 생성하는 계측만으로 운영 판단을 내릴 수는 없다. 기간별 집계, 사용자 영향,
@@ -571,6 +632,9 @@ Lighthouse의 Gap report라면 운영과 같은 migration·DB role을 사용해 
 - 공유 데이터와 개인 데이터를 구분했는가?
 - Application filter와 DB 강제를 구분했는가?
 - Process-local 보호와 fleet 전체 보장을 구분했는가?
+- 사용자 요청 수를 provider 호출 수로 그대로 간주하지 않았는가?
+- 정상 fan-out과 실패 시 retry 증폭을 따로 계산했는가?
+- 전체 cap과 기능별 bulkhead가 공통 gateway에서 강제되는가?
 - 코드, DB, 테스트, 운영 증거를 연결했는가?
 - 발견을 영향도·가능성·노출로 우선순위화했는가?
 - 지원하지 않는 범위를 `unknown`으로 남겼는가?
@@ -594,6 +658,8 @@ Lighthouse의 Gap report라면 운영과 같은 migration·DB role을 사용해 
 - [Gap report runtime flow](https://github.com/corca-ai/lighthouse/blob/main/docs/runtime-flows/gap-network-analysis.md)
 - [운영 준비도](https://github.com/corca-ai/lighthouse/blob/main/docs/operational-readiness.md)
 - [Lighthouse Architecture Fitness integration](https://github.com/corca-ai/lighthouse/blob/main/docs/architecture-fitness/README.md)
+- [Lighthouse structured-generation gateway](https://github.com/corca-ai/lighthouse/blob/main/app/server/ai-generation/gateway.ts)
+- [Lighthouse inline analysis service](https://github.com/corca-ai/lighthouse/blob/main/app/server/services/inline-analysis-service.ts)
 - [Architecture Fitness workload envelope](https://github.com/jaeyoung2026/architecture-fitness/blob/main/skills/architecture-fitness-review/references/workload-envelope.md)
 - [Architecture Fitness critical path](https://github.com/jaeyoung2026/architecture-fitness/blob/main/skills/architecture-fitness-review/references/critical-path.md)
 - [Amazon CloudWatch Database Insights](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Database-Insights.html)

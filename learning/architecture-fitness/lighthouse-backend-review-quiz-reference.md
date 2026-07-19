@@ -53,6 +53,7 @@ title: Lighthouse 백엔드 리뷰 퀴즈 해설
 | G    | 32–35 중 1개 | 20분      | 재시도, 권한, 운영과 공통 mechanism   |
 | H    | 36–40        | 20분      | 실제 DB identity와 오류 계약          |
 | I    | 41–46        | 20분      | Transaction, version과 저장 경계      |
+| J    | 47–50        | 20분      | LLM fan-out, admission과 부하 증거    |
 
 ### 역량별 평가
 
@@ -885,6 +886,53 @@ Enrichment 실패 때 core를 남기는 현재 제품 계약과 DB 연결·잠�
 저장한다”는 설명을 검토하라. Episteme가 맡는 일과 Lighthouse DB가 맡는 상태를
 나누고, DB 학습 사례로 Gap report를 깊게 본 이유를 설명하라.
 
+### 47. 검색 20개의 LLM 호출량
+
+모든 기능이 실행되는 검색 1건이 inline-analysis batch, AI comment,
+research-term discovery, spelling correction를 각각 한 번 호출한다. 검색
+20건의 정상 호출 시도 수를 계산하라.
+
+Inline-analysis batch가 실패한 뒤 같은 provider에 논문별 5회를 추가 호출하는
+현재 fallback이 모든 검색에서 발생하면 총 시도 수가 얼마까지 늘어나는지도
+계산하라. 총 시도 수와 동시 실행 수가 같은지도 설명하라.
+
+### 48. 전체 cap과 기능별 pool
+
+다음 승인안을 검토하라.
+
+```text
+process total = 200
+Gemini Flash inline analysis = 100
+Gemini Lite other features = 100
+OpenAI secondary = 50
+```
+
+하위 pool의 합이 250이므로 250개가 동시에 실행될 수 있는가? 전체 cap,
+기능별 bulkhead와 semaphore가 각각 무엇을 막는지 Lighthouse 기준으로
+설명하라.
+
+### 49. 포화 시 작업 우선순위
+
+LLM 실행 자리가 가득 찼다. 다음 작업을 모두 같은 queue에 넣어 먼저 온 순서로
+처리할지 판단하라.
+
+1. 사용자가 화면에서 기다리는 AI comment
+2. Inline analysis
+3. Background research-term discovery
+4. Best-effort spelling correction
+
+사용자 보장과 장애 범위를 기준으로 지연하거나 생략할 작업을 결정하라.
+
+### 50. 설정 상수가 있으면 검증이 끝나는가
+
+공통 gateway에 `MAX_ACTIVE_LLM = 200`이 추가되고 unit test가 통과했다. 다음
+주장을 검토하라.
+
+> Lighthouse는 20개 동시 검색을 안전하게 처리한다.
+
+현재 코드, 부하 테스트, process와 fleet 범위, provider 실패를 나누어 필요한
+증거를 적어라. 구현 전 Architecture Fitness 판정도 제시하라.
+
 ## 해설
 
 ### 36. 공유 report와 개인 preference
@@ -964,6 +1012,39 @@ LLM usage와 운영 기록처럼 지속되어야 하는 상태를 맡는다. Gap
 route라서가 아니라 identity, lease, CAS, 중단 복구와 partial failure가 가장
 밀집된 DB 사례라서 깊게 검토했다.
 
+### 47. 검색 20개의 LLM 호출량
+
+정상 경로는 검색당 4회이므로 총 80회다. Batch 실패 뒤 개별 호출 5회가
+추가되면 검색당 최대 9회, 20건은 최대 180회다. 180회는 cohort 전체에서 발생할
+수 있는 총 시도 수다. 첫 batch의 실패 뒤 개별 호출이 시작되므로 모두 같은
+순간에 실행된다는 뜻은 아니다. 동시 실행 수는 실제 timing, queue와 cap을
+측정해야 알 수 있다.
+
+### 48. 전체 cap과 기능별 pool
+
+동시에 250개를 실행할 수 없다. 전체 200이 모든 하위 pool을 합친 hard cap이다.
+Semaphore는 현재 실행 중인 수를 세고 새 작업을 대기·거부한다. 기능별 pool은
+한 workload가 모든 자리를 점유하지 못하게 하는 bulkhead다. OpenAI secondary가
+포화돼도 primary 사용자 작업의 자리를 모두 빼앗지 않도록 분리해야 한다.
+
+### 49. 포화 시 작업 우선순위
+
+모두 같은 FIFO queue에 넣으면 background 작업이 사용자가 기다리는 응답을
+막을 수 있다. 초기 승인 순서는 AI comment, inline analysis, research-term,
+spelling correction다. 사용자-visible 작업은 bounded wait 뒤 명시적인
+degraded/failure로 닫는다. Background와 best-effort 작업은 먼저 지연하거나
+생략한다. 우선순위만 정하고 queue 대기 시간에 상한을 두지 않으면 요청 수명과
+메모리 사용이 다시 무제한이 될 수 있다.
+
+### 50. 설정 상수가 있으면 검증이 끝나는가
+
+주장은 아직 증명되지 않았다. 모든 structured generation이 공통 gateway를
+통과하는지 정적 경로를 확인해야 한다. 20개 검색 fixture로 정상 약 80회와
+batch 실패 fan-out 제거를 측정해야 한다. Active, queued, wait time, timeout,
+429, latency와 token도 관측해야 한다. Process-local 200은 fleet 전체 200이나
+provider 계정 quota를 보장하지 않는다. 구현과 행동 증거 전 Architecture
+Fitness 판정은 `unknown`이다.
+
 ---
 
 # 복습 계획
@@ -977,6 +1058,7 @@ route라서가 아니라 identity, lease, CAS, 중단 복구와 partial failure�
 | 보호장치를 만능으로 해석함    | 22–27        | 장치가 막는 것과 못 막는 것을 두 열로 쓴다. |
 | 결정을 바로 단정함            | 28–35        | 대안, 필요한 증거와 재검토 조건을 추가한다. |
 | DB 저장 경계가 약함           | 36–46        | identity, 원자성, 동시성과 수명을 나눈다.   |
+| 내부 호출량을 과소평가함      | 47–50        | 정상 fan-out과 실패 증폭을 따로 계산한다.   |
 
 ## Lighthouse 코드 근거
 
@@ -990,6 +1072,11 @@ route라서가 아니라 identity, lease, CAS, 중단 복구와 partial failure�
 - [Gap runtime flow](https://github.com/corca-ai/lighthouse/blob/main/docs/runtime-flows/gap-network-analysis.md)
 - [Search runtime flow](https://github.com/corca-ai/lighthouse/blob/main/docs/runtime-flows/search-mechanism.md)
 - [Operational readiness](https://github.com/corca-ai/lighthouse/blob/main/docs/operational-readiness.md)
+- [Structured-generation gateway](https://github.com/corca-ai/lighthouse/blob/main/app/server/ai-generation/gateway.ts)
+- [Inline analysis service](https://github.com/corca-ai/lighthouse/blob/main/app/server/services/inline-analysis-service.ts)
+- [Route AI comment generation](https://github.com/corca-ai/lighthouse/blob/main/app/server/agent/route-ai-comment-generation.ts)
+- [Research-term discovery](https://github.com/corca-ai/lighthouse/blob/main/app/server/services/search-term-discovery.ts)
+- [Spelling correction](https://github.com/corca-ai/lighthouse/blob/main/app/server/services/search-spelling-correction-service.ts)
 
 ## 지식 레퍼런스
 

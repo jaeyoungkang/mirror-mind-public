@@ -729,7 +729,7 @@
         <div class="brand">
           <div class="brand-kicker">Lighthouse / Backend Lab</div>
           <h1>Request Boundary Workbook</h1>
-          <p>용어를 코드와 결정으로 연결하는 46개 실전 문제</p>
+          <p>용어를 코드와 결정으로 연결하는 50개 실전 문제</p>
         </div>
 
         <section class="progress-block" aria-labelledby="progress-title">
@@ -802,11 +802,10 @@
 
         <p class="footer-note">
           답안은 이 브라우저에만 저장된다. 개념의 설명 순서는
-          <a href="./lighthouse-backend-review-guide">백엔드 리뷰 가이드</a
-          >에서 확인하고, 텍스트 참고본은
+          <a href="./lighthouse-backend-review-guide">백엔드 리뷰 가이드</a>에서
+          확인하고, 텍스트 참고본은
           <a href="./lighthouse-backend-review-quiz-reference">Markdown 퀴즈</a
-          >에서
-          확인한다.
+          >에서 확인한다.
         </p>
       </main>
     </div>
@@ -822,6 +821,7 @@
         { id: 5, title: "시니어 결정", range: "28–35", pipeline: 5 },
         { id: 6, title: "DB와 오류 계약", range: "36–40", pipeline: 4 },
         { id: 7, title: "저장 경계", range: "41–46", pipeline: 4 },
+        { id: 8, title: "LLM 부하 경계", range: "47–50", pipeline: 5 },
       ];
 
       const q = (
@@ -1413,6 +1413,94 @@ reaction_version</pre>
           "<p>설명은 틀렸다. Query 검색과 논문 corpus는 Episteme provider가 담당한다. Lighthouse DB는 reviewed papers, Gap artifact와 reaction, inline-analysis cache, LLM usage와 운영 기록처럼 지속되어야 하는 상태를 맡는다. Gap report는 평균 route라서가 아니라 identity, 동시성, lease, CAS, 중단 복구와 partial failure가 가장 밀집돼 있어 DB 리뷰를 학습하기 좋은 사례다.</p>",
           ["제품 보장", "의사결정"],
           ["설명이 맞다", "설명이 틀리다"],
+        ),
+        q(
+          47,
+          8,
+          "호출량 계산",
+          "검색 20개는 LLM을 몇 번 호출할까",
+          `<p>모든 기능이 실행되는 검색 1건은 다음 LLM 작업을 만든다.</p>
+<ul>
+  <li>Inline-analysis batch 1회</li>
+  <li>AI comment 1회</li>
+  <li>Research-term discovery 1회</li>
+  <li>Spelling correction 1회</li>
+</ul>
+<p>검색 20건의 정상 호출 시도 수를 계산하라. Inline batch가 실패한 뒤 같은 provider에 논문별 5회를 추가 호출하는 현재 fallback이 모든 검색에서 발생할 때의 최대 시도 수도 계산하라. 총 시도 수와 동시 실행 수가 같은지도 설명하라.</p>
+<p class="source-note">실제 근거:
+<a href="https://github.com/corca-ai/lighthouse/blob/main/app/server/services/inline-analysis-service.ts">inline-analysis-service.ts</a>,
+<a href="https://github.com/corca-ai/lighthouse/blob/main/app/server/agent/route-ai-comment-generation.ts">route-ai-comment-generation.ts</a>,
+<a href="https://github.com/corca-ai/lighthouse/blob/main/app/server/services/search-term-discovery.ts">search-term-discovery.ts</a></p>`,
+          "정상 검색당 4회다. 실패 fallback은 기존 batch를 대신하는 것이 아니라 그 뒤에 5회를 추가한다.",
+          "<p>정상 경로는 <strong>80회</strong>다. Batch 실패가 모두 발생하면 검색당 4 + 5 = 9회이므로 최대 <strong>180회</strong>다. 180회는 cohort 전체의 총 시도 수다. 첫 batch의 실패 뒤 개별 호출이 시작되므로 모두 같은 순간에 실행된다는 뜻은 아니다. 실제 동시 실행 수는 timing, queue와 admission cap을 측정해야 안다.</p>",
+          ["용어", "코드", "운영"],
+          [
+            "정상 20회 / 실패 120회",
+            "정상 80회 / 실패 180회",
+            "정상 80회 / 실패 160회",
+            "정상 100회 / 실패 200회",
+          ],
+        ),
+        q(
+          48,
+          8,
+          "Admission",
+          "전체 cap과 기능별 pool",
+          `<p>다음 process-local 정책을 승인했다.</p>
+<pre>process total = 200
+Gemini Flash inline analysis = 100
+Gemini Lite other features = 100
+OpenAI secondary = 50</pre>
+<p>하위 pool의 합이 250이므로 250개를 동시에 실행할 수 있는가? 전체 cap, 기능별 bulkhead와 semaphore의 책임을 설명하라.</p>
+<p class="source-note">추적:
+<a href="https://github.com/corca-ai/lighthouse/issues/435">#435</a></p>`,
+          "전체 cap은 모든 pool보다 바깥에 있다. Pool은 각 workload가 사용할 수 있는 최대 몫이다.",
+          "<p>동시에 250개를 실행할 수 없다. 전체 200이 모든 pool을 합친 hard cap이다. Semaphore는 현재 실행 중인 수를 세고 새 작업을 대기하거나 거부한다. 기능별 pool은 한 workload가 다른 기능의 실행 자리까지 모두 점유하지 못하게 하는 bulkhead다. 이 값은 provider quota를 복제하는 것이 아니라 한 process의 장애 범위를 제한한다.</p>",
+          ["용어", "제품 보장"],
+          [
+            "최대 200개",
+            "최대 250개",
+            "Provider가 허용하는 만큼 무제한",
+            "서버 수와 무관하게 fleet 전체 200개",
+          ],
+        ),
+        q(
+          49,
+          8,
+          "과부하 정책",
+          "LLM 실행 자리가 가득 찼다",
+          `<p>다음 작업을 모두 같은 FIFO queue에 넣을지 판단하라.</p>
+<ol>
+  <li>사용자가 기다리는 AI comment</li>
+  <li>Inline analysis</li>
+  <li>Background research-term discovery</li>
+  <li>Best-effort spelling correction</li>
+</ol>
+<p>사용자 보장과 장애 범위를 기준으로 지연하거나 생략할 작업을 결정하라.</p>`,
+          "먼저 온 내부 작업보다 사용자가 지금 기다리는 milestone이 더 중요할 수 있다.",
+          "<p>모두 같은 FIFO queue에 넣으면 background 작업이 사용자-visible 응답을 막을 수 있다. 초기 우선순위는 AI comment, inline analysis, research-term, spelling correction다. 사용자-visible 작업은 bounded wait 뒤 명시적인 degraded/failure로 닫는다. Background와 best-effort 작업은 먼저 지연하거나 생략한다. Queue 대기 시간도 제한해야 한다.</p>",
+          ["제품 보장", "의사결정"],
+        ),
+        q(
+          50,
+          8,
+          "검증 증거",
+          "MAX_ACTIVE_LLM = 200이면 끝일까",
+          `<p>공통 gateway에 <code>MAX_ACTIVE_LLM = 200</code>이 추가되고 unit test가 통과했다.</p>
+<pre>Lighthouse는 20개 동시 검색을 안전하게 처리한다.</pre>
+<p>이 주장을 검토하라. 코드 경로, 부하 테스트, process와 fleet 범위, provider 실패를 나누어 필요한 증거를 적어라.</p>
+<p class="source-note">추적:
+<a href="https://github.com/corca-ai/lighthouse/issues/401">#401</a>,
+<a href="https://github.com/corca-ai/lighthouse/issues/435">#435</a></p>`,
+          "설정 상수는 의도를 보여주지만 실제 fan-out, wait와 failure isolation을 증명하지 않는다.",
+          "<p>아직 증명되지 않았다. 모든 structured generation이 공통 gateway를 통과하는지 확인해야 한다. 20개 검색 fixture로 정상 약 80회와 failed-batch fan-out 제거를 측정해야 한다. Active, queued, wait time, timeout, 429, latency와 token도 관측해야 한다. Process-local 200은 fleet 전체 200이나 provider 계정 quota를 보장하지 않는다. 구현과 행동 증거 전 Architecture Fitness 판정은 <code>unknown</code>이다.</p>",
+          ["코드", "운영", "의사결정"],
+          [
+            "전체가 healthy다",
+            "Architecture Fitness는 unknown이다",
+            "Provider quota만 확인하면 healthy다",
+            "Unit test가 통과했으므로 fleet도 안전하다",
+          ],
         ),
       ];
 
