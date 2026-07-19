@@ -582,7 +582,7 @@ Lighthouse의 Gap report라면 운영과 같은 migration·DB role을 사용해 
 사용한다. 한 문제씩 Lighthouse의 실제 migration, route와 repository 코드를
 판단한다. 답안과 복습 상태는 현재 브라우저에 저장된다.
 
-[`lighthouse-backend-review-quiz`](./lighthouse-backend-review-quiz)는
+[`lighthouse-backend-review-quiz-reference`](./lighthouse-backend-review-quiz-reference)는
 텍스트로 학습 방법과 해설을 훑을 때 사용하는 참고본이다. 학습 진입점과 최신
 실전 문항은 HTML 퀴즈다. 한 번에 전체 점수를 내지 않는다. 약한 영역을 확인하고
 해당 단계만 다시 푼다.

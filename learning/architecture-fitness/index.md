@@ -25,7 +25,7 @@ Lighthouse 코드를 따라가며 제품 보장부터 API, DB, 동시성, 실패
 
 1. [백엔드 프로젝트 리뷰 가이드](lighthouse-backend-review-guide)
 2. [인터랙티브 퀴즈](lighthouse-backend-review-quiz.html) — 46개 실전 문항, 힌트와 브라우저 진도 저장
-3. [퀴즈 해설](lighthouse-backend-review-quiz) — 전체 문항과 판단 기준 참고본
+3. [퀴즈 해설](lighthouse-backend-review-quiz-reference) — 전체 문항과 판단 기준 참고본
 
 각 문제는 먼저 자신의 말로 답한 뒤 `정답·판단 기준`을 연다. 틀린 문제가 있으면 전체 내용을 다시
 읽기보다 해당 개념 하나만 복습한다.
