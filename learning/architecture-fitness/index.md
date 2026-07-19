@@ -18,6 +18,15 @@ title: Architecture Fitness 학습
 6. [Q5: 캐시 전략](q5) — owner, key scope, freshness, invalidation, stampede control
 7. [종합: Architecture Fitness 전문성 모델](professional-model) — Q1–Q5 통합, 설계와 지속 관리
 
+## Lighthouse 백엔드 리뷰
+
+Lighthouse 코드를 따라가며 제품 보장부터 API, DB, 동시성, 실패 복구와 운영 증거까지 검토한다.
+주니어 백엔드 개발자가 실제 프로젝트를 읽는 순서에 맞췄다.
+
+1. [백엔드 프로젝트 리뷰 가이드](lighthouse-backend-review-guide)
+2. [인터랙티브 퀴즈](lighthouse-backend-review-quiz.html) — 46개 실전 문항, 힌트와 브라우저 진도 저장
+3. [퀴즈 해설](lighthouse-backend-review-quiz) — 전체 문항과 판단 기준 참고본
+
 각 문제는 먼저 자신의 말로 답한 뒤 `정답·판단 기준`을 연다. 틀린 문제가 있으면 전체 내용을 다시
 읽기보다 해당 개념 하나만 복습한다.
 

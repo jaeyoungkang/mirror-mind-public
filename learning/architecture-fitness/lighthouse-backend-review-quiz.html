@@ -1,0 +1,1741 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Lighthouse 실제 사례로 용어, 코드 판독, 구현 비교와 시니어 백엔드 의사결정을 훈련하는 인터랙티브 워크북"
+    />
+    <title>Lighthouse Backend Review Lab</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --ink: #102a43;
+        --ink-soft: #486581;
+        --paper: #f4f7fb;
+        --surface: #ffffff;
+        --navy: #102a43;
+        --navy-2: #173f5f;
+        --line: #bcccdc;
+        --line-strong: #829ab1;
+        --cyan: #00a8cc;
+        --cyan-soft: #d9f3f8;
+        --amber: #f0a202;
+        --amber-soft: #fff3ce;
+        --green: #16865c;
+        --green-soft: #dcf4e9;
+        --red: #c2413b;
+        --red-soft: #fee8e7;
+        --shadow: 0 18px 42px rgba(16, 42, 67, 0.1);
+        --radius: 14px;
+        --display:
+          "Arial Narrow", "Aptos Narrow", "Apple SD Gothic Neo", sans-serif;
+        --body: "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+        --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        background: var(--paper);
+        scroll-behavior: smooth;
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        color: var(--ink);
+        background:
+          linear-gradient(rgba(16, 42, 67, 0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(16, 42, 67, 0.035) 1px, transparent 1px),
+          var(--paper);
+        background-size: 24px 24px;
+        font-family: var(--body);
+        line-height: 1.62;
+      }
+
+      button,
+      textarea,
+      select {
+        font: inherit;
+      }
+
+      button {
+        cursor: pointer;
+      }
+
+      button:focus-visible,
+      textarea:focus-visible,
+      select:focus-visible,
+      a:focus-visible {
+        outline: 3px solid var(--amber);
+        outline-offset: 3px;
+      }
+
+      .app {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 292px minmax(0, 1fr);
+      }
+
+      .sidebar {
+        position: sticky;
+        top: 0;
+        height: 100vh;
+        overflow-y: auto;
+        padding: 28px 22px 24px;
+        color: #f0f6fa;
+        background: var(--navy);
+        border-right: 5px solid var(--cyan);
+      }
+
+      .brand {
+        margin-bottom: 28px;
+      }
+
+      .brand-kicker,
+      .eyebrow,
+      .module-label,
+      .utility-label {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.09em;
+        text-transform: uppercase;
+      }
+
+      .brand-kicker {
+        color: #72d7e8;
+      }
+
+      .brand h1 {
+        margin: 7px 0 8px;
+        max-width: 230px;
+        font-family: var(--display);
+        font-size: clamp(2rem, 3vw, 2.8rem);
+        font-stretch: condensed;
+        line-height: 0.96;
+        letter-spacing: -0.035em;
+        text-transform: uppercase;
+      }
+
+      .brand p {
+        margin: 0;
+        color: #bcccdc;
+        font-size: 0.88rem;
+      }
+
+      .progress-block {
+        padding: 16px;
+        margin-bottom: 24px;
+        background: rgba(255, 255, 255, 0.065);
+        border: 1px solid rgba(255, 255, 255, 0.13);
+        border-radius: 10px;
+      }
+
+      .progress-meta {
+        display: flex;
+        align-items: baseline;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 9px;
+      }
+
+      .progress-number {
+        font-family: var(--mono);
+        font-size: 1.35rem;
+        font-weight: 800;
+        color: white;
+      }
+
+      .progress-caption {
+        color: #9fb3c8;
+        font-size: 0.76rem;
+      }
+
+      .progress-track {
+        height: 7px;
+        overflow: hidden;
+        background: #334e68;
+        border-radius: 999px;
+      }
+
+      .progress-fill {
+        width: 0;
+        height: 100%;
+        background: var(--cyan);
+        transition: width 220ms ease;
+      }
+
+      .progress-counts {
+        display: flex;
+        gap: 12px;
+        margin-top: 10px;
+        color: #bcccdc;
+        font-size: 0.76rem;
+      }
+
+      .module-nav {
+        display: grid;
+        gap: 7px;
+      }
+
+      .module-button {
+        display: grid;
+        grid-template-columns: 34px 1fr auto;
+        align-items: center;
+        gap: 9px;
+        width: 100%;
+        padding: 10px 9px;
+        color: #d9e2ec;
+        text-align: left;
+        background: transparent;
+        border: 1px solid transparent;
+        border-radius: 8px;
+      }
+
+      .module-button:hover {
+        background: rgba(255, 255, 255, 0.06);
+      }
+
+      .module-button.active {
+        color: white;
+        background: var(--navy-2);
+        border-color: rgba(114, 215, 232, 0.4);
+      }
+
+      .module-index {
+        display: grid;
+        width: 30px;
+        height: 30px;
+        place-items: center;
+        color: #072331;
+        background: #72d7e8;
+        border-radius: 50%;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        font-weight: 800;
+      }
+
+      .module-title {
+        font-size: 0.86rem;
+        font-weight: 700;
+      }
+
+      .module-count {
+        color: #9fb3c8;
+        font-family: var(--mono);
+        font-size: 0.7rem;
+      }
+
+      .sidebar-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 24px;
+      }
+
+      .ghost-button {
+        padding: 8px 10px;
+        color: #d9e2ec;
+        background: transparent;
+        border: 1px solid #486581;
+        border-radius: 7px;
+        font-size: 0.76rem;
+      }
+
+      .main {
+        min-width: 0;
+        padding: 28px clamp(22px, 5vw, 72px) 48px;
+      }
+
+      .topbar {
+        max-width: 980px;
+        margin: 0 auto 22px;
+      }
+
+      .pipeline {
+        position: relative;
+        display: grid;
+        grid-template-columns: repeat(5, 1fr);
+        gap: 8px;
+        padding: 0;
+        margin: 0 0 22px;
+        list-style: none;
+      }
+
+      .pipeline::before {
+        position: absolute;
+        top: 13px;
+        right: 8%;
+        left: 8%;
+        height: 2px;
+        content: "";
+        background: repeating-linear-gradient(
+          90deg,
+          var(--line-strong) 0,
+          var(--line-strong) 8px,
+          transparent 8px,
+          transparent 14px
+        );
+      }
+
+      .pipeline li {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        justify-items: center;
+        gap: 5px;
+        color: var(--ink-soft);
+        font-family: var(--mono);
+        font-size: 0.67rem;
+        font-weight: 700;
+      }
+
+      .pipeline-dot {
+        width: 27px;
+        height: 27px;
+        background: var(--surface);
+        border: 2px solid var(--line-strong);
+        border-radius: 50%;
+      }
+
+      .pipeline li.active .pipeline-dot {
+        background: var(--cyan);
+        border-color: var(--navy);
+        box-shadow: 0 0 0 5px var(--cyan-soft);
+      }
+
+      .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 14px;
+      }
+
+      .toolbar-copy {
+        color: var(--ink-soft);
+        font-size: 0.87rem;
+      }
+
+      .toolbar-controls {
+        display: flex;
+        gap: 8px;
+      }
+
+      .toolbar select,
+      .toolbar button {
+        padding: 9px 11px;
+        color: var(--ink);
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        font-size: 0.8rem;
+      }
+
+      .question-shell {
+        max-width: 980px;
+        margin: 0 auto;
+      }
+
+      .question-card {
+        overflow: hidden;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-top: 7px solid var(--cyan);
+        border-radius: var(--radius);
+        box-shadow: var(--shadow);
+      }
+
+      .question-head {
+        display: grid;
+        grid-template-columns: 76px minmax(0, 1fr) auto;
+        gap: 20px;
+        align-items: start;
+        padding: clamp(22px, 4vw, 38px);
+        padding-bottom: 22px;
+        border-bottom: 1px solid #d9e2ec;
+      }
+
+      .question-number {
+        font-family: var(--display);
+        font-size: 2.7rem;
+        font-weight: 900;
+        line-height: 1;
+        letter-spacing: -0.04em;
+      }
+
+      .question-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 7px;
+        margin-bottom: 8px;
+      }
+
+      .chip {
+        display: inline-flex;
+        align-items: center;
+        min-height: 24px;
+        padding: 3px 8px;
+        color: var(--ink-soft);
+        background: #edf2f7;
+        border-radius: 999px;
+        font-family: var(--mono);
+        font-size: 0.67rem;
+        font-weight: 700;
+      }
+
+      .chip.status-mastered {
+        color: #0c5a3d;
+        background: var(--green-soft);
+      }
+
+      .chip.status-revisit {
+        color: #8b2f2a;
+        background: var(--red-soft);
+      }
+
+      .question-title {
+        margin: 0;
+        font-family: var(--display);
+        font-size: clamp(1.7rem, 3vw, 2.45rem);
+        line-height: 1.08;
+        letter-spacing: -0.025em;
+      }
+
+      .question-body {
+        padding: clamp(24px, 4vw, 38px);
+      }
+
+      .prompt {
+        max-width: 760px;
+        color: #243b53;
+        font-size: 1.02rem;
+      }
+
+      .prompt p:first-child {
+        margin-top: 0;
+      }
+
+      .prompt code,
+      .model-answer code {
+        padding: 0.1em 0.34em;
+        background: #e9f1f7;
+        border-radius: 4px;
+        font-family: var(--mono);
+        font-size: 0.9em;
+      }
+
+      pre {
+        overflow-x: auto;
+        padding: 18px;
+        color: #e6fffa;
+        background: #102a43;
+        border-left: 5px solid var(--cyan);
+        border-radius: 8px;
+        font-family: var(--mono);
+        font-size: 0.84rem;
+        line-height: 1.6;
+        white-space: pre;
+      }
+
+      .choice-list {
+        display: grid;
+        gap: 9px;
+        margin: 22px 0;
+      }
+
+      .choice {
+        display: grid;
+        grid-template-columns: 24px 1fr;
+        gap: 10px;
+        align-items: start;
+        padding: 12px 14px;
+        background: #f8fafc;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+      }
+
+      .choice:has(input:checked) {
+        background: var(--cyan-soft);
+        border-color: var(--cyan);
+      }
+
+      .answer-label {
+        display: block;
+        margin: 24px 0 8px;
+        color: var(--ink-soft);
+        font-family: var(--mono);
+        font-size: 0.73rem;
+        font-weight: 800;
+        letter-spacing: 0.06em;
+        text-transform: uppercase;
+      }
+
+      textarea {
+        width: 100%;
+        min-height: 170px;
+        padding: 16px;
+        resize: vertical;
+        color: var(--ink);
+        background: #fbfdff;
+        border: 1px solid var(--line-strong);
+        border-radius: 8px;
+        line-height: 1.6;
+      }
+
+      .question-actions {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+        margin-top: 18px;
+      }
+
+      .action {
+        padding: 10px 14px;
+        border: 1px solid transparent;
+        border-radius: 8px;
+        font-weight: 750;
+      }
+
+      .action-primary {
+        color: white;
+        background: var(--navy);
+      }
+
+      .action-secondary {
+        color: var(--ink);
+        background: white;
+        border-color: var(--line-strong);
+      }
+
+      .action-hint {
+        color: #805b00;
+        background: var(--amber-soft);
+        border-color: #e8bf55;
+      }
+
+      .hint,
+      .model-answer,
+      .self-check {
+        display: none;
+        padding: 16px 18px;
+        margin-top: 16px;
+        border-radius: 8px;
+      }
+
+      .hint.visible,
+      .model-answer.visible,
+      .self-check.visible {
+        display: block;
+      }
+
+      .hint {
+        color: #604600;
+        background: var(--amber-soft);
+        border-left: 5px solid var(--amber);
+      }
+
+      .model-answer {
+        color: #143d2c;
+        background: var(--green-soft);
+        border-left: 5px solid var(--green);
+      }
+
+      .model-answer h3 {
+        margin-top: 0;
+        font-size: 1rem;
+      }
+
+      .self-check {
+        background: #edf2f7;
+      }
+
+      .self-check strong {
+        display: block;
+        margin-bottom: 10px;
+      }
+
+      .review-buttons {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 9px;
+      }
+
+      .review-mastered {
+        color: white;
+        background: var(--green);
+      }
+
+      .review-revisit {
+        color: white;
+        background: var(--red);
+      }
+
+      .navigation {
+        display: flex;
+        justify-content: space-between;
+        gap: 12px;
+        margin-top: 16px;
+      }
+
+      .nav-button {
+        min-width: 120px;
+        padding: 11px 16px;
+        color: var(--ink);
+        background: var(--surface);
+        border: 1px solid var(--line-strong);
+        border-radius: 8px;
+        font-weight: 750;
+      }
+
+      .nav-button.next {
+        color: white;
+        background: var(--navy);
+      }
+
+      .empty {
+        padding: 64px 24px;
+        text-align: center;
+        background: var(--surface);
+        border: 1px solid var(--line);
+        border-radius: var(--radius);
+      }
+
+      .empty h2 {
+        font-family: var(--display);
+        font-size: 2rem;
+      }
+
+      .footer-note {
+        max-width: 980px;
+        margin: 28px auto 0;
+        color: var(--ink-soft);
+        font-size: 0.78rem;
+      }
+
+      .footer-note a {
+        color: var(--navy-2);
+      }
+
+      @media (max-width: 820px) {
+        .app {
+          display: block;
+        }
+
+        .sidebar {
+          position: relative;
+          width: auto;
+          height: auto;
+          border-right: 0;
+          border-bottom: 5px solid var(--cyan);
+        }
+
+        .brand h1 {
+          max-width: none;
+        }
+
+        .module-nav {
+          grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .main {
+          padding: 22px 14px 40px;
+        }
+
+        .question-head {
+          grid-template-columns: 54px minmax(0, 1fr);
+        }
+
+        .question-head > :last-child {
+          grid-column: 2;
+        }
+      }
+
+      @media (max-width: 520px) {
+        .module-nav {
+          grid-template-columns: 1fr;
+        }
+
+        .pipeline li span:last-child {
+          font-size: 0.58rem;
+        }
+
+        .toolbar {
+          align-items: stretch;
+          flex-direction: column;
+        }
+
+        .toolbar-controls {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+        }
+
+        .question-head {
+          grid-template-columns: 1fr;
+          gap: 10px;
+        }
+
+        .question-head > :last-child {
+          grid-column: auto;
+        }
+
+        .question-number {
+          font-size: 2rem;
+        }
+
+        .navigation .nav-button {
+          min-width: 0;
+          flex: 1;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition: none !important;
+        }
+      }
+
+      @media print {
+        .sidebar,
+        .topbar,
+        .question-actions,
+        .navigation {
+          display: none !important;
+        }
+
+        .app {
+          display: block;
+        }
+
+        .main {
+          padding: 0;
+        }
+
+        .question-card {
+          box-shadow: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="app">
+      <aside class="sidebar" aria-label="학습 모듈">
+        <div class="brand">
+          <div class="brand-kicker">Lighthouse / Backend Lab</div>
+          <h1>Request Boundary Workbook</h1>
+          <p>용어를 코드와 결정으로 연결하는 46개 실전 문제</p>
+        </div>
+
+        <section class="progress-block" aria-labelledby="progress-title">
+          <div class="progress-meta">
+            <span id="progress-title" class="utility-label">학습 진도</span>
+            <span id="progress-number" class="progress-number">0%</span>
+          </div>
+          <div class="progress-track" aria-hidden="true">
+            <div id="progress-fill" class="progress-fill"></div>
+          </div>
+          <div class="progress-counts">
+            <span id="mastered-count">이해 0</span>
+            <span id="revisit-count">복습 0</span>
+          </div>
+        </section>
+
+        <nav id="module-nav" class="module-nav" aria-label="단계 선택"></nav>
+
+        <div class="sidebar-actions">
+          <button id="next-open-button" class="ghost-button" type="button">
+            다음 미완료
+          </button>
+          <button id="reset-button" class="ghost-button" type="button">
+            진도 초기화
+          </button>
+        </div>
+      </aside>
+
+      <main class="main">
+        <div class="topbar">
+          <ol class="pipeline" aria-label="백엔드 요청 처리 흐름">
+            <li data-pipeline="1">
+              <span class="pipeline-dot"></span><span>입구</span>
+            </li>
+            <li data-pipeline="2">
+              <span class="pipeline-dot"></span><span>검증</span>
+            </li>
+            <li data-pipeline="3">
+              <span class="pipeline-dot"></span><span>실행</span>
+            </li>
+            <li data-pipeline="4">
+              <span class="pipeline-dot"></span><span>저장</span>
+            </li>
+            <li data-pipeline="5">
+              <span class="pipeline-dot"></span><span>운영</span>
+            </li>
+          </ol>
+
+          <div class="toolbar">
+            <div id="toolbar-copy" class="toolbar-copy">
+              한 번에 한 문제만 판단한다.
+            </div>
+            <div class="toolbar-controls">
+              <select id="status-filter" aria-label="문항 상태 필터">
+                <option value="all">전체 문항</option>
+                <option value="open">미완료만</option>
+                <option value="revisit">복습만</option>
+                <option value="mastered">이해한 문항</option>
+              </select>
+              <button id="print-button" type="button">현재 문제 인쇄</button>
+            </div>
+          </div>
+        </div>
+
+        <div
+          id="question-shell"
+          class="question-shell"
+          aria-live="polite"
+        ></div>
+
+        <p class="footer-note">
+          답안은 이 브라우저에만 저장된다. 개념의 설명 순서는
+          <a href="./lighthouse-backend-review-guide">백엔드 리뷰 가이드</a
+          >에서 확인하고, 텍스트 참고본은
+          <a href="./lighthouse-backend-review-quiz">Markdown 퀴즈</a>에서
+          확인한다.
+        </p>
+      </main>
+    </div>
+
+    <script>
+      "use strict";
+
+      const modules = [
+        { id: 1, title: "용어와 입구", range: "1–6", pipeline: 1 },
+        { id: 2, title: "동시성과 권한", range: "7–12", pipeline: 4 },
+        { id: 3, title: "코드 판독", range: "13–21", pipeline: 2 },
+        { id: 4, title: "구현 비교", range: "22–27", pipeline: 3 },
+        { id: 5, title: "시니어 결정", range: "28–35", pipeline: 5 },
+        { id: 6, title: "DB와 오류 계약", range: "36–40", pipeline: 4 },
+        { id: 7, title: "저장 경계", range: "41–46", pipeline: 4 },
+      ];
+
+      const q = (
+        id,
+        module,
+        type,
+        title,
+        prompt,
+        hint,
+        model,
+        axes,
+        choices = [],
+      ) => ({
+        id,
+        module,
+        type,
+        title,
+        prompt,
+        hint,
+        model,
+        axes,
+        choices,
+      });
+
+      const questions = [
+        q(
+          1,
+          1,
+          "용어",
+          "Zod와 bounded body",
+          `<p>다음 두 장치의 책임을 각각 설명하라. 둘 중 하나만 사용했을 때 남는 위험도 적어라.</p>
+<pre>await readBoundedJsonBody(req, { maxBytes: 1_000_000 });
+schema.safeParse(body);</pre>`,
+          "크기와 내용은 서로 다른 질문이다. 어느 장치가 JSON parse보다 먼저 작동하는지 보라.",
+          "<p><strong>Bounded body</strong>는 읽을 byte를 제한하고 초과 시 413으로 거부한다. <strong>Zod</strong>는 허용된 크기의 JSON 안에서 필드 형식과 값을 검사한다. Zod만 쓰면 큰 요청의 메모리·parse 비용을 이미 사용한다. 크기 제한만 쓰면 작지만 잘못된 값을 통과시킨다.</p>",
+          ["용어", "제품 보장"],
+        ),
+        q(
+          2,
+          1,
+          "상태 코드",
+          "호출자가 다음에 할 행동",
+          "<p>본문 크기 제한을 넘은 요청에는 어떤 상태가 가장 적절한가?</p>",
+          "400은 값이 잘못됐다는 뜻이다. 크기 초과는 별도 상태가 있다.",
+          "<p><strong>413 Payload Too Large</strong>다. 호출자는 인증을 갱신하거나 잠시 기다리는 것이 아니라 입력 크기를 줄여야 한다.</p>",
+          ["용어"],
+          ["400", "401", "413", "429"],
+        ),
+        q(
+          3,
+          1,
+          "권한",
+          "인증과 권한은 다르다",
+          "<p>Lighthouse reaction에서 인증과 권한 확인의 차이를 설명하라. 현재 API가 사용자 A에게 사용자 B의 principal을 직접 지정하게 하는지도 답하라.</p>",
+          "현재 target principal이 request body에서 오는지 서버가 인증 결과로 넣는지 확인하라.",
+          "<p>인증은 요청자가 A임을 확인한다. 권한은 A가 해당 개인 상태를 바꿀 수 있는지 결정한다. 현재 reaction API는 target principal을 caller에게 받지 않고 인증된 principal을 서버에서 넣는다. A가 B를 지정하는 표현 자체를 제거한다.</p>",
+          ["용어", "제품 보장"],
+        ),
+        q(
+          4,
+          1,
+          "비교",
+          "Rate limit과 dedupe",
+          "<p>같은 사용자의 동일 query 세 번과 서로 다른 query 100개를 각각 어떻게 처리할지 설명하라.</p>",
+          "같은 일을 합치는 것과 허용량을 넘은 일을 거부하는 것은 다른 문제다.",
+          "<p>동일한 진행 중 요청은 in-flight deduplication으로 하나로 합칠 수 있다. 서로 다른 요청 100개는 합칠 수 없으므로 rate·concurrency limit으로 초과분을 429 처리한다.</p>",
+          ["용어", "의사결정"],
+        ),
+        q(
+          5,
+          1,
+          "용어",
+          "Gap artifact 예약의 idempotency",
+          "<p>같은 Gap 입력이 하나의 artifact 예약으로 수렴하게 하는 값과 DB 장치는 무엇인가? Gap POST 전체가 항상 같은 effect라고 말할 수 있는가?</p>",
+          "Artifact identity와 failed artifact의 retry effect를 분리하라.",
+          "<p>Canonical digest와 DB unique constraint가 같은 입력의 artifact 예약을 하나로 수렴시킨다. 범위는 artifact identity다. Failed artifact에 대한 다음 POST는 pending 전환과 retry를 시작할 수 있으므로 POST 전체가 항상 같은 effect라고 확장하면 안 된다.</p>",
+          ["용어", "제품 보장"],
+        ),
+        q(
+          6,
+          1,
+          "용어",
+          "Lease는 timer가 아니다",
+          "<p><code>leaseExpiresAt = now + 70초</code>가 저장됐다. 70초 뒤 Runner 2가 자동 실행되는가?</p>",
+          "시간이 지났음을 누가 관찰하는가?",
+          "<p>자동 실행되지 않는다. Lease 만료는 새 Runner가 소유권을 획득할 수 있게 할 뿐이다. 현재는 다음 조회나 recovery 요청이 만료를 관찰해야 Runner 2가 시작된다.</p>",
+          ["용어", "제품 보장"],
+          ["자동 실행된다", "다음 관찰자가 만료를 확인해야 한다"],
+        ),
+        q(
+          7,
+          2,
+          "동시성",
+          "CAS가 막는 것",
+          "<p>CAS는 무엇을 비교하며 무엇을 막는가? 같은 계산의 중복 실행까지 막는가?</p>",
+          "계산 단계와 최종 commit 단계를 분리하라.",
+          "<p>저장된 version과 caller가 읽은 expectedVersion을 비교한다. 오래된 결과가 최신 결과를 덮는 것을 막는다. 계산이 잠시 중복되는 것은 막지 않고 최종 commit 하나만 인정한다.</p>",
+          ["용어", "제품 보장"],
+        ),
+        q(
+          8,
+          2,
+          "보안",
+          "Service role과 owner filter",
+          "<p>Repository가 owner filter를 사용한다. DB client가 service role이라면 사용자 격리가 충분한가?</p>",
+          "Filter가 빠졌을 때 DB가 거부하는지 생각하라.",
+          "<p>충분하지 않다. Service role은 RLS를 우회하므로 application filter가 빠지면 DB가 방어하지 못한다. Session-bound client와 DB 정책은 실수한 코드도 데이터 경계에서 거부한다.</p>",
+          ["코드", "제품 보장"],
+          ["충분하다", "filter 누락을 DB가 막지 못하므로 불충분하다"],
+        ),
+        q(
+          9,
+          2,
+          "실행 범위",
+          "Process-local은 fleet-wide가 아니다",
+          "<p>Episteme queue가 process마다 동시 실행을 4개로 제한한다. Instance가 10개라면 전체도 반드시 4개 이하인가?</p>",
+          "각 instance가 독립 counter를 갖는다고 가정하라.",
+          "<p>아니다. 각 instance가 process 하나이고 같은 provider를 향한다면 이론상 40개까지 가능하다. 실제 상한에는 process 수, reserved slot, fan-out과 autoscaling 범위가 필요하다.</p>",
+          ["용어", "의사결정"],
+        ),
+        q(
+          10,
+          2,
+          "실패 계약",
+          "Core ready, enrichment failed",
+          "<p>Gap core는 준비됐지만 enrichment가 실패했다. 전체 실패로 처리하지 않는 이유와 남겨야 할 상태를 설명하라.</p>",
+          "이미 사용할 수 있는 결과와 재시도 비용을 보라.",
+          "<p>사용 가능한 core를 버리면 결과와 계산 비용을 잃는다. Lifecycle은 terminal이어도 결과 품질은 degraded일 수 있다. Core 결과와 enrichment 실패를 함께 남기고 재시도 정책을 별도로 표현한다.</p>",
+          ["제품 보장", "의사결정"],
+        ),
+        q(
+          11,
+          2,
+          "운영",
+          "평균보다 p95·p99",
+          "<p>평균 응답시간이 500ms여도 느린 사용자가 존재할 수 있는 이유와 provider queue에서 p99가 답하는 질문을 적어라.</p>",
+          "빠른 다수가 느린 소수를 가릴 수 있다.",
+          "<p>평균은 매우 느린 일부 요청을 가린다. p99는 99% 요청이 어느 시간 안에 끝나고 가장 느린 1% 경계가 어디인지 보여준다. Queue wait와 timeout이 일부 사용자에게 집중되는지 판단한다.</p>",
+          ["용어", "운영"],
+        ),
+        q(
+          12,
+          2,
+          "Identity",
+          "Canonical digest에서 빠진 필드",
+          "<p>결과를 바꾸는 필드가 Gap canonical digest에서 빠졌다. 어떤 문제가 생기는가?</p>",
+          "서로 다른 입력이 같은 key가 되면 어떤 결과를 재사용하는가?",
+          "<p>의미가 다른 두 입력이 같은 artifact로 합쳐져 잘못된 결과를 재사용할 수 있다. Canonical identity는 ID 생성 기법이 아니라 어떤 차이를 같은 작업으로 볼지 정하는 제품·데이터 계약이다.</p>",
+          ["용어", "제품 보장"],
+        ),
+        q(
+          13,
+          3,
+          "코드 판독",
+          "늦은 크기 검증",
+          `<pre>const body = await req.json();
+const parsed = schema.safeParse(body);</pre>
+<p>형식 오류는 거부한다. 그래도 ingress 보호가 충분하지 않은 이유와 최소 수정 방향을 적어라.</p>`,
+          "Zod가 실행될 때 body는 어디에 있는가?",
+          "<p><code>req.json()</code>이 전체 body를 읽고 parse한 뒤 Zod가 실행된다. Stream을 읽으며 byte를 세고 상한 초과 시 중단하는 bounded reader를 schema 앞에 둔다.</p>",
+          ["코드", "제품 보장"],
+        ),
+        q(
+          14,
+          3,
+          "코드 수정",
+          "인증보다 먼저 쓰는 비용",
+          `<pre>const body = await req.json();
+const parsed = schema.safeParse(body);
+const { db, user } = await requireOwnerPrincipalAuth();
+return runLlmWork(parsed.data);</pre>
+<p>Authenticated-only route의 안전한 순서로 다시 작성하라.</p>`,
+          "가장 싼 거부부터 배치하라.",
+          "<p>권장 순서는 인증 → bounded body → schema → rate·concurrency admission → LLM effect다. 인증되지 않은 caller가 body parse와 LLM 비용을 사용하지 않게 한다.</p>",
+          ["코드", "제품 보장"],
+        ),
+        q(
+          15,
+          3,
+          "코드 판독",
+          "Gap route의 강한 순서",
+          `<pre>const { db, user } = await requireOwnerPrincipalAuth();
+const body = await readBoundedJsonBody(req, { maxBytes });
+const issues = listCollectionLimitIssues(body);
+const parsed = gapNetworkPostSchema.safeParse(body);</pre>
+<p>각 줄이 막는 실패를 설명하라.</p>`,
+          "주체, byte, collection 수, 필드 관계 순으로 읽어라.",
+          "<p>인증되지 않은 요청, 큰 body, 과도한 배열·중첩 collection, 잘못된 필드 형식과 관계를 차례로 거부한다. 싼 검사를 effect보다 앞에 둔 좋은 기준선이다.</p>",
+          ["코드", "제품 보장"],
+        ),
+        q(
+          16,
+          3,
+          "코드 판독",
+          "withRouteGuard 이름에 속지 않는다",
+          `<pre>try { return await handler(); }
+catch (error) {
+  if (error instanceof UnauthenticatedError) return response(401);
+  if (error instanceof ForbiddenError) return response(403);
+  throw error;
+}</pre>
+<p>이 wrapper가 자동 제공하지 않는 보호를 세 가지 적어라.</p>`,
+          "이 함수가 실제로 호출하는 보안·부하 함수가 있는지 보라.",
+          "<p>인증 수행, body 크기 제한, rate limit을 제공하지 않는다. 알려진 오류를 HTTP 응답으로 바꾸는 error mapper에 가깝다. Handler 안의 실제 effect 순서를 추적해야 한다.</p>",
+          ["코드", "제품 보장"],
+        ),
+        q(
+          17,
+          3,
+          "코드 리뷰",
+          "Spelling correction 위험",
+          `<pre>const body = await req.json();
+const parsed = schema.safeParse(body);
+if (!parsed.success) return badRequest();
+const corrected = await resolveSearchSpellingCorrection(parsed.data.query);</pre>
+<p>네 가지 위험 또는 미결정 정책을 찾아 우선순위를 정하라.</p>`,
+          "공개성, body, query, 사용량, 중복 실행을 차례로 확인하라.",
+          "<p>Route 인증 정책, body byte와 query 길이, 사용자별 rate·concurrency, in-flight dedupe·cache 정책이 필요하다. 현재 route에는 명시적 인증과 dedupe가 없다. 정확한 숫자는 사용량과 provider allowance로 승인해야 한다.</p>",
+          ["코드", "의사결정"],
+        ),
+        q(
+          18,
+          3,
+          "테스트",
+          "401만 확인하면 부족하다",
+          "<p>인증되지 않은 spelling correction 요청이 401을 받으며 LLM 비용도 발생하지 않았음을 검증하는 assertion을 작성하라.</p>",
+          "응답과 effect mock을 모두 검사하라.",
+          `<pre>expect(response.status).toBe(401);
+expect(resolveSearchSpellingCorrection).not.toHaveBeenCalled();</pre>
+<p>현재 인증 보강은 #430의 권장 범위다. Negative assertion은 응답 모양뿐 아니라 비용 경계를 잠근다.</p>`,
+          ["코드", "제품 보장"],
+        ),
+        q(
+          19,
+          3,
+          "설계",
+          "Spelling dedupe key",
+          "<p>현재는 dedupe가 없다. 도입한다면 어떤 key를 사용할지 선택하라.</p>",
+          "현재 LLM 결과에 실제로 들어가는 값과 비용 귀속 주체를 보라.",
+          "<p>현재 LLM 입력은 query뿐이므로 인증 보강 뒤 <code>userId + normalizedQuery</code>가 맞다. Metadata가 결과에 참여하게 되면 결과 의미에 참여하는 projection만 추가한다.</p>",
+          ["코드", "의사결정"],
+          [
+            "query",
+            "userId + normalizedQuery",
+            "userId + normalizedQuery + metadata 전체",
+            "Date.now()",
+          ],
+        ),
+        q(
+          20,
+          3,
+          "DB 동시성",
+          "CAS update의 0 row",
+          `<pre>UPDATE gap_reports
+SET metadata = :metadata, version = version + 1
+WHERE id = :id AND version = 3;</pre>
+<p>Runner 1이 먼저 version 4로 올렸다. Runner 2의 affected row와 해석은 무엇인가?</p>`,
+          "DB 오류와 정상적인 경쟁 패배를 구분하라.",
+          "<p>Affected row는 0이다. DB 장애가 아니라 내가 읽은 version이 더 이상 최신이 아니라는 뜻이다. 오래된 결과를 버리고 최신 row를 읽는다.</p>",
+          ["코드", "제품 보장"],
+        ),
+        q(
+          21,
+          3,
+          "실패 계약",
+          "Partial failure를 지우는 코드",
+          `<pre>try {
+  const core = await buildCore();
+  const enrichment = await enrich(core);
+  await saveReady({ core, enrichment });
+} catch {
+  await saveFailed();
+}</pre>
+<p>Enrichment만 실패했을 때 무엇이 사라지는가? 저장 순서를 다시 설계하라.</p>`,
+          "Core persist를 enrichment 앞의 독립 milestone으로 만들라.",
+          "<p>이 나쁜 코드는 완성된 core를 저장하지 못한다. Core를 먼저 저장하고 enrichment를 별도 ready/failed 상태로 닫는다. 현재 Lighthouse는 이미 core를 먼저 저장하는 좋은 대조 사례다.</p>",
+          ["코드", "제품 보장"],
+        ),
+        q(
+          22,
+          4,
+          "구현 비교",
+          "모든 route에 같은 제한값",
+          "<p>모든 API에 1MB, 분당 10회, 동시 실행 1개를 공통 middleware로 적용하려 한다. 그대로 채택할지 결정하라.</p>",
+          "Mechanism 재사용과 policy 숫자 통일을 분리하라.",
+          "<p>Bounded reader와 admission 실행기는 공통화할 수 있다. 공개성, effect, body envelope, rate, concurrency와 deadline 숫자는 route가 소유해야 한다. 조회와 LLM route의 위험이 다르다.</p>",
+          ["코드", "의사결정"],
+        ),
+        q(
+          23,
+          4,
+          "공개 API",
+          "Magic link abuse 경계",
+          "<p>Magic link는 로그인 전에 호출한다. Allowlist, source rate limit, 이메일별 cooldown, CAPTCHA, provider 제한을 어떻게 조합할지 결정하라.</p>",
+          "누가 가입 가능한지와 얼마나 자주 발송할 수 있는지는 다른 질문이다.",
+          "<p>Allowlist에 source rate limit과 이메일별 cooldown을 함께 둔다. Provider 제한은 보조 방어다. CAPTCHA는 공격 증거와 UX 비용을 보고 단계적으로 도입한다. Fleet 책임은 platform 또는 shared store owner를 정해야 한다.</p>",
+          ["제품 보장", "의사결정"],
+        ),
+        q(
+          24,
+          4,
+          "실패 비교",
+          "Provider timeout과 빈 결과",
+          "<p>Episteme timeout을 빈 배열과 200으로 바꾸는 구현과 provider 실패 상태를 별도로 반환하는 구현을 비교하라.</p>",
+          "사용자가 논문 없음과 검색 실패를 구분할 수 있는가?",
+          "<p>빈 배열과 200은 관련 논문 없음과 검색하지 못함을 섞는다. 실패 상태를 분리하고 이미 받은 결과나 keyword-only 결과를 유지하며 degraded 안내를 제공할 수 있다.</p>",
+          ["제품 보장", "의사결정"],
+        ),
+        q(
+          25,
+          4,
+          "위험 비교",
+          "Reaction write와 LLM route",
+          "<p>Reaction write와 spelling correction에 각각 가장 중요한 보장 두 개를 선정하라.</p>",
+          "금전 비용 순위 하나로 보안·무결성까지 정렬하지 마라.",
+          "<p>Spelling correction은 인증·비용 귀속과 rate·concurrency가 중요하다. Reaction은 viewer-private 격리와 중복·경쟁 쓰기의 일관성이 중요하다. 비싼 route가 모든 축에서 더 위험한 것은 아니다.</p>",
+          ["제품 보장", "의사결정"],
+        ),
+        q(
+          26,
+          4,
+          "증거",
+          "Process-local queue test의 한계",
+          "<p>Episteme queue unit test와 process당 동시 실행 상한이 통과했다. Production provider 보호 완료로 판정할 수 있는가?</p>",
+          "Instance 수와 provider account allowance가 테스트 입력에 있는가?",
+          "<p>판정할 수 없다. Instance·process 수, autoscaling peak, 요청당 fan-out, provider allowance와 production queue wait·timeout·5xx가 필요하다. Unit test는 한 process 알고리즘만 증명한다.</p>",
+          ["제품 보장", "의사결정"],
+        ),
+        q(
+          27,
+          4,
+          "증거",
+          "Mock과 실제 PostgreSQL",
+          "<p>CAS repository mock test가 통과했다. 실제 DB 경쟁 테스트를 생략해도 되는 조건과 반드시 해야 하는 조건을 나누어 설명하라.</p>",
+          "보장의 최종 판정자가 application branch인지 DB인지 보라.",
+          "<p>순수한 branch 처리만 확인하면 mock으로 충분할 수 있다. MVCC, lock, unique constraint, RLS와 driver affected-row semantics가 보장을 결정하면 실제 migration과 role을 사용한 경쟁 테스트가 필요하다.</p>",
+          ["코드", "의사결정"],
+        ),
+        q(
+          28,
+          5,
+          "우선순위",
+          "첫 리뷰에서 무엇부터 볼까",
+          "<p>다음 발견의 조사 순서를 정하라.</p><ol><li>search-execution.ts가 600줄이다.</li><li>Spelling correction route에 명시적 인증과 비용 상한이 없다.</li><li>Gap 변수 이름이 일관되지 않다.</li></ol>",
+          "사용자 보장, 영향도, 발생 가능성과 발견 난이도를 사용하라.",
+          "<p>2번을 먼저 본다. 실제 비용 경계의 정책 공백이기 때문이다. 파일 길이는 변경 비용의 신호지만 그 자체로 보장 위반은 아니다. 변수 이름도 의미 혼동이 결함으로 이어질 증거가 있을 때 우선순위를 올린다.</p>",
+          ["제품 보장", "의사결정"],
+        ),
+        q(
+          29,
+          5,
+          "부하 정책",
+          "사용자별 Gap build 한 개",
+          "<p>Gap build 총수가 아직 적다. 사용자별 active build를 한 개로 제한할지, 조회와 polling도 막을지 결정하라.</p>",
+          "Command와 read를 분리하고 여러 instance에서 같은 정책을 지킬 owner를 정하라.",
+          "<p>작은 admission rule로 시작할 수 있다. DB의 principal과 active lease/state를 기준으로 command 하나만 허용한다. 추가 build는 429나 기존 작업 안내로 거부하지만 조회와 status는 막지 않는다. 관측량이 낮다면 지표와 재검토 조건부터 둘 수도 있다.</p>",
+          ["제품 보장", "의사결정"],
+        ),
+        q(
+          30,
+          5,
+          "비용 정책",
+          "동일 query 세 번",
+          "<p>모두 실행, 두 개 429, 하나만 실행하고 결과 공유 중 하나를 선택하라. 서로 다른 query 100개일 때 결정도 적어라.</p>",
+          "동일성 판단과 허용량 판단을 분리하라.",
+          "<p>동일 의미 요청은 하나만 실행하고 결과를 공유한다. 서로 다른 query는 dedupe할 수 없으므로 rate·concurrency limit으로 초과분을 거부한다. Canonical key와 principal 격리가 필요하다.</p>",
+          ["코드", "의사결정"],
+        ),
+        q(
+          31,
+          5,
+          "입력 정책",
+          "year=garbage",
+          "<p>Provider 요청에서는 year가 빠졌지만 화면에는 필터처럼 남는다. 기본 검색 복구, 400, 경고 후 canonical URL 정리 중 무엇을 선택할지 결정하라.</p>",
+          "직접 오타와 저장된 필터 migration 오류의 신뢰 수준은 다르다.",
+          "<p>화면 조건과 실제 실행 조건은 같아야 한다. 직접 오타는 경고와 canonical no-year 복구가 자연스러울 수 있다. 저장된 필터나 migration 오류라면 조용히 지우지 않고 사용자와 운영자에게 알려야 한다. 정책 공백은 #408이 추적한다.</p>",
+          ["제품 보장", "의사결정"],
+        ),
+        q(
+          32,
+          5,
+          "재시도 정책",
+          "Enrichment만 다시 시도한다",
+          "<p>Core ready, enrichment failed다. 페이지 자동 재시도, 서버 자동 재시도, 사용자의 명시적 command 중 하나를 선택하라.</p>",
+          "Read가 effect를 시작해야 하는지, 성공한 core를 다시 계산해야 하는지 보라.",
+          "<p>Lighthouse는 사용자의 명시적 command를 제품 요구사항으로 채택했지만 아직 미구현이다. Read와 polling은 저장 상태만 읽는다. Retry route는 인증, 상태, admission, CAS와 lease를 확인하고 core는 다시 계산하지 않는다. #414가 추적한다.</p>",
+          ["제품 보장", "의사결정"],
+        ),
+        q(
+          33,
+          5,
+          "권한 설계",
+          "Service role 제거",
+          "<p>일반 request가 service-role DB client를 사용하고 owner filter 테스트가 있다. 유지할지 session-bound client와 RLS로 옮길지 결정하라.</p>",
+          "Shared artifact, private reaction과 telemetry writer의 권한 목적을 분리하라.",
+          "<p>일반 request는 session-bound client와 DB-enforced isolation으로 옮긴다. Repository filter 테스트는 보조 증거다. Shared artifact, viewer-private reaction, telemetry append와 admin read는 서로 다른 capability로 유지한다.</p>",
+          ["제품 보장", "의사결정"],
+        ),
+        q(
+          34,
+          5,
+          "장애 대응",
+          "검색 p99가 증가했다",
+          "<p>Episteme console log에는 queue wait가 남지만 grounding 결과와 instance 수는 집계되지 않는다. 조사 순서, 지표와 임시 완화책을 제안하라.</p>",
+          "Provider를 원인으로 단정하기 전에 route 시간을 구간별로 나누어라.",
+          "<p>Parse, auth, DB, queue, provider 시간을 나누고 instance 수, provider 요청·timeout·5xx, grounding outcome과 영향 principal을 같은 시간축으로 본다. Queue 포화라면 admission을 낮추고 keyword-only degrade를 보존할 수 있다. DB pool이 원인이면 provider 조정은 효과가 없다.</p>",
+          ["운영", "의사결정"],
+        ),
+        q(
+          35,
+          5,
+          "아키텍처",
+          "secureRoute 하나로 충분할까",
+          "<p>#430에서 하나의 wrapper에 인증, 1MB, Zod, 분당 10회와 30초 deadline을 모두 넣으려 한다. 공통 mechanism과 route policy를 나누어라.</p>",
+          "같이 재사용할 코드와 route마다 달라야 하는 숫자를 분리하라.",
+          "<p>Bounded reader, error mapping, admission 실행기와 계측은 공통 mechanism이 될 수 있다. 공개성, 인증, body, schema, rate·concurrency 숫자와 deadline은 route가 소유한다. <code>secureRoute</code> 대신 책임이 드러나는 작은 이름을 쓰고 실제 route의 400/401/413/429와 effect 미호출을 테스트한다.</p>",
+          ["코드", "의사결정"],
+        ),
+        q(
+          36,
+          6,
+          "DB Identity",
+          "공유 report와 개인 preference",
+          `<p>Lighthouse의 실제 migration은 다음 복합 primary key를 사용한다.</p>
+<pre>primary key (gap_report_id, viewer_principal_id)</pre>
+<p>다음 중 DB가 허용하는 조합을 고르고 이유를 설명하라.</p>
+<ol>
+  <li><code>(report-1, user-A)</code>와 <code>(report-1, user-B)</code></li>
+  <li><code>(report-1, user-A)</code> 두 row</li>
+</ol>
+<p class="source-note">실제 근거:
+<a href="https://github.com/corca-ai/lighthouse/blob/main/supabase/migrations/00019_shared_gap_report_artifacts.sql">00019_shared_gap_report_artifacts.sql</a></p>`,
+          "gap_report_id의 공유성과 viewer_principal_id의 개인성을 따로 보라.",
+          "<p>1번은 허용하고 2번은 거부한다. Gap report는 인증 회원이 공유하는 artifact다. Reaction preference는 사용자별 저장된 선택이다. 복합 primary key는 report의 소유자를 표현하지 않는다. 같은 공유 report에서 어느 사용자의 preference인지 식별한다.</p>",
+          ["용어", "제품 보장"],
+          ["1번만 허용", "2번만 허용", "둘 다 허용", "둘 다 거부"],
+        ),
+        q(
+          37,
+          6,
+          "DB 동시성",
+          "아직 commit되지 않은 같은 key",
+          `<p>서버 1과 서버 2가 동시에 <code>(report-1, user-A)</code>를 INSERT한다. 첫 transaction은 아직 commit되지 않았다. PostgreSQL이 두 row를 모두 성공시키지 않는 과정을 설명하라.</p>
+<p class="source-note">실제 근거:
+<a href="https://www.postgresql.org/docs/current/index-unique-checks.html">PostgreSQL Index Uniqueness Checks</a></p>`,
+          "일반 SELECT의 visibility와 unique index의 충돌 검사를 구분하라.",
+          "<p>첫 INSERT는 commit 전이라 일반 SELECT에는 보이지 않을 수 있지만 unique index에는 진행 중인 동일 key 충돌로 잡힌다. 두 번째 INSERT는 첫 transaction이 끝날 때까지 기다린다. 첫 transaction이 commit하면 두 번째는 <code>23505 unique_violation</code>으로 실패한다. Rollback하면 두 번째가 진행한다.</p>",
+          ["용어", "코드"],
+        ),
+        q(
+          38,
+          6,
+          "Repository",
+          "23505를 받은 Lighthouse 코드",
+          `<pre>if (inserted.error?.code === "23505") return null;</pre>
+<p>이 코드가 처리하는 실제 상황과 <code>null</code>을 받은 상위 계층이 해야 할 일을 설명하라.</p>
+<p class="source-note">실제 근거:
+<a href="https://github.com/corca-ai/lighthouse/blob/main/app/server/repository/gap-reports.ts">app/server/repository/gap-reports.ts</a></p>`,
+          "DB 오류를 일반 서버 장애로만 보지 말고 동시 요청의 결과로 해석하라.",
+          "<p>같은 report와 viewer preference를 다른 요청이 먼저 저장한 경쟁 상황이다. Repository는 이를 알 수 없는 장애로 던지지 않고 충돌 신호인 <code>null</code>로 바꾼다. 상위 계층은 최신 row와 version을 다시 읽고 제한된 횟수 안에서 수렴하거나 <code>409</code>로 닫아야 한다. Blind INSERT 반복은 안 된다.</p>",
+          ["코드", "제품 보장"],
+        ),
+        q(
+          39,
+          6,
+          "오류 계약",
+          "400은 LLM 일시 실패가 아니다",
+          `<p>Search enrichment route가 <code>400 invalid payload</code>를 반환했다. Client가 같은 payload를 잠시 뒤 최대 세 번 재시도하는 것이 적절한가?</p>
+<p class="source-note">실제 근거:
+<a href="https://github.com/corca-ai/lighthouse/blob/main/app/api/search/enrichment/route.ts">search enrichment route</a>,
+<a href="https://github.com/corca-ai/lighthouse/blob/main/app/components/research/background-search-tasks.ts">background retry loop</a></p>`,
+          "400이 route의 어느 단계에서 만들어지는지 확인하라.",
+          "<p>부적절하다. <code>400</code>은 Zod schema가 LLM이나 provider 작업 전에 payload를 거부했다는 뜻이다. 같은 payload는 기다려도 유효해지지 않는다. 일시적인 provider·LLM 실패는 <code>429</code>, <code>5xx</code>, timeout 또는 명시적인 degraded success로 구분해야 한다. 현재 모든 non-2xx를 같은 retry loop에 넣는 gap은 #433이 추적한다.</p>",
+          ["코드", "의사결정"],
+          ["같은 payload를 재시도한다", "자동 재시도하지 않는다"],
+        ),
+        q(
+          40,
+          6,
+          "아키텍처",
+          "정책 결정과 구조 검증",
+          `<p>팀이 다음 정책을 승인했다.</p>
+<pre>400 → 동일 payload 재시도 금지
+409 → 최신 상태를 읽고 command 재구성
+429 → server backoff 뒤 제한 재시도</pre>
+<p>제품 정책, 구현과 Architecture Fitness가 각각 맡아야 할 일을 나누어 설명하라.</p>
+<p class="source-note">추적:
+<a href="https://github.com/corca-ai/lighthouse/issues/433">#433</a>,
+<a href="https://github.com/corca-ai/lighthouse/issues/401">#401</a></p>`,
+          "Architecture Fitness가 retry 정책을 새로 결정하면 안 된다.",
+          "<p>사람이 제품·운영 정책과 재검토 조건을 승인한다. #433의 구현은 stable error identity를 server response, transport와 client action으로 연결하고 negative test를 둔다. #401의 Architecture Fitness는 승인된 연결이 구조 변경 뒤에도 끊기지 않는지 검증한다. 정책이나 결정적 evidence가 없으면 구현에서 의도를 추정하지 않고 <code>authority-missing</code> 또는 <code>unknown</code>으로 남긴다.</p>",
+          ["제품 보장", "의사결정"],
+        ),
+        q(
+          41,
+          7,
+          "Transaction",
+          "Reaction 세 필드를 함께 저장한다",
+          `<p>Lighthouse는 reaction preference를 갱신할 때 다음 값을 한 <code>UPDATE</code>에 담는다.</p>
+<pre>reaction
+reaction_history
+reaction_version</pre>
+<p><code>reaction</code>만 저장되고 history와 version 저장이 실패할 수 있는가? SQL 한 문장과 transaction의 관계를 설명하라.</p>
+<p class="source-note">실제 근거:
+<a href="https://github.com/corca-ai/lighthouse/blob/main/app/server/repository/gap-reports.ts">app/server/repository/gap-reports.ts</a></p>`,
+          "명시적인 BEGIN이 없어도 SQL 한 문장이 어떤 단위로 실행되는지 보라.",
+          "<p>PostgreSQL은 SQL 한 문장도 하나의 transaction으로 실행한다. 한 <code>UPDATE</code>에 들어간 세 column은 함께 성공하거나 함께 취소된다. Reaction만 반영되고 같은 문장의 history와 version만 남는 상태는 허용하지 않는다. 여러 SQL 문장을 함께 묶어야 할 때만 별도의 명시적 transaction 범위를 검토한다.</p>",
+          ["용어", "코드"],
+        ),
+        q(
+          42,
+          7,
+          "동시 수정",
+          "두 화면이 version 3을 읽었다",
+          `<p>노트북과 휴대폰이 같은 preference의 <code>reaction_version = 3</code>을 읽었다. 노트북이 먼저 version 4로 저장했다. 휴대폰이 다음 조건으로 저장하면 affected row는 몇 개인가?</p>
+<pre>WHERE gap_report_id = :id
+  AND viewer_principal_id = :viewer
+  AND reaction_version = 3</pre>
+<p>Version 조건이 없을 때 깨지는 보장도 설명하라.</p>
+<p class="source-note">실제 근거:
+<a href="https://github.com/corca-ai/lighthouse/blob/main/app/server/repository/gap-reports.ts">updateGapReportReactionPreferenceIfVersionUnchecked</a></p>`,
+          "노트북 저장 뒤 DB에는 version 3인 row가 남아 있는지 확인하라.",
+          "<p>Affected row는 0이다. 노트북 저장 뒤 현재 version은 4이므로 휴대폰이 기대한 version 3과 맞지 않는다. Version 조건이 없으면 늦게 도착한 휴대폰 요청이 노트북의 최신 선택을 조용히 덮어쓰는 갱신 유실이 발생한다. 이 조건부 변경은 CAS 또는 낙관적 동시성 제어라고 부른다.</p>",
+          ["용어", "제품 보장"],
+          ["0개", "1개", "2개", "DB 설정에 따라 항상 다름"],
+        ),
+        q(
+          43,
+          7,
+          "상태 의미",
+          "세 version은 같은 뜻이 아니다",
+          `<p>다음 Lighthouse 필드의 역할을 각각 연결하라.</p>
+<ol>
+  <li><code>gap_reports.version</code></li>
+  <li><code>gap_report_reactions.reaction_version</code></li>
+  <li><code>paper_inline_analysis_cache.version</code></li>
+</ol>
+<p>컬럼 이름만 보고 모두 같은 concurrency 장치라고 판단하면 안 되는 이유도 적어라.</p>`,
+          "어떤 상태의 변경 순서를 조정하는지, 어떤 생성 계약을 구분하는지 나누어라.",
+          "<p><code>gap_reports.version</code>은 Runner가 공유 report의 오래된 상태를 덮지 못하게 한다. <code>reaction_version</code>은 한 viewer의 preference 갱신 순서를 조정한다. Inline-analysis cache의 <code>version</code>은 어느 분석 계약으로 생성한 결과인지 구분한다. 같은 이름이라도 identity와 갱신 규칙에 참여하는 방식이 다르므로 write 조건과 소비 코드를 함께 읽어야 한다.</p>",
+          ["용어", "코드"],
+        ),
+        q(
+          44,
+          7,
+          "설계 선택",
+          "모든 변경 row에 version을 붙일까",
+          `<p>다음 Lighthouse 데이터에 모두 동시 수정용 version을 추가하자는 제안을 검토하라.</p>
+<ul>
+  <li>사용자별 reaction preference</li>
+  <li>검토 완료 논문의 <code>reviewed_papers</code></li>
+  <li>추가만 하는 analytics event</li>
+</ul>
+<p>각 데이터에 version, <code>UNIQUE + upsert</code>, append 중 무엇이 맞는지 설명하라.</p>`,
+          "오래된 요청의 덮어쓰기가 실제로 생기는지 먼저 판단하라.",
+          "<p>Reaction preference는 오래된 선택의 덮어쓰기를 막아야 하므로 version이 적절하다. 검토 완료 표시는 같은 요청을 반복해도 같은 상태로 수렴하므로 현재 <code>UNIQUE + upsert</code>가 더 단순하다. Analytics event는 기존 row를 바꾸지 않고 append하므로 동시 수정용 version이 필요하지 않다. 모든 row에 version을 붙이면 불필요한 충돌 처리만 늘어난다.</p>",
+          ["제품 보장", "의사결정"],
+        ),
+        q(
+          45,
+          7,
+          "Transaction 경계",
+          "Gap build 전체를 하나로 묶지 않는다",
+          `<p>다음 단계를 하나의 긴 DB transaction으로 묶는 안을 검토하라.</p>
+<pre>pending 저장
+→ core build와 저장
+→ LLM enrichment
+→ enrichment 저장</pre>
+<p>Enrichment가 실패했을 때 core를 남기는 현재 Lighthouse 계약과 DB 자원 관점에서 판단하라.</p>
+<p class="source-note">실제 근거:
+<a href="https://github.com/corca-ai/lighthouse/blob/main/docs/runtime-flows/gap-network-analysis.md">Gap network runtime flow</a></p>`,
+          "Transaction 범위를 코드 편의가 아니라 사용자에게 함께 보장할 결과로 정하라.",
+          "<p>하나의 긴 transaction으로 묶지 않는다. LLM을 기다리는 동안 DB 연결과 잠금을 오래 점유하고, enrichment 실패가 이미 유효한 core까지 rollback하기 때문이다. 현재처럼 pending, core, enrichment terminal을 짧은 write로 나누고 version 조건으로 오래된 Runner를 거부한다. 다만 core만으로 사용자 가치를 제공할 수 있는지는 제품 정책이 먼저 결정한다.</p>",
+          ["제품 보장", "의사결정"],
+        ),
+        q(
+          46,
+          7,
+          "거시 구조",
+          "Lighthouse는 DB 중심 서비스인가",
+          `<p>다음 설명을 검토하라.</p>
+<pre>Lighthouse는 검색 서비스이므로 모든 논문 검색과 결과를
+자체 DB에서 처리하고 저장한다.</pre>
+<p>실제 검색 경로와 DB가 맡는 상태를 나누고, DB 학습 사례로 Gap report를 깊게 본 이유를 설명하라.</p>
+<p class="source-note">실제 근거:
+<a href="https://github.com/corca-ai/lighthouse/blob/main/docs/runtime-flows/search-mechanism.md">Search runtime flow</a>,
+<a href="https://github.com/corca-ai/lighthouse/blob/main/docs/runtime-flows/gap-network-analysis.md">Gap runtime flow</a></p>`,
+          "검색 corpus의 owner와 재방문·복구해야 하는 상태의 owner를 분리하라.",
+          "<p>설명은 틀렸다. Query 검색과 논문 corpus는 Episteme provider가 담당한다. Lighthouse DB는 reviewed papers, Gap artifact와 reaction, inline-analysis cache, LLM usage와 운영 기록처럼 지속되어야 하는 상태를 맡는다. Gap report는 평균 route라서가 아니라 identity, 동시성, lease, CAS, 중단 복구와 partial failure가 가장 밀집돼 있어 DB 리뷰를 학습하기 좋은 사례다.</p>",
+          ["제품 보장", "의사결정"],
+          ["설명이 맞다", "설명이 틀리다"],
+        ),
+      ];
+
+      const STORAGE_KEY = "lighthouse-backend-review-lab-v1";
+      const defaultState = {
+        currentId: 1,
+        selectedModule: 1,
+        filter: "all",
+        answers: {},
+        reviews: {},
+        revealed: {},
+        hints: {},
+      };
+
+      function loadState() {
+        try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY));
+          return { ...defaultState, ...parsed };
+        } catch {
+          return { ...defaultState };
+        }
+      }
+
+      let state = loadState();
+
+      function saveState() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+        } catch {
+          // Local file privacy settings may block storage. The session still works.
+        }
+      }
+
+      function filteredQuestions() {
+        return questions.filter((question) => {
+          if (question.module !== state.selectedModule) return false;
+          const review = state.reviews[question.id];
+          if (state.filter === "open") return !review;
+          if (state.filter === "mastered") return review === "mastered";
+          if (state.filter === "revisit") return review === "revisit";
+          return true;
+        });
+      }
+
+      function reviewLabel(questionId) {
+        const review = state.reviews[questionId];
+        if (review === "mastered") return ["이해", "status-mastered"];
+        if (review === "revisit") return ["복습", "status-revisit"];
+        if (state.answers[questionId]) return ["작성 중", ""];
+        return ["미완료", ""];
+      }
+
+      function setCurrent(questionId) {
+        const question = questions.find((item) => item.id === questionId);
+        if (!question) return;
+        state.currentId = question.id;
+        state.selectedModule = question.module;
+        saveState();
+        render();
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      }
+
+      function renderModules() {
+        const nav = document.getElementById("module-nav");
+        nav.innerHTML = modules
+          .map((module) => {
+            const items = questions.filter(
+              (question) => question.module === module.id,
+            );
+            const complete = items.filter(
+              (question) => state.reviews[question.id] === "mastered",
+            ).length;
+            return `<button class="module-button ${state.selectedModule === module.id ? "active" : ""}"
+              type="button" data-module-id="${module.id}" aria-pressed="${state.selectedModule === module.id}">
+              <span class="module-index">${module.id}</span>
+              <span class="module-title">${module.title}</span>
+              <span class="module-count">${complete}/${items.length}</span>
+            </button>`;
+          })
+          .join("");
+
+        nav.querySelectorAll("[data-module-id]").forEach((button) => {
+          button.addEventListener("click", () => {
+            state.selectedModule = Number(button.dataset.moduleId);
+            const candidates = filteredQuestions();
+            state.currentId =
+              candidates.find((question) => !state.reviews[question.id])?.id ??
+              candidates[0]?.id ??
+              questions.find(
+                (question) => question.module === state.selectedModule,
+              )?.id;
+            saveState();
+            render();
+          });
+        });
+      }
+
+      function renderProgress() {
+        const mastered = questions.filter(
+          (question) => state.reviews[question.id] === "mastered",
+        ).length;
+        const revisit = questions.filter(
+          (question) => state.reviews[question.id] === "revisit",
+        ).length;
+        const percent = Math.round((mastered / questions.length) * 100);
+
+        document.getElementById("progress-number").textContent = `${percent}%`;
+        document.getElementById("progress-fill").style.width = `${percent}%`;
+        document.getElementById("mastered-count").textContent =
+          `이해 ${mastered}`;
+        document.getElementById("revisit-count").textContent =
+          `복습 ${revisit}`;
+      }
+
+      function renderPipeline(moduleId) {
+        const active =
+          modules.find((module) => module.id === moduleId)?.pipeline ?? 1;
+        document.querySelectorAll("[data-pipeline]").forEach((item) => {
+          item.classList.toggle(
+            "active",
+            Number(item.dataset.pipeline) === active,
+          );
+        });
+      }
+
+      function renderQuestion() {
+        const shell = document.getElementById("question-shell");
+        const candidates = filteredQuestions();
+        let question = candidates.find((item) => item.id === state.currentId);
+        if (!question) {
+          question = candidates[0];
+          if (question) state.currentId = question.id;
+        }
+
+        if (!question) {
+          shell.innerHTML = `<section class="empty">
+            <h2>이 조건의 문항이 없다</h2>
+            <p>다른 상태 필터나 모듈을 선택하라.</p>
+          </section>`;
+          return;
+        }
+
+        renderPipeline(question.module);
+        const module = modules.find((item) => item.id === question.module);
+        const [statusText, statusClass] = reviewLabel(question.id);
+        const candidateIndex = candidates.findIndex(
+          (item) => item.id === question.id,
+        );
+        const answer = state.answers[question.id] ?? "";
+        const isRevealed = Boolean(state.revealed[question.id]);
+        const isHintVisible = Boolean(state.hints[question.id]);
+
+        const choices = question.choices.length
+          ? `<div class="choice-list">${question.choices
+              .map(
+                (choice, index) => `<label class="choice">
+                  <input type="radio" name="choice" value="${index}" ${
+                    answer === `choice:${index}` ? "checked" : ""
+                  } />
+                  <span>${choice}</span>
+                </label>`,
+              )
+              .join("")}</div>`
+          : `<label class="answer-label" for="answer-input">내 판단</label>
+             <textarea id="answer-input" placeholder="관찰한 사실 → 깨질 수 있는 보장 → 대응 → 검증 순서로 적어보라."></textarea>`;
+
+        shell.innerHTML = `
+          <article class="question-card">
+            <header class="question-head">
+              <div class="question-number">${String(question.id).padStart(2, "0")}</div>
+              <div>
+                <div class="question-meta">
+                  <span class="chip">${module.title}</span>
+                  <span class="chip">${question.type}</span>
+                  ${question.axes.map((axis) => `<span class="chip">${axis}</span>`).join("")}
+                </div>
+                <h2 class="question-title">${question.title}</h2>
+              </div>
+              <span class="chip ${statusClass}">${statusText}</span>
+            </header>
+            <div class="question-body">
+              <div class="prompt">${question.prompt}</div>
+              ${choices}
+              <div class="question-actions">
+                <button id="hint-button" class="action action-hint" type="button">힌트</button>
+                <button id="answer-button" class="action action-primary" type="button">모범 판단 보기</button>
+              </div>
+              <div id="hint-panel" class="hint ${isHintVisible ? "visible" : ""}">
+                <strong>힌트</strong><br />${question.hint}
+              </div>
+              <div id="model-panel" class="model-answer ${isRevealed ? "visible" : ""}">
+                <h3>모범 판단</h3>
+                ${question.model}
+              </div>
+              <div id="self-check" class="self-check ${isRevealed ? "visible" : ""}">
+                <strong>지금 내 설명 수준을 기록한다.</strong>
+                <div class="review-buttons">
+                  <button class="action review-mastered" data-review="mastered" type="button">이해했다</button>
+                  <button class="action review-revisit" data-review="revisit" type="button">다시 볼 것</button>
+                </div>
+              </div>
+            </div>
+          </article>
+          <nav class="navigation" aria-label="문항 이동">
+            <button id="previous-button" class="nav-button" type="button" ${
+              candidateIndex <= 0 ? "disabled" : ""
+            }>← 이전</button>
+            <button id="next-button" class="nav-button next" type="button" ${
+              candidateIndex >= candidates.length - 1 ? "disabled" : ""
+            }>다음 →</button>
+          </nav>`;
+
+        const textarea = document.getElementById("answer-input");
+        if (textarea) {
+          textarea.value = answer;
+          textarea.addEventListener("input", (event) => {
+            state.answers[question.id] = event.target.value;
+            saveState();
+          });
+        }
+
+        shell.querySelectorAll('input[name="choice"]').forEach((input) => {
+          input.addEventListener("change", () => {
+            state.answers[question.id] = `choice:${input.value}`;
+            saveState();
+          });
+        });
+
+        document.getElementById("hint-button").addEventListener("click", () => {
+          state.hints[question.id] = !state.hints[question.id];
+          saveState();
+          document.getElementById("hint-panel").classList.toggle("visible");
+        });
+
+        document
+          .getElementById("answer-button")
+          .addEventListener("click", () => {
+            state.revealed[question.id] = true;
+            saveState();
+            document.getElementById("model-panel").classList.add("visible");
+            document.getElementById("self-check").classList.add("visible");
+          });
+
+        shell.querySelectorAll("[data-review]").forEach((button) => {
+          button.addEventListener("click", () => {
+            state.reviews[question.id] = button.dataset.review;
+            saveState();
+            render();
+          });
+        });
+
+        document
+          .getElementById("previous-button")
+          .addEventListener("click", () => {
+            if (candidateIndex > 0)
+              setCurrent(candidates[candidateIndex - 1].id);
+          });
+
+        document.getElementById("next-button").addEventListener("click", () => {
+          if (candidateIndex < candidates.length - 1)
+            setCurrent(candidates[candidateIndex + 1].id);
+        });
+
+        document.getElementById("toolbar-copy").textContent =
+          `${module.title} · ${candidateIndex + 1}/${candidates.length} · 답안은 자동 저장된다`;
+      }
+
+      function render() {
+        renderModules();
+        renderProgress();
+        document.getElementById("status-filter").value = state.filter;
+        renderQuestion();
+      }
+
+      document
+        .getElementById("status-filter")
+        .addEventListener("change", (event) => {
+          state.filter = event.target.value;
+          const candidates = filteredQuestions();
+          state.currentId = candidates[0]?.id ?? state.currentId;
+          saveState();
+          render();
+        });
+
+      document
+        .getElementById("next-open-button")
+        .addEventListener("click", () => {
+          const next = questions.find(
+            (question) => !state.reviews[question.id],
+          );
+          if (next) setCurrent(next.id);
+        });
+
+      document.getElementById("reset-button").addEventListener("click", () => {
+        if (!window.confirm("작성한 답안과 진도를 모두 지울까?")) return;
+        state = {
+          ...defaultState,
+          answers: {},
+          reviews: {},
+          revealed: {},
+          hints: {},
+        };
+        saveState();
+        render();
+      });
+
+      document
+        .getElementById("print-button")
+        .addEventListener("click", () => window.print());
+
+      document.addEventListener("keydown", (event) => {
+        if (!event.altKey) return;
+        const candidates = filteredQuestions();
+        const index = candidates.findIndex(
+          (question) => question.id === state.currentId,
+        );
+        if (event.key === "ArrowLeft" && index > 0)
+          setCurrent(candidates[index - 1].id);
+        if (event.key === "ArrowRight" && index < candidates.length - 1) {
+          setCurrent(candidates[index + 1].id);
+        }
+      });
+
+      render();
+    </script>
+  </body>
+</html>
