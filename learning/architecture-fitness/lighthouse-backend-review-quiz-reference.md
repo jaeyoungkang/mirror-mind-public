@@ -54,6 +54,7 @@ title: Lighthouse 백엔드 리뷰 퀴즈 해설
 | H    | 36–40        | 20분      | 실제 DB identity와 오류 계약          |
 | I    | 41–46        | 20분      | Transaction, version과 저장 경계      |
 | J    | 47–50        | 20분      | LLM fan-out, admission과 부하 증거    |
+| K    | 51–54        | 20분      | 배포 topology와 상태 수명             |
 
 ### 역량별 평가
 
@@ -173,9 +174,11 @@ service role이라면 사용자 격리가 충분한가? Application filter와 DB
 
 ### 9. Process-local과 fleet-wide
 
-Episteme queue가 서버 process마다 동시 실행을 4개로 제한한다. 서버 instance가
-10개라면 provider에는 최대 몇 개가 동시에 갈 수 있는가? 이 계산에 필요한
-추가 가정도 적어라.
+Episteme queue가 process마다 동시 실행을 4개로 제한한다. 고정 서버 instance
+10개라면 provider에는 이론상 최대 몇 개가 동시에 갈 수 있는가?
+
+현재 Lighthouse의 Vercel Fluid에서는 같은 계산으로 fleet 상한을 확정할 수
+있는지도 설명하라.
 
 ### 10. Partial failure
 
@@ -253,9 +256,10 @@ CAS는 저장된 version과 caller가 읽었던 `expectedVersion`이 같은지 �
 ### 9. Process-local과 fleet-wide
 
 모든 instance가 같은 provider를 향하고 각 process에 queue가 하나라면 이론상
-40개다. 실제 상한에는 instance 수, process 수, reserved slot, 요청 fan-out과
-autoscaling 범위를 알아야 한다. Process-local 상한을 fleet 전체 상한으로
-보고하면 안 된다.
+40개다. Vercel Fluid에서는 Function instance가 동적으로 추가·재사용·폐기되고
+route와 region별로 module state 사본이 달라질 수 있다. 따라서 고정된 10개라는
+전제가 없다. Function별 active work와 같은 시간창에 겹친 instance를 측정해야
+한다. Process-local 상한을 fleet 전체 상한으로 보고하면 안 된다.
 
 ### 10. Partial failure
 
@@ -572,7 +576,8 @@ Reaction write는 DB write이고 spelling correction은 LLM 호출이다. 두 ro
 
 Episteme queue의 unit test가 통과했고 process당 동시 실행 상한도 지켜졌다. 이를
 production provider 보호 완료로 판정할 수 있는가? 추가로 필요한 증거를 세
-가지 적어라.
+가지 적어라. 장기 실행 고정 서버와 Vercel Fluid에서 증거가 어떻게 달라지는지도
+포함하라.
 
 ### 27. Mock과 실제 PostgreSQL
 
@@ -618,7 +623,9 @@ Spelling correction은 비용, latency와 호출량이 중요하다. Reaction은
 
 판정할 수 없다. 현재 instance·process 수, autoscaling peak, provider account
 allowance, 요청당 fan-out, production queue wait·timeout·5xx가 필요하다. 단위
-테스트는 한 process의 알고리즘만 증명한다.
+테스트는 한 process의 알고리즘만 증명한다. 고정 서버에서는 배포 replica 수를
+곱해 상한 후보를 계산할 수 있다. Vercel Fluid에서는 route·region별 Function
+instance와 같은 시간창의 overlapping active work를 관측해야 한다.
 
 ### 27. Mock과 실제 PostgreSQL
 
@@ -898,7 +905,7 @@ Inline-analysis batch가 실패한 뒤 같은 provider에 논문별 5회를 추�
 
 ### 48. 전체 cap과 기능별 pool
 
-다음 승인안을 검토하라.
+다음 초기 제안을 현재 Lighthouse의 Vercel Fluid topology에서 다시 검토하라.
 
 ```text
 process total = 200
@@ -907,9 +914,8 @@ Gemini Lite other features = 100
 OpenAI secondary = 50
 ```
 
-하위 pool의 합이 250이므로 250개가 동시에 실행될 수 있는가? 전체 cap,
-기능별 bulkhead와 semaphore가 각각 무엇을 막는지 Lighthouse 기준으로
-설명하라.
+Module-level semaphore가 제한하는 정확한 범위와 fleet hard cap으로 사용할 수
+없는 이유를 설명하라. 이 숫자를 계속 승인 상태로 둘지도 판단하라.
 
 ### 49. 포화 시 작업 우선순위
 
@@ -930,8 +936,49 @@ LLM 실행 자리가 가득 찼다. 다음 작업을 모두 같은 queue에 넣�
 
 > Lighthouse는 20개 동시 검색을 안전하게 처리한다.
 
-현재 코드, 부하 테스트, process와 fleet 범위, provider 실패를 나누어 필요한
-증거를 적어라. 구현 전 Architecture Fitness 판정도 제시하라.
+현재 코드, 부하 테스트, Function·region과 fleet 범위, provider 실패를 나누어
+필요한 증거를 적어라. 구현 전 Architecture Fitness 판정도 제시하라.
+
+### 51. 같은 module global의 세 배포
+
+다음 module global cache가 있다.
+
+```ts
+const cache = new Map<string, Result>();
+```
+
+장기 실행 단일 서버, Vercel Fluid, durable worker 세 환경에서 어느 실행끼리
+cache를 공유하는지 설명하라. 어느 환경에서도 이 cache만으로 durable 결과
+저장을 보장할 수 있는지도 답하라.
+
+### 52. `after()`와 durable queue
+
+Gap route가 `202 pending`을 반환하고 `after(runGapNetworkBuildJob())`를
+등록했다. 다음 주장을 검토하라.
+
+> 응답과 job이 분리됐으므로 Function이 종료돼도 job은 반드시 재개된다.
+
+현재 Vercel 구조와 durable queue worker 구조의 차이를 설명하라.
+
+### 53. Circuit breaker의 범위
+
+`gateway.ts`의 module global circuit breaker가 Gemini 장애를 감지해 `open`이
+됐다. `iad1`의 다른 Function instance와 `icn1`도 즉시 `open`인가?
+
+Process-local과 shared breaker의 장단점도 설명하라.
+
+### 54. 배포 형태가 바뀔 때 유지되는 보장
+
+Lighthouse가 Vercel Fluid에서 고정된 container 서버나 durable worker로
+이전한다고 가정하라. 다음 중 그대로 유지되는 보장과 다시 검토할 보장을
+나누어라.
+
+- DB unique constraint
+- Lease와 version CAS
+- Module in-flight dedupe
+- `maxDuration`
+- User-visible partial failure contract
+- Process-local queue
 
 ## 해설
 
@@ -1022,10 +1069,12 @@ route라서가 아니라 identity, lease, CAS, 중단 복구와 partial failure�
 
 ### 48. 전체 cap과 기능별 pool
 
-동시에 250개를 실행할 수 없다. 전체 200이 모든 하위 pool을 합친 hard cap이다.
-Semaphore는 현재 실행 중인 수를 세고 새 작업을 대기·거부한다. 기능별 pool은
-한 workload가 모든 자리를 점유하지 못하게 하는 bulkhead다. OpenAI secondary가
-포화돼도 primary 사용자 작업의 자리를 모두 빼앗지 않도록 분리해야 한다.
+Module-level semaphore는 그 module 사본이 올라간 Function instance만 제한한다.
+같은 instance 안에서는 전체 200과 하위 pool의 관계가 성립할 수 있다. 그러나
+다른 route, `iad1`, `icn1`과 scale-out instance는 별도 counter를 가질 수 있다.
+따라서 service hard cap으로 승인하면 안 된다. 기존 숫자는 철회하고
+`per_function_instance` soft guard 후보로만 남긴다. 실제 숫자는 production
+overlap evidence 뒤 결정한다.
 
 ### 49. 포화 시 작업 우선순위
 
@@ -1041,9 +1090,42 @@ degraded/failure로 닫는다. Background와 best-effort 작업은 먼저 지연
 주장은 아직 증명되지 않았다. 모든 structured generation이 공통 gateway를
 통과하는지 정적 경로를 확인해야 한다. 20개 검색 fixture로 정상 약 80회와
 batch 실패 fan-out 제거를 측정해야 한다. Active, queued, wait time, timeout,
-429, latency와 token도 관측해야 한다. Process-local 200은 fleet 전체 200이나
-provider 계정 quota를 보장하지 않는다. 구현과 행동 증거 전 Architecture
-Fitness 판정은 `unknown`이다.
+429, latency와 token을 Function·region·runtime identity와 함께 관측해야 한다.
+서로 다른 identity 수만 세지 말고 같은 시간창에 겹친 active work를 확인한다.
+Process-local 200은 fleet 전체 200이나 provider account를 보장하지 않는다.
+구현과 행동 증거 전 Architecture Fitness 판정은 `unknown`이다.
+
+### 51. 같은 module global의 세 배포
+
+단일 서버에서는 같은 process의 요청이 cache를 공유한다. Vercel Fluid에서는
+같은 Function instance에 배치된 invocation만 공유할 수 있다. 다른 route bundle,
+region과 scale-out instance에는 별도 cache가 생긴다. Durable worker도 worker
+process마다 별도 cache를 가진다. 어느 환경에서도 process memory는 재시작을
+넘는 durable 결과 저장소가 아니다.
+
+### 52. `after()`와 durable queue
+
+주장은 틀렸다. `after()`는 응답 뒤에도 같은 Vercel Function invocation의 실행을
+이어가지만 Function duration과 platform 수명 안에 있다. 종료 뒤 다른 worker가
+job을 자동 인수한다고 보장하지 않는다. Durable queue는 job을 공유 저장소에
+기록하고 visibility timeout, ack와 retry로 다른 worker의 인수를 조정한다. 현재
+Gap은 DB pending·lease·CAS와 사용자의 recovery 요청으로 중단을 복구한다.
+
+### 53. Circuit breaker의 범위
+
+즉시 `open`이라고 보장할 수 없다. Module global breaker는 해당 Function
+instance에서만 상태를 공유한다. Process-local breaker는 한 instance의 네트워크
+이상을 fleet 장애로 확대하지 않는 장점이 있다. Shared breaker는 provider 전체
+장애에 빠르게 반응하지만 한 instance의 오판을 전체에 전파할 수 있다. 관측된
+장애 범위와 승격 정책이 필요하다.
+
+### 54. 배포 형태가 바뀔 때 유지되는 보장
+
+같은 DB를 사용한다면 unique constraint, lease와 version CAS는 유지된다.
+User-visible partial failure contract도 제품 계약이므로 유지해야 한다. Module
+dedupe와 process-local queue는 새 process·worker topology에 맞춰 범위를 다시
+검토한다. `maxDuration`은 Vercel Function 설정이므로 container나 worker에서는
+다른 실행 deadline과 shutdown 계약으로 바꿔야 한다.
 
 ---
 
@@ -1051,14 +1133,15 @@ Fitness 판정은 `unknown`이다.
 
 오답을 개수로만 세지 않는다.
 
-| 약한 영역                     | 다시 볼 문제 | 다음 실습                                   |
-| ----------------------------- | ------------ | ------------------------------------------- |
-| 용어가 동작으로 연결되지 않음 | 1–12         | 코드에서 해당 장치 한 곳을 직접 찾는다.     |
-| 코드는 읽지만 위험을 못 찾음  | 13–21        | effect까지 호출 순서를 화살표로 그린다.     |
-| 보호장치를 만능으로 해석함    | 22–27        | 장치가 막는 것과 못 막는 것을 두 열로 쓴다. |
-| 결정을 바로 단정함            | 28–35        | 대안, 필요한 증거와 재검토 조건을 추가한다. |
-| DB 저장 경계가 약함           | 36–46        | identity, 원자성, 동시성과 수명을 나눈다.   |
-| 내부 호출량을 과소평가함      | 47–50        | 정상 fan-out과 실패 증폭을 따로 계산한다.   |
+| 약한 영역                      | 다시 볼 문제 | 다음 실습                                      |
+| ------------------------------ | ------------ | ---------------------------------------------- |
+| 용어가 동작으로 연결되지 않음  | 1–12         | 코드에서 해당 장치 한 곳을 직접 찾는다.        |
+| 코드는 읽지만 위험을 못 찾음   | 13–21        | effect까지 호출 순서를 화살표로 그린다.        |
+| 보호장치를 만능으로 해석함     | 22–27        | 장치가 막는 것과 못 막는 것을 두 열로 쓴다.    |
+| 결정을 바로 단정함             | 28–35        | 대안, 필요한 증거와 재검토 조건을 추가한다.    |
+| DB 저장 경계가 약함            | 36–46        | identity, 원자성, 동시성과 수명을 나눈다.      |
+| 내부 호출량을 과소평가함       | 47–50        | 정상 fan-out과 실패 증폭을 따로 계산한다.      |
+| 실행 환경을 고정 서버로 가정함 | 51–54        | 상태마다 request·instance·fleet 범위를 적는다. |
 
 ## Lighthouse 코드 근거
 
@@ -1077,6 +1160,10 @@ Fitness 판정은 `unknown`이다.
 - [Route AI comment generation](https://github.com/corca-ai/lighthouse/blob/main/app/server/agent/route-ai-comment-generation.ts)
 - [Research-term discovery](https://github.com/corca-ai/lighthouse/blob/main/app/server/services/search-term-discovery.ts)
 - [Spelling correction](https://github.com/corca-ai/lighthouse/blob/main/app/server/services/search-spelling-correction-service.ts)
+- [Vercel topology 추적 이슈 #442](https://github.com/corca-ai/lighthouse/issues/442)
+- [Vercel Fluid Compute](https://vercel.com/docs/fluid-compute)
+- [Vercel Function region](https://vercel.com/docs/functions/configuring-functions/region)
+- [Vercel Function duration](https://vercel.com/docs/functions/configuring-functions/duration)
 
 ## 지식 레퍼런스
 

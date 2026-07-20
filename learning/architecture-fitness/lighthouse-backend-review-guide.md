@@ -119,6 +119,54 @@ entrypoint
 코드가 존재한다는 사실만으로 검토를 닫지 않는다. 실패를 재현하는 테스트와
 운영 환경에서 확인할 지표가 필요하다.
 
+### 배포 형태를 먼저 선언한다
+
+같은 TypeScript 코드도 어디서 실행되는지에 따라 보장 범위가 달라진다. 코드에서
+`server`, `global`, `singleton`이라는 이름을 발견해도 서비스 전체에서 하나라고
+가정하지 않는다.
+
+| 배포 형태              | 실행과 상태의 특징                                                                                                        |
+| ---------------------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 장기 실행 단일 서버    | 한 process의 module state를 여러 요청이 공유한다. Process가 죽으면 함께 사라진다.                                         |
+| 고정된 다중 서버       | 서버마다 module state가 하나씩 있다. 전체 합은 서버 수에 따라 증가한다.                                                   |
+| 전통적 serverless      | Invocation과 instance 수명이 짧고 scale-out된다. 메모리 상태 재사용을 기대하지 않는다.                                    |
+| Vercel Fluid Compute   | 한 Function instance가 여러 invocation을 처리할 수 있다. Region·route·scale-out instance 사이에는 상태를 공유하지 않는다. |
+| Durable queue와 worker | Job은 공유 queue에 저장된다. Web request와 별도 worker가 ack·retry·복구를 맡는다.                                         |
+
+Lighthouse의 현재 production은 Vercel Fluid Compute다. `iad1`과 `icn1` 두 Function
+region을 사용하며 elastic concurrency가 켜져 있다. 한 Function instance의 module
+state는 재사용될 수 있지만 fleet 전체 상태는 아니다.
+
+전문가는 먼저 상태 범위를 표시한다.
+
+```text
+request
+→ Function instance
+→ region fleet
+→ 전체 deployment fleet
+→ shared DB 또는 queue
+→ provider account
+```
+
+필요한 보장 범위와 실제 상태 범위가 같아야 한다. 사용자별 동시 build 한 개를
+모든 instance에서 지켜야 한다면 DB 같은 공유 저장소가 권위를 가져야 한다.
+반대로 한 instance의 socket과 메모리만 보호한다면 process-local semaphore도
+의미가 있다.
+
+배포 형태별로 장치의 보장도 달라진다.
+
+| 장치                | 고정 서버에서의 범위            | Vercel Fluid에서의 범위                   | Fleet 보장이 필요할 때              |
+| ------------------- | ------------------------------- | ----------------------------------------- | ----------------------------------- |
+| Module cache·dedupe | 해당 server process             | 해당 Function instance                    | Shared cache·DB identity            |
+| Queue·semaphore     | 해당 server process             | 해당 Function instance                    | Shared admission coordinator        |
+| Circuit breaker     | 해당 server process             | 해당 Function instance                    | Shared breaker를 별도 정책으로 설계 |
+| `setTimeout` timer  | Process가 살아 있는 동안만      | Invocation·instance 종료를 넘겨 보장 못함 | Durable scheduler·queue             |
+| DB unique·lease·CAS | 모든 서버가 같은 DB를 쓰면 공유 | Region·instance가 달라도 공유             | 이미 shared DB가 권위를 가짐        |
+
+이 구분은 serverless가 항상 더 약하다는 뜻이 아니다. Vercel은 Function을 자동으로
+확장하고 한 instance에서 여러 invocation을 처리한다. 대신 애플리케이션은 module
+메모리를 durable state나 fleet-wide counter로 오해하면 안 된다.
+
 ### 위험 기반 검토 순서
 
 정확성, 실패 계약, 보안, 복구, 부하 순으로 시작하되 고정하지 않는다.
@@ -302,8 +350,10 @@ reaction, inline-analysis cache, LLM usage와 운영 기록처럼 재방문·복
 
 ## API route 입구 검토
 
-API route는 외부 요청이 DB, provider, LLM에 도달하기 전 서버가 책임질 범위를
-결정한다. 시니어는 요청을 거부하는지만 보지 않는다. 얼마의 메모리, CPU와 외부
+API route는 외부 요청이 DB, provider, LLM에 도달하기 전 backend가 책임질 범위를
+결정한다. 장기 실행 서버에서는 handler가 같은 process에서 반복 실행된다.
+Lighthouse의 Vercel 배포에서는 App Router route handler가 Function invocation으로
+실행된다. 시니어는 요청을 거부하는지만 보지 않는다. 얼마의 메모리, CPU와 외부
 비용을 사용한 뒤 거부하는지도 확인한다.
 
 고비용 인증 route는 다음 순서를 기준으로 검토한다.
@@ -344,7 +394,9 @@ Reaction write는 비용이 작아도 사용자 격리와 중복 쓰기 검사�
 
 현재 Lighthouse의 Gap report, inline analysis와 Gap reaction route는 인증,
 bounded body와 schema 검증 순서가 강하다. 모든 API route에는 `maxDuration`
-검사가 있다. 반면 일부 검색 보조·LLM route는 body를 먼저 읽은 뒤 인증하거나
+선언 검사가 있다. 이 값은 Vercel Function invocation의 최대 실행 시간을
+제한한다. 내부 provider timeout이나 durable job 수명을 대신하지 않는다. 반면
+일부 검색 보조·LLM route는 body를 먼저 읽은 뒤 인증하거나
 명시적인 body·query·호출량 상한이 없다. `withRouteGuard`도 인증과 부하 제한이
 아니라 domain error를 HTTP 응답으로 변환하는 wrapper다.
 
@@ -383,8 +435,17 @@ Gap report는 다시 열고 공유해야 하므로 DB에 저장한다. 현재 �
 ```
 
 Runner는 별도 종류의 서버가 아니다. 같은 `runGapNetworkBuildJob()`이 Gap report
-하나를 처리하는 실행 1회를 뜻한다. 서버 runner는 분석과 provider 호출을 맡고,
-DB는 공유 attempt·lease·version과 최종 결과를 저장한다.
+하나를 처리하는 실행 1회를 뜻한다. 현재 Lighthouse에서는 Vercel Function
+invocation 안에서 분석과 provider 호출을 수행한다. DB는 invocation과 region을
+넘어 공유하는 attempt·lease·version과 최종 결과를 저장한다.
+
+배포 형태가 바뀌면 Runner의 수명도 달라진다.
+
+| 배포 형태              | Runner가 실행되는 곳                | 중단 뒤 자동 재개                                   |
+| ---------------------- | ----------------------------------- | --------------------------------------------------- |
+| 장기 실행 서버         | Web server process                  | Process supervisor만 재시작한다. Job 재개는 별도다. |
+| Vercel Fluid 현재 구조 | Response를 만든 Function invocation | `after()`만으로 durable 재개를 보장하지 않는다.     |
+| Durable worker 구조    | Queue에서 job을 받은 worker         | Queue의 visibility timeout·ack·retry 정책이 맡는다. |
 
 정상 흐름에는 Runner 1만 존재한다. Runner 1의 lease가 만료된 뒤 사용자가
 재방문하거나 recovery를 요청하면 같은 report를 처리하는 Runner 2가 시작될 수
@@ -421,8 +482,8 @@ Enrichment가 실패했을 때 사용자가 “분석 다시 시도” command�
 연속 클릭을 막고, digest unique key가 artifact를 하나로 수렴시킨다. Lease와
 version CAS는 같은 artifact의 runner와 최종 commit을 하나로 수렴시킨다.
 
-서버가 죽으면 runner는 사라진다. DB에는 입력과 pending 상태가 남는다. 사용자가
-lease 만료를 관찰하면 recovery POST로 작업을 재개한다.
+현재 Function invocation이 종료되면 runner도 사라진다. DB에는 입력과 pending
+상태가 남는다. 사용자가 lease 만료를 관찰하면 recovery POST로 작업을 재개한다.
 
 Lease는 70초 뒤 실행되는 timer가 아니다. Runner가 시작할 때 DB에
 `leaseExpiresAt = now + 70초`를 저장한다. 시간이 지나도 자동 작업은 실행되지
@@ -432,8 +493,9 @@ Lease는 70초 뒤 실행되는 timer가 아니다. Runner가 시작할 때 DB�
 `POST /api/gap-reports` route는 인증, bounded body 검증, 기존 report 조회 또는
 pending row 예약, 실패 상태의 retry 전환을 수행한다. Report가 아직 준비되지
 않았으면 `after()`에 Runner를 등록하고 `202 pending`을 반환한다. 응답 뒤의
-Runner도 같은 server invocation에서 실행되므로 route의 60초 실행 예산에
-포함된다.
+Runner도 같은 Vercel Function invocation에서 실행되므로 route의 60초 실행 예산에
+포함된다. `after()`는 응답 뒤 실행 시간을 제공하지만 durable queue가 아니다.
+Invocation timeout이나 platform 중단 뒤 다른 worker가 자동으로 이어받지는 않는다.
 
 시간 예산은 안쪽 작업부터 바깥 실행 경계 순서로 잡는다.
 
@@ -475,9 +537,11 @@ Gap build는 Episteme를 다시 호출하지 않는다. 검색 snapshot에 저�
 `graphSupport`를 사용한다. Episteme 보호는 upstream 검색을 안정화하고, Gap 제한은
 Gemini workload를 통제한다. 자원별 bulkhead가 한쪽 장애의 전파를 막는다.
 
-Episteme queue는 process-local이고 core 요청용 슬롯을 남긴다. Gap의 사용자별 active
-build 1개 제한은 #417에서 DB 기준으로 추적한다. 평균 시간뿐 아니라 p95·p99, 5xx,
-queue, token 비용과 load shedding을 본다. Process-local 상한은 fleet 전체 상한이 아니다.
+Episteme queue는 process-local이고 core 요청용 슬롯을 남긴다. Vercel Fluid에서는
+같은 Function instance의 concurrent invocation만 조정한다. 다른 route bundle,
+region과 scale-out instance는 별도 queue를 가질 수 있다. Gap의 사용자별 active
+build 1개 제한은 #417에서 DB 기준으로 추적한다. 평균 시간뿐 아니라 p95·p99,
+5xx, queue, token 비용과 load shedding을 본다.
 
 ### 검색 1회가 만드는 LLM workload
 
@@ -507,19 +571,15 @@ Lighthouse에서는 검색 결과를 받은 뒤 여러 LLM 기능이 함께 실�
 증가한다. 포화 상태에서는 timeout이 retry를 만들고, retry가 다시 timeout을
 늘리는 악순환도 생긴다.
 
-Lighthouse는 다음 초기 admission 정책을 승인했다.
-
-| 보호 경계                         | 동시 실행 상한 |
-| --------------------------------- | -------------- |
-| 한 server process의 전체 LLM 실행 | 200            |
-| Gemini Flash inline-analysis pool | 100            |
-| Gemini Lite 기타 기능 pool        | 100            |
-| OpenAI secondary provider pool    | 50             |
+초기 논의에서는 process 전체 200, Gemini Flash 100, Gemini Lite 100, OpenAI
+secondary 50을 hard cap으로 제안했다. 이 숫자는 장기 실행 서버의 단일 process
+모델에 가까웠다. Lighthouse의 Vercel Fluid topology를 확인한 뒤 service
+hard cap 승인을 철회했다.
 
 Admission control은 새 작업을 지금 실행할지, 기다리게 할지, 거부할지 결정하는
-입구 제어다. Semaphore는 동시에 실행 중인 작업 수를 세는 구현 방법이다. 위에서
-전체 200은 상위 hard cap이고 각 pool은 기능별 하위 cap이다. 하위 상한의 합을
-동시에 모두 사용할 수 있다는 뜻은 아니다.
+입구 제어다. Semaphore는 동시에 실행 중인 작업 수를 세는 구현 방법이다.
+Module-level semaphore를 추가하면 해당 Vercel Function instance는 보호한다.
+그러나 여러 region·route·scale-out instance의 합을 제한하지 않는다.
 
 기능별 pool은 **bulkhead** 역할을 한다. Bulkhead는 한 기능의 포화가 다른 기능의
 실행 자리까지 모두 차지하지 못하게 자원을 나누는 경계다. 초기 우선순위는
@@ -527,18 +587,23 @@ Admission control은 새 작업을 지금 실행할지, 기다리게 할지, 거
 discovery, best-effort spelling correction 순이다. 포화되면 background와
 best-effort 작업부터 지연하거나 생략한다.
 
-이 숫자는 provider 계정 quota를 복제하지 않는다. 한 process의 메모리, socket,
-비용과 장애 전파 범위를 제한한다. 여러 server instance가 있으면 process-local
-200은 fleet 전체 200을 보장하지 않는다. Provider 429나 fleet 포화가 실제로
-관측될 때 shared admission이 필요한지 다시 판단한다.
+현재 우선순위는 숫자보다 증폭 경계를 먼저 줄이는 것이다. Batch 실패 뒤 같은
+provider에 5회를 추가 호출하지 않는다. Route별 paper·token·timeout을 제한한다.
+동일 작업은 cache·in-flight dedupe·DB lease로 합친다. Background와 best-effort
+작업은 사용자-visible 작업보다 먼저 지연하거나 생략한다.
+
+Process-local limiter를 둔다면 `per_function_instance` soft guard라고 명시한다.
+숫자는 production의 Function별 active invocation과 LLM overlap을 측정한 뒤
+정한다. Provider 429, multi-instance 동시 포화, 비용 threshold 초과나 background
+고갈이 관측될 때 DB·Redis 같은 shared admission을 검토한다.
 
 현재 공통 structured-generation gateway는 timeout, 입력 byte와 출력 token
-상한을 적용하지만 서비스 전체 동시 실행을 제한하지 않는다. 승인된 cap과
-batch failure 증폭 제거는
-[#435](https://github.com/corca-ai/lighthouse/issues/435)에서 추적한다.
-아직 구현과 20개 동시 검색 부하 증거가 없으므로 Architecture Fitness 판정은
-`unknown`이다. 정책 상수만 추가해도 처리량과 failure isolation이 증명되지는
-않는다.
+상한을 적용하지만 Function instance나 fleet 전체 동시 실행을 제한하지 않는다.
+Provider failover와 batch failure 증폭 제거는
+[#435](https://github.com/corca-ai/lighthouse/issues/435)가 맡는다. Vercel
+Function topology, admission scope와 multi-region 검증은
+[#442](https://github.com/corca-ai/lighthouse/issues/442)가 맡는다. Production
+evidence 전 Architecture Fitness 판정은 `unknown`이다.
 
 ### 계측과 관측 가능성
 
@@ -631,10 +696,12 @@ Lighthouse의 Gap report라면 운영과 같은 migration·DB role을 사용해 
 - 정확성·보안·회복성·부하를 겹쳐 확인했는가?
 - 공유 데이터와 개인 데이터를 구분했는가?
 - Application filter와 DB 강제를 구분했는가?
+- 현재 배포 형태와 Function·worker 경계를 먼저 확인했는가?
 - Process-local 보호와 fleet 전체 보장을 구분했는가?
+- `after()`와 module global state를 durable queue·shared state로 오해하지 않았는가?
 - 사용자 요청 수를 provider 호출 수로 그대로 간주하지 않았는가?
 - 정상 fan-out과 실패 시 retry 증폭을 따로 계산했는가?
-- 전체 cap과 기능별 bulkhead가 공통 gateway에서 강제되는가?
+- Admission과 bulkhead의 request·Function instance·fleet 범위를 명시했는가?
 - 코드, DB, 테스트, 운영 증거를 연결했는가?
 - 발견을 영향도·가능성·노출로 우선순위화했는가?
 - 지원하지 않는 범위를 `unknown`으로 남겼는가?
@@ -660,6 +727,9 @@ Lighthouse의 Gap report라면 운영과 같은 migration·DB role을 사용해 
 - [Lighthouse Architecture Fitness integration](https://github.com/corca-ai/lighthouse/blob/main/docs/architecture-fitness/README.md)
 - [Lighthouse structured-generation gateway](https://github.com/corca-ai/lighthouse/blob/main/app/server/ai-generation/gateway.ts)
 - [Lighthouse inline analysis service](https://github.com/corca-ai/lighthouse/blob/main/app/server/services/inline-analysis-service.ts)
+- [Vercel Fluid Compute](https://vercel.com/docs/fluid-compute)
+- [Vercel Function region](https://vercel.com/docs/functions/configuring-functions/region)
+- [Vercel Function duration](https://vercel.com/docs/functions/configuring-functions/duration)
 - [Architecture Fitness workload envelope](https://github.com/jaeyoung2026/architecture-fitness/blob/main/skills/architecture-fitness-review/references/workload-envelope.md)
 - [Architecture Fitness critical path](https://github.com/jaeyoung2026/architecture-fitness/blob/main/skills/architecture-fitness-review/references/critical-path.md)
 - [Amazon CloudWatch Database Insights](https://docs.aws.amazon.com/AmazonCloudWatch/latest/monitoring/Database-Insights.html)
