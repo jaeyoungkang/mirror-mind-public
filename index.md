@@ -16,6 +16,7 @@ title: Mirror Mind — Public Pages
   - [Lighthouse 백엔드 프로젝트 리뷰 가이드](learning/architecture-fitness/lighthouse-backend-review-guide)
   - [Lighthouse 실전 인터랙티브 퀴즈](learning/architecture-fitness/lighthouse-backend-review-quiz.html)
 - [맘 테스트 연습장 — 고객 대화 판별 훈련](learning/mom-test-practice.html)
+- [아이디어가 검증 가능한 제품이 되는 8단계](learning/product-idea-to-code.html)
 
 ## Engelbart 리서치 (2026-05, W19)
 

@@ -1,0 +1,1451 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="인간의 제품 아이디어가 정책, 계약, 코드, 테스트와 실행 증거로 구체화되는 8단계 제작 프로세스"
+    />
+    <title>아이디어가 검증 가능한 제품이 되는 과정</title>
+    <style>
+      :root {
+        color-scheme: light;
+        --paper: #eef1ed;
+        --surface: #f9faf7;
+        --surface-strong: #ffffff;
+        --ink: #17201d;
+        --ink-soft: #59635f;
+        --line: #cbd2cd;
+        --line-strong: #8d9993;
+        --intent: #f05a3f;
+        --intent-soft: #ffe2da;
+        --evidence: #2457d6;
+        --evidence-soft: #dce6ff;
+        --human: #d6452f;
+        --agent: #2154c7;
+        --skill: #52735a;
+        --machine: #6a4e87;
+        --shadow: 0 18px 50px rgba(29, 47, 39, 0.1);
+        --display:
+          "Arial Narrow", "Aptos Narrow", "Apple SD Gothic Neo", sans-serif;
+        --body: "Apple SD Gothic Neo", "Noto Sans KR", system-ui, sans-serif;
+        --mono: "SFMono-Regular", Consolas, "Liberation Mono", monospace;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html {
+        scroll-behavior: smooth;
+        background: var(--paper);
+      }
+
+      body {
+        margin: 0;
+        min-width: 320px;
+        color: var(--ink);
+        background:
+          linear-gradient(rgba(23, 32, 29, 0.035) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(23, 32, 29, 0.035) 1px, transparent 1px),
+          var(--paper);
+        background-size: 28px 28px;
+        font-family: var(--body);
+        line-height: 1.68;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      button,
+      a {
+        -webkit-tap-highlight-color: transparent;
+      }
+
+      button:focus-visible,
+      a:focus-visible {
+        outline: 3px solid var(--intent);
+        outline-offset: 3px;
+      }
+
+      .skip-link {
+        position: fixed;
+        top: 10px;
+        left: 10px;
+        z-index: 100;
+        padding: 8px 12px;
+        color: white;
+        background: var(--ink);
+        transform: translateY(-150%);
+      }
+
+      .skip-link:focus {
+        transform: translateY(0);
+      }
+
+      .page-shell {
+        width: min(1180px, calc(100% - 40px));
+        margin: 0 auto;
+      }
+
+      .masthead {
+        padding: 32px 0 76px;
+      }
+
+      .topline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 20px;
+        padding-bottom: 18px;
+        border-bottom: 1px solid var(--line-strong);
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .topline a {
+        color: var(--ink-soft);
+        text-decoration: none;
+      }
+
+      .hero {
+        display: grid;
+        grid-template-columns: minmax(0, 1.12fr) minmax(320px, 0.88fr);
+        gap: clamp(32px, 6vw, 82px);
+        align-items: end;
+        padding-top: 72px;
+      }
+
+      .eyebrow,
+      .section-kicker,
+      .stage-number,
+      .role-name,
+      .artifact-label,
+      .flow-label {
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        font-weight: 800;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+      }
+
+      .eyebrow {
+        margin: 0 0 18px;
+        color: var(--evidence);
+      }
+
+      h1 {
+        max-width: 760px;
+        margin: 0;
+        font-family: var(--display);
+        font-size: clamp(3.5rem, 8vw, 7.7rem);
+        font-stretch: condensed;
+        font-weight: 850;
+        letter-spacing: -0.065em;
+        line-height: 0.87;
+        word-break: keep-all;
+      }
+
+      .hero-copy {
+        margin: 30px 0 0;
+        max-width: 670px;
+        color: var(--ink-soft);
+        font-size: clamp(1rem, 1.5vw, 1.17rem);
+        word-break: keep-all;
+      }
+
+      .continuity-note {
+        position: relative;
+        margin: 0;
+        padding: 26px 28px 26px 32px;
+        background: var(--surface-strong);
+        border: 1px solid var(--line);
+        box-shadow: var(--shadow);
+      }
+
+      .continuity-note::before {
+        position: absolute;
+        top: -1px;
+        bottom: -1px;
+        left: -1px;
+        width: 7px;
+        content: "";
+        background: linear-gradient(var(--intent) 0 50%, var(--evidence) 50%);
+      }
+
+      .continuity-note strong {
+        display: block;
+        margin-bottom: 8px;
+        font-family: var(--display);
+        font-size: 1.55rem;
+        line-height: 1.05;
+      }
+
+      .continuity-note p {
+        margin: 0;
+        color: var(--ink-soft);
+        font-size: 0.94rem;
+      }
+
+      .flow-board {
+        position: relative;
+        margin-top: 64px;
+        padding: 24px;
+        overflow: hidden;
+        background: var(--ink);
+        color: white;
+      }
+
+      .flow-board::after {
+        position: absolute;
+        right: -80px;
+        bottom: -160px;
+        width: 360px;
+        height: 360px;
+        border: 80px solid rgba(255, 255, 255, 0.04);
+        border-radius: 50%;
+        content: "";
+      }
+
+      .flow-grid {
+        position: relative;
+        z-index: 1;
+        display: grid;
+        grid-template-columns: 150px repeat(6, minmax(90px, 1fr));
+        align-items: center;
+        gap: 12px;
+      }
+
+      .flow-label {
+        line-height: 1.25;
+      }
+
+      .flow-label.intent {
+        color: #ff8f7a;
+      }
+
+      .flow-label.evidence {
+        color: #8aaaff;
+      }
+
+      .flow-node {
+        position: relative;
+        min-height: 58px;
+        display: grid;
+        place-items: center;
+        padding: 10px;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.22);
+        font-size: 0.79rem;
+        font-weight: 700;
+        line-height: 1.3;
+      }
+
+      .flow-node:not(:last-child)::after {
+        position: absolute;
+        top: 50%;
+        right: -13px;
+        width: 13px;
+        height: 1px;
+        content: "";
+        background: currentColor;
+      }
+
+      .intent-row .flow-node {
+        color: #ffb2a4;
+      }
+
+      .evidence-row .flow-node {
+        color: #b7c9ff;
+      }
+
+      .evidence-row .flow-node::after {
+        right: auto;
+        left: -13px;
+      }
+
+      .control-dock {
+        position: sticky;
+        top: 0;
+        z-index: 20;
+        background: rgba(238, 241, 237, 0.94);
+        border-top: 1px solid var(--line);
+        border-bottom: 1px solid var(--line);
+        backdrop-filter: blur(14px);
+      }
+
+      .control-inner {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 18px;
+        min-height: 70px;
+      }
+
+      .progress-readout {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        min-width: 190px;
+        font-family: var(--mono);
+        font-size: 0.72rem;
+        font-weight: 700;
+      }
+
+      .progress-track {
+        width: 96px;
+        height: 5px;
+        overflow: hidden;
+        background: var(--line);
+      }
+
+      .progress-fill {
+        width: 12.5%;
+        height: 100%;
+        background: linear-gradient(90deg, var(--intent), var(--evidence));
+        transition: width 180ms ease;
+      }
+
+      .role-filter {
+        display: flex;
+        gap: 6px;
+        overflow-x: auto;
+        padding: 8px 0;
+      }
+
+      .filter-button {
+        flex: 0 0 auto;
+        padding: 8px 12px;
+        color: var(--ink-soft);
+        background: transparent;
+        border: 1px solid var(--line);
+        border-radius: 999px;
+        font-family: var(--mono);
+        font-size: 0.7rem;
+        font-weight: 800;
+        cursor: pointer;
+      }
+
+      .filter-button:hover,
+      .filter-button[aria-pressed="true"] {
+        color: white;
+        background: var(--ink);
+        border-color: var(--ink);
+      }
+
+      main {
+        padding: 94px 0 120px;
+      }
+
+      .section-head {
+        display: grid;
+        grid-template-columns: minmax(0, 0.65fr) minmax(300px, 0.35fr);
+        gap: 48px;
+        align-items: end;
+        margin-bottom: 42px;
+      }
+
+      .section-kicker {
+        margin: 0 0 12px;
+        color: var(--evidence);
+      }
+
+      h2 {
+        margin: 0;
+        font-family: var(--display);
+        font-size: clamp(2.4rem, 5vw, 4.6rem);
+        letter-spacing: -0.045em;
+        line-height: 0.96;
+        word-break: keep-all;
+      }
+
+      .section-summary {
+        margin: 0;
+        color: var(--ink-soft);
+      }
+
+      .timeline {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        counter-reset: stage;
+      }
+
+      .stage {
+        position: relative;
+        display: grid;
+        grid-template-columns: 88px minmax(0, 0.76fr) minmax(380px, 1.24fr);
+        gap: clamp(22px, 4vw, 54px);
+        padding: 44px 0 58px;
+        border-top: 1px solid var(--line-strong);
+        counter-increment: stage;
+        scroll-margin-top: 96px;
+      }
+
+      .stage::before {
+        display: grid;
+        width: 64px;
+        height: 64px;
+        place-items: center;
+        color: white;
+        background: var(--ink);
+        content: counter(stage, decimal-leading-zero);
+        font-family: var(--mono);
+        font-size: 1rem;
+        font-weight: 800;
+      }
+
+      .stage.active::before {
+        background: linear-gradient(
+          135deg,
+          var(--intent) 0 50%,
+          var(--evidence) 50%
+        );
+      }
+
+      .stage-number {
+        margin: 0 0 12px;
+        color: var(--ink-soft);
+      }
+
+      .stage h3 {
+        margin: 0;
+        font-family: var(--display);
+        font-size: clamp(1.9rem, 3.5vw, 3.1rem);
+        letter-spacing: -0.035em;
+        line-height: 0.98;
+      }
+
+      .stage-description {
+        margin: 18px 0 0;
+        color: var(--ink-soft);
+      }
+
+      .artifact {
+        margin-top: 24px;
+        padding-top: 14px;
+        border-top: 3px solid var(--ink);
+      }
+
+      .artifact-label {
+        display: block;
+        margin-bottom: 5px;
+        color: var(--ink-soft);
+      }
+
+      .artifact strong {
+        font-size: 0.95rem;
+      }
+
+      .contributions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .contribution {
+        min-height: 150px;
+        padding: 18px 19px;
+        background: var(--surface-strong);
+        border: 1px solid var(--line);
+        transition:
+          opacity 180ms ease,
+          transform 180ms ease,
+          border-color 180ms ease;
+      }
+
+      .contribution:hover {
+        transform: translateY(-2px);
+        border-color: var(--line-strong);
+      }
+
+      .role-name {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 12px;
+      }
+
+      .role-name::before {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        content: "";
+        background: currentColor;
+      }
+
+      [data-role="human"] .role-name {
+        color: var(--human);
+      }
+
+      [data-role="agent"] .role-name {
+        color: var(--agent);
+      }
+
+      [data-role="skill"] .role-name {
+        color: var(--skill);
+      }
+
+      [data-role="machine"] .role-name {
+        color: var(--machine);
+      }
+
+      .contribution p {
+        margin: 0;
+        color: var(--ink-soft);
+        font-size: 0.91rem;
+      }
+
+      body[data-focus]:not([data-focus="all"]) .contribution:not(.role-match) {
+        opacity: 0.18;
+      }
+
+      body[data-focus]:not([data-focus="all"]) .contribution.role-match {
+        border-color: currentColor;
+      }
+
+      .explainers {
+        display: grid;
+        grid-template-columns: repeat(12, 1fr);
+        gap: 16px;
+        margin-top: 110px;
+      }
+
+      .explainer {
+        grid-column: span 4;
+        padding: 28px;
+        background: var(--surface);
+        border: 1px solid var(--line);
+      }
+
+      .explainer.wide {
+        grid-column: span 8;
+      }
+
+      .explainer.dark {
+        color: white;
+        background: var(--ink);
+        border-color: var(--ink);
+      }
+
+      .explainer h3 {
+        margin: 0 0 16px;
+        font-family: var(--display);
+        font-size: 1.75rem;
+        letter-spacing: -0.025em;
+        line-height: 1.05;
+      }
+
+      .explainer p {
+        margin: 0 0 12px;
+        color: var(--ink-soft);
+        font-size: 0.93rem;
+      }
+
+      .explainer.dark p {
+        color: #c8d0cc;
+      }
+
+      .concept-list {
+        display: grid;
+        gap: 14px;
+        margin: 20px 0 0;
+      }
+
+      .concept {
+        display: grid;
+        grid-template-columns: 145px 1fr;
+        gap: 18px;
+        padding-top: 14px;
+        border-top: 1px solid var(--line);
+      }
+
+      .concept dt {
+        font-family: var(--mono);
+        font-size: 0.75rem;
+        font-weight: 800;
+      }
+
+      .concept dd {
+        margin: 0;
+        color: var(--ink-soft);
+        font-size: 0.91rem;
+      }
+
+      pre {
+        margin: 20px 0 0;
+        padding: 20px;
+        overflow-x: auto;
+        color: #e7ece9;
+        background: #0d1412;
+        border-left: 5px solid var(--evidence);
+        font-family: var(--mono);
+        font-size: 0.78rem;
+        line-height: 1.65;
+      }
+
+      code {
+        font-family: var(--mono);
+      }
+
+      .test-window {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 8px;
+        margin-top: 20px;
+      }
+
+      .paper-chip {
+        padding: 12px 10px;
+        text-align: center;
+        background: var(--surface-strong);
+        border: 1px solid var(--line);
+        font-family: var(--mono);
+        font-size: 0.7rem;
+      }
+
+      .paper-chip.visible {
+        border-color: var(--evidence);
+        box-shadow: inset 0 -4px var(--evidence);
+      }
+
+      .paper-chip.hidden {
+        color: var(--ink-soft);
+        border-style: dashed;
+        opacity: 0.58;
+      }
+
+      .legacy-note {
+        margin-top: 110px;
+        padding: clamp(32px, 6vw, 68px);
+        background: linear-gradient(
+          120deg,
+          var(--intent-soft),
+          var(--evidence-soft)
+        );
+        border: 1px solid var(--line);
+      }
+
+      .legacy-note h2 {
+        max-width: 800px;
+      }
+
+      .legacy-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 48px;
+        margin-top: 34px;
+      }
+
+      .legacy-grid p {
+        margin: 0;
+        color: #38433f;
+      }
+
+      footer {
+        padding: 34px 0 50px;
+        border-top: 1px solid var(--line-strong);
+        color: var(--ink-soft);
+        font-family: var(--mono);
+        font-size: 0.72rem;
+      }
+
+      .footer-inner {
+        display: flex;
+        justify-content: space-between;
+        gap: 24px;
+      }
+
+      @media (max-width: 900px) {
+        .hero,
+        .section-head,
+        .legacy-grid {
+          grid-template-columns: 1fr;
+        }
+
+        .flow-board {
+          overflow-x: auto;
+        }
+
+        .flow-grid {
+          min-width: 850px;
+        }
+
+        .stage {
+          grid-template-columns: 64px minmax(0, 1fr);
+        }
+
+        .stage::before {
+          grid-row: 1 / span 2;
+          width: 54px;
+          height: 54px;
+        }
+
+        .contributions {
+          grid-column: 2;
+        }
+
+        .explainer,
+        .explainer.wide {
+          grid-column: span 6;
+        }
+      }
+
+      @media (max-width: 640px) {
+        .page-shell {
+          width: min(100% - 28px, 1180px);
+        }
+
+        .masthead {
+          padding-top: 22px;
+          padding-bottom: 46px;
+        }
+
+        .topline {
+          align-items: flex-start;
+          font-size: 0.62rem;
+        }
+
+        .hero {
+          padding-top: 48px;
+        }
+
+        h1 {
+          font-size: clamp(3.3rem, 18vw, 5rem);
+        }
+
+        .flow-board {
+          margin-top: 44px;
+          padding: 16px;
+        }
+
+        .control-inner {
+          align-items: flex-start;
+          flex-direction: column;
+          gap: 0;
+          padding: 9px 0 7px;
+        }
+
+        .progress-readout {
+          display: none;
+        }
+
+        .role-filter {
+          width: 100%;
+        }
+
+        main {
+          padding-top: 64px;
+        }
+
+        .stage {
+          grid-template-columns: 1fr;
+          padding: 34px 0 44px;
+        }
+
+        .stage::before {
+          grid-row: auto;
+        }
+
+        .contributions {
+          grid-column: 1;
+          grid-template-columns: 1fr;
+        }
+
+        .contribution {
+          min-height: 0;
+        }
+
+        .explainer,
+        .explainer.wide {
+          grid-column: 1 / -1;
+        }
+
+        .concept {
+          grid-template-columns: 1fr;
+          gap: 4px;
+        }
+
+        .legacy-note {
+          margin-top: 74px;
+          padding: 30px 22px;
+        }
+
+        .footer-inner {
+          flex-direction: column;
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        html {
+          scroll-behavior: auto;
+        }
+
+        *,
+        *::before,
+        *::after {
+          scroll-behavior: auto !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      @media print {
+        .control-dock,
+        .skip-link {
+          display: none;
+        }
+
+        body {
+          background: white;
+        }
+
+        .stage,
+        .explainer,
+        .legacy-note {
+          break-inside: avoid;
+        }
+      }
+    </style>
+  </head>
+  <body data-focus="all">
+    <a class="skip-link" href="#process">본문으로 이동</a>
+
+    <header class="masthead">
+      <div class="page-shell">
+        <div class="topline">
+          <span>Mirror Mind / Product Making Protocol</span>
+          <a href="../">Public pages로 돌아가기</a>
+        </div>
+
+        <div class="hero">
+          <div>
+            <p class="eyebrow">Human intent → executable evidence</p>
+            <h1>아이디어가<br />제품이 되는<br />8단계</h1>
+            <p class="hero-copy">
+              인간의 아이디어를 제품 정책으로 구체화하고, 계약·코드·테스트와
+              실행 증거로 연결한다. 검증 결과는 다시 인간의 다음 판단으로
+              돌아간다.
+            </p>
+          </div>
+
+          <aside class="continuity-note">
+            <strong>이 프로세스는 AI보다 오래됐다.</strong>
+            <p>
+              제품 관리자, 도메인 전문가, 개발자와 QA가 같은 변환 작업을 나누어
+              맡아 왔다. AI 에이전트는 이 작업을 더 빠르게 연결하지만 제품의
+              의미와 검증 절차를 대신 결정하지 않는다.
+            </p>
+          </aside>
+        </div>
+
+        <div class="flow-board" aria-label="아이디어와 증거의 양방향 흐름">
+          <div class="flow-grid intent-row">
+            <span class="flow-label intent">Intent<br />moves down</span>
+            <span class="flow-node">아이디어</span>
+            <span class="flow-node">제품 정책</span>
+            <span class="flow-node">계약</span>
+            <span class="flow-node">코드</span>
+            <span class="flow-node">테스트</span>
+            <span class="flow-node">사용 결과</span>
+          </div>
+          <div class="flow-grid evidence-row" style="margin-top: 12px">
+            <span class="flow-label evidence">Evidence<br />returns up</span>
+            <span class="flow-node">다음 판단</span>
+            <span class="flow-node">승인·수정</span>
+            <span class="flow-node">검증 결과</span>
+            <span class="flow-node">실행 증거</span>
+            <span class="flow-node">관찰 결과</span>
+            <span class="flow-node">운영 지표</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <nav class="control-dock" aria-label="기여 주체 강조">
+      <div class="page-shell control-inner">
+        <div class="progress-readout" aria-live="polite">
+          <span id="progressText">01 / 08</span>
+          <span class="progress-track" aria-hidden="true">
+            <span class="progress-fill" id="progressFill"></span>
+          </span>
+        </div>
+        <div class="role-filter">
+          <button
+            class="filter-button"
+            type="button"
+            data-focus="all"
+            aria-pressed="true"
+          >
+            전체 과정
+          </button>
+          <button
+            class="filter-button"
+            type="button"
+            data-focus="human"
+            aria-pressed="false"
+          >
+            인간
+          </button>
+          <button
+            class="filter-button"
+            type="button"
+            data-focus="agent"
+            aria-pressed="false"
+          >
+            에이전트
+          </button>
+          <button
+            class="filter-button"
+            type="button"
+            data-focus="skill"
+            aria-pressed="false"
+          >
+            스킬·지침
+          </button>
+          <button
+            class="filter-button"
+            type="button"
+            data-focus="machine"
+            aria-pressed="false"
+          >
+            기계적 처리
+          </button>
+        </div>
+      </div>
+    </nav>
+
+    <main id="process">
+      <div class="page-shell">
+        <section aria-labelledby="processTitle">
+          <div class="section-head">
+            <div>
+              <p class="section-kicker">
+                Process snapshot / Search result window
+              </p>
+              <h2 id="processTitle">정책 하나가 만들어지는 장면</h2>
+            </div>
+            <p class="section-summary">
+              검색 결과를 처음에는 10편만 보여주고, 사용자가 요청하면 같은
+              목록에 10편씩 추가한다는 사례를 끝까지 따라간다.
+            </p>
+          </div>
+
+          <ol class="timeline">
+            <li class="stage active" id="stage-1" data-stage="1">
+              <div class="stage-copy">
+                <p class="stage-number">Observe</p>
+                <h3>문제 포착</h3>
+                <p class="stage-description">
+                  검색 결과가 너무 길어 읽을 논문을 고르기 어렵다는 문제를
+                  발견한다.
+                </p>
+                <div class="artifact">
+                  <span class="artifact-label">Output</span>
+                  <strong>구체적인 사용자 문제</strong>
+                </div>
+              </div>
+              <div class="contributions">
+                <article class="contribution" data-role="human">
+                  <span class="role-name">Human</span>
+                  <p>관찰한 불편과 바라는 변화를 설명한다.</p>
+                </article>
+                <article class="contribution" data-role="agent">
+                  <span class="role-name">Agent</span>
+                  <p>관찰된 문제, 추정 원인, 해결 아이디어를 분리한다.</p>
+                </article>
+                <article class="contribution" data-role="skill">
+                  <span class="role-name">Skill</span>
+                  <p>
+                    <code>product-discovery-steward</code>가 관찰을 성급하게
+                    구현안으로 확정하지 않도록 조사 순서를 안내한다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="machine">
+                  <span class="role-name">Machine</span>
+                  <p>
+                    분석 이벤트와 화면 기록이 현재 행동을 보여준다. 더 나은
+                    경험이 무엇인지는 결정하지 않는다.
+                  </p>
+                </article>
+              </div>
+            </li>
+
+            <li class="stage" id="stage-2" data-stage="2">
+              <div class="stage-copy">
+                <p class="stage-number">Decide</p>
+                <h3>정책 결정</h3>
+                <p class="stage-description">
+                  “적당히 보여준다”를 “처음 10편, 이후 10편씩”으로 구체화한다.
+                </p>
+                <div class="artifact">
+                  <span class="artifact-label">Output</span>
+                  <strong>인간이 승인한 제품 정책</strong>
+                </div>
+              </div>
+              <div class="contributions">
+                <article class="contribution" data-role="human">
+                  <span class="role-name">Human</span>
+                  <p>사용자에게 제공할 결과와 판단 기준을 승인한다.</p>
+                </article>
+                <article class="contribution" data-role="agent">
+                  <span class="role-name">Agent</span>
+                  <p>
+                    가능한 선택지와 각 선택이 사용자 경험에 주는 영향을
+                    정리한다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="skill">
+                  <span class="role-name">Skill</span>
+                  <p>
+                    <code>mission-control</code>이 제품 원칙, 사용 상황, 기대
+                    결과와 충족 조건을 구분한다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="machine">
+                  <span class="role-name">Machine</span>
+                  <p>
+                    ID와 문서 형식을 검사한다. 숫자 10이 적절한지는 판단하지
+                    않는다.
+                  </p>
+                </article>
+              </div>
+            </li>
+
+            <li class="stage" id="stage-3" data-stage="3">
+              <div class="stage-copy">
+                <p class="stage-number">Declare</p>
+                <h3>계약 작성</h3>
+                <p class="stage-description">
+                  정책을 Experience, Moment, Promise, Acceptance Check와
+                  Aspect로 구조화한다.
+                </p>
+                <div class="artifact">
+                  <span class="artifact-label">Output</span>
+                  <strong>검증 가능한 제품 계약</strong>
+                </div>
+              </div>
+              <div class="contributions">
+                <article class="contribution" data-role="human">
+                  <span class="role-name">Human</span>
+                  <p>
+                    계약 초안이 원래 의도와 사용자 경험을 보존하는지 확인한다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="agent">
+                  <span class="role-name">Agent</span>
+                  <p>
+                    승인된 의미를 계약 문장과 추적 가능한 ID 관계로 작성한다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="skill">
+                  <span class="role-name">Skill</span>
+                  <p>
+                    Contract Steward는 Promise의 종단 관계를, Aspect Steward는
+                    여러 목록에 적용되는 공통 정책을 안내한다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="machine">
+                  <span class="role-name">Machine</span>
+                  <p>
+                    <code>mc:validate-story-chain</code>이 ID, 부모 관계, AC
+                    존재와 Promise·Aspect의 양방향 참조를 검사한다.
+                  </p>
+                </article>
+              </div>
+            </li>
+
+            <li class="stage" id="stage-4" data-stage="4">
+              <div class="stage-copy">
+                <p class="stage-number">Scope</p>
+                <h3>구현 범위 결정</h3>
+                <p class="stage-description">
+                  정책을 구현할 route, component, hook, store와 기존 테스트를
+                  찾는다.
+                </p>
+                <div class="artifact">
+                  <span class="artifact-label">Output</span>
+                  <strong>구현 계획과 코드 연결</strong>
+                </div>
+              </div>
+              <div class="contributions">
+                <article class="contribution" data-role="human">
+                  <span class="role-name">Human</span>
+                  <p>
+                    제품 의미나 구조를 바꾸는 선택이 생기면 방향을 결정한다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="agent">
+                  <span class="role-name">Agent</span>
+                  <p>
+                    계약에서 관련 코드와 테스트로 추적하고 변경 범위를 제안한다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="skill">
+                  <span class="role-name">Skill</span>
+                  <p>
+                    데이터, 상태 수명, 실행 순서, AI 경계 등에 영향이 있으면
+                    Architecture Impact Review로 보낸다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="machine">
+                  <span class="role-name">Machine</span>
+                  <p>
+                    코드 검색과 surface audit가 누락된 파일과 잘못된 참조를
+                    찾는다.
+                  </p>
+                </article>
+              </div>
+            </li>
+
+            <li class="stage" id="stage-5" data-stage="5">
+              <div class="stage-copy">
+                <p class="stage-number">Build</p>
+                <h3>코드와 테스트 작성</h3>
+                <p class="stage-description">
+                  처음 10편을 렌더하고 요청할 때 같은 목록에 10편씩 추가한다.
+                </p>
+                <div class="artifact">
+                  <span class="artifact-label">Output</span>
+                  <strong>코드와 재현 가능한 테스트</strong>
+                </div>
+              </div>
+              <div class="contributions">
+                <article class="contribution" data-role="human">
+                  <span class="role-name">Human</span>
+                  <p>
+                    중간 결과가 승인된 정책과 다르면 의미와 우선순위를
+                    바로잡는다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="agent">
+                  <span class="role-name">Agent</span>
+                  <p>
+                    UI와 상태 로직을 구현하고 경계값과 실패 조건을 테스트로
+                    만든다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="skill">
+                  <span class="role-name">Skill</span>
+                  <p>
+                    구현 스킬이 저장소의 상태 소유권, 코드 경계와 테스트 관례를
+                    알려준다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="machine">
+                  <span class="role-name">Machine</span>
+                  <p>
+                    TypeScript와 lint가 정적 오류를 찾고 Vitest가 DOM 결과를
+                    검사한다.
+                  </p>
+                </article>
+              </div>
+            </li>
+
+            <li class="stage" id="stage-6" data-stage="6">
+              <div class="stage-copy">
+                <p class="stage-number">Prove</p>
+                <h3>실행 증거 연결</h3>
+                <p class="stage-description">
+                  각 Acceptance Check를 실제로 실행할 테스트와 Evidence Ledger
+                  행에 연결한다.
+                </p>
+                <div class="artifact">
+                  <span class="artifact-label">Output</span>
+                  <strong>조건별 실행 증거</strong>
+                </div>
+              </div>
+              <div class="contributions">
+                <article class="contribution" data-role="human">
+                  <span class="role-name">Human</span>
+                  <p>증거가 제품 의도를 충분히 입증하는지 의미를 검토한다.</p>
+                </article>
+                <article class="contribution" data-role="agent">
+                  <span class="role-name">Agent</span>
+                  <p>
+                    조건, 실행 명령, 테스트, 적용 범위를 한 Ledger 행으로
+                    연결한다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="skill">
+                  <span class="role-name">Skill</span>
+                  <p>
+                    Contract Steward가 모든 조건에 증거를 붙이고 낡은 참조를
+                    제거하게 한다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="machine">
+                  <span class="role-name">Machine</span>
+                  <p>
+                    dry-run이 명령과 필터를 검사한다. runner는 하나 이상의
+                    테스트가 선택되는지 확인한 뒤 실행한다.
+                  </p>
+                </article>
+              </div>
+            </li>
+
+            <li class="stage" id="stage-7" data-stage="7">
+              <div class="stage-copy">
+                <p class="stage-number">Review</p>
+                <h3>통합 검증과 승인</h3>
+                <p class="stage-description">
+                  계약, 코드, 테스트와 증거가 함께 유지되는지 확인한다.
+                </p>
+                <div class="artifact">
+                  <span class="artifact-label">Output</span>
+                  <strong>배포 가능한 변경</strong>
+                </div>
+              </div>
+              <div class="contributions">
+                <article class="contribution" data-role="human">
+                  <span class="role-name">Human</span>
+                  <p>제품 의미와 실행 증거의 충분성을 최종 검토한다.</p>
+                </article>
+                <article class="contribution" data-role="agent">
+                  <span class="role-name">Agent</span>
+                  <p>
+                    실패를 계약, 구현, 증거 문제로 분류하고 해당 범위를
+                    수정한다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="skill">
+                  <span class="role-name">Skill</span>
+                  <p>
+                    Mission Control이 제품 원칙부터 증거까지의 리뷰 순서를
+                    제공한다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="machine">
+                  <span class="role-name">Machine</span>
+                  <p>
+                    <code>quality:contract</code>, 테스트, audit와
+                    <code>mc:status</code>가 끊어진 참조와 실패를 차단한다.
+                  </p>
+                </article>
+              </div>
+            </li>
+
+            <li class="stage" id="stage-8" data-stage="8">
+              <div class="stage-copy">
+                <p class="stage-number">Learn</p>
+                <h3>사용 결과 반영</h3>
+                <p class="stage-description">
+                  배포 뒤의 관찰을 다음 제품 판단의 입력으로 돌려보낸다.
+                </p>
+                <div class="artifact">
+                  <span class="artifact-label">Output</span>
+                  <strong>유지·수정·철회 결정</strong>
+                </div>
+              </div>
+              <div class="contributions">
+                <article class="contribution" data-role="human">
+                  <span class="role-name">Human</span>
+                  <p>
+                    사용 결과를 보고 정책을 유지하거나 제품 결정을 다시 연다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="agent">
+                  <span class="role-name">Agent</span>
+                  <p>피드백과 사용 데이터를 기존 정책과 증거에 연결한다.</p>
+                </article>
+                <article class="contribution" data-role="skill">
+                  <span class="role-name">Skill</span>
+                  <p>
+                    discovery 절차가 새 관찰과 기존 결정을 구분해 같은 흐름으로
+                    되돌린다.
+                  </p>
+                </article>
+                <article class="contribution" data-role="machine">
+                  <span class="role-name">Machine</span>
+                  <p>
+                    analytics가 행동, 오류와 성능을 수집한다. 수치는 판단의
+                    증거로 쓰인다.
+                  </p>
+                </article>
+              </div>
+            </li>
+          </ol>
+        </section>
+
+        <section class="explainers" aria-label="계약과 증거의 작동 방식">
+          <article class="explainer wide">
+            <p class="section-kicker">Contract vocabulary</p>
+            <h3>정책을 검증 가능한 단위로 나눈다</h3>
+            <dl class="concept-list">
+              <div class="concept">
+                <dt>Experience</dt>
+                <dd>
+                  오래 유지할 제품 경험이다. 연구 결과와 논문 관계를 탐색하는
+                  전체 경험을 다룬다.
+                </dd>
+              </div>
+              <div class="concept">
+                <dt>Moment</dt>
+                <dd>제품 동작이 필요한 구체적인 사용 상황이다.</dd>
+              </div>
+              <div class="concept">
+                <dt>Promise</dt>
+                <dd>그 상황에서 제품이 책임질 기대 결과를 기술한다.</dd>
+              </div>
+              <div class="concept">
+                <dt>Acceptance Check</dt>
+                <dd>
+                  기대 결과의 충족 여부를 결정적으로 판단한다. 모든 Promise는
+                  최소 하나를 가진다.
+                </dd>
+              </div>
+              <div class="concept">
+                <dt>Aspect</dt>
+                <dd>
+                  여러 Promise에 함께 적용되는 공통 정책이다. 초기 10편과 +10편
+                  규칙이 한 사례다.
+                </dd>
+              </div>
+            </dl>
+          </article>
+
+          <article class="explainer dark">
+            <p class="section-kicker" style="color: #8aaaff">Traceability</p>
+            <h3>코드 주석이 계약을 가리킨다</h3>
+            <p>
+              앱에는 일반 주석이지만 audit 스크립트는 이를 계약 참조로 읽는다.
+              태그는 연결을 증명하고 테스트는 동작을 증명한다.
+            </p>
+            <pre><code>// @promise promise:graph-neighbor-papers
+// @aspect aspect:paper-card-list-windowing
+// @check acceptance-check:graph-neighbor-papers-paginated-window</code></pre>
+          </article>
+
+          <article class="explainer">
+            <p class="section-kicker">Executable evidence</p>
+            <h3>10번째는 보이고 11번째는 보이지 않는다</h3>
+            <p>
+              Vitest는 논문 12편의 fixture를 jsdom에 렌더한다. DOM에서 10번째
+              논문과 <code>더보기 (10/12)</code>를 찾고 11번째 논문은 없는지
+              확인한다.
+            </p>
+            <div class="test-window" aria-label="DOM 노출 경계 예시">
+              <span class="paper-chip visible">paper 10<br />visible</span>
+              <span class="paper-chip hidden">paper 11<br />absent</span>
+              <span class="paper-chip visible">more<br />10 / 12</span>
+            </div>
+          </article>
+
+          <article class="explainer">
+            <p class="section-kicker">Ledger</p>
+            <h3>조건마다 실행 위치를 남긴다</h3>
+            <p>
+              Evidence Ledger는 자동 보고서가 아니다. 에이전트 또는 인간
+              전문가가 각 <code>Promise#AcceptanceCheck</code>를 실행 명령과
+              테스트에 연결한다. 행이 없으면 정책은 선언됐지만 증명 방법은 없다.
+            </p>
+          </article>
+
+          <article class="explainer">
+            <p class="section-kicker">Validation limit</p>
+            <h3>스크립트는 표현된 규칙만 판정한다</h3>
+            <p>
+              validator는 ID, 연결과 필수 항목을 검사한다. 여러 문서에 적힌
+              숫자가 모두 같은지, 정책이 인간의 의도를 충분히 표현하는지는 의미
+              리뷰가 맡는다.
+            </p>
+          </article>
+
+          <article class="explainer">
+            <p class="section-kicker">Runner</p>
+            <h3>테스트가 하나도 없으면 증거도 없다</h3>
+            <p>
+              Vitest의 <code>-t</code>는 이름이 일치하는 테스트만 선택한다.
+              필터가 낡으면 아무 동작도 검증하지 못한다. Evidence runner는 최소
+              한 개의 테스트가 선택되는지 먼저 확인한다.
+            </p>
+          </article>
+        </section>
+
+        <section class="legacy-note" aria-labelledby="legacyTitle">
+          <p class="section-kicker">Before and after agents</p>
+          <h2 id="legacyTitle">실행자는 바뀌어도 제작 원리는 남는다</h2>
+          <div class="legacy-grid">
+            <p>
+              AI 이전에는 인간 전문가가 인터뷰, 정책 문서, 구현, 테스트와
+              추적표를 나누어 관리했다. 업무 매뉴얼과 체크리스트가 작업 순서를
+              안내하고, 빌드와 테스트 스크립트가 반복 검사를 수행했다.
+            </p>
+            <p>
+              AI 에이전트는 이 작업 사이를 빠르게 이동한다. 스킬은 조직의 업무
+              순서와 권한 경계를 알려준다. 인간은 제품의 의미를 결정하고,
+              에이전트 또는 인간 전문가는 결정을 실행 가능한 구조로 변환한다.
+              기계가 확인한 결과는 다시 인간의 판단으로 돌아간다.
+            </p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer>
+      <div class="page-shell footer-inner">
+        <span>Mirror Mind · Product making process</span>
+        <a href="../">Public pages</a>
+      </div>
+    </footer>
+
+    <script>
+      "use strict";
+
+      const body = document.body;
+      const filterButtons = Array.from(
+        document.querySelectorAll(".filter-button"),
+      );
+      const contributions = Array.from(
+        document.querySelectorAll(".contribution"),
+      );
+      const stages = Array.from(document.querySelectorAll(".stage"));
+      const progressText = document.getElementById("progressText");
+      const progressFill = document.getElementById("progressFill");
+
+      function setFocus(role) {
+        body.dataset.focus = role;
+        filterButtons.forEach((button) => {
+          button.setAttribute(
+            "aria-pressed",
+            String(button.dataset.focus === role),
+          );
+        });
+        contributions.forEach((item) => {
+          item.classList.toggle(
+            "role-match",
+            role === "all" || item.dataset.role === role,
+          );
+        });
+      }
+
+      filterButtons.forEach((button) => {
+        button.addEventListener("click", () => setFocus(button.dataset.focus));
+      });
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          const visible = entries
+            .filter((entry) => entry.isIntersecting)
+            .sort((a, b) => b.intersectionRatio - a.intersectionRatio)[0];
+          if (!visible) return;
+
+          const current = Number(visible.target.dataset.stage);
+          stages.forEach((stage) =>
+            stage.classList.toggle("active", stage === visible.target),
+          );
+          progressText.textContent = `${String(current).padStart(2, "0")} / 08`;
+          progressFill.style.width = `${current * 12.5}%`;
+        },
+        { rootMargin: "-20% 0px -55% 0px", threshold: [0.05, 0.35, 0.7] },
+      );
+
+      stages.forEach((stage) => observer.observe(stage));
+      setFocus("all");
+    </script>
+  </body>
+</html>
