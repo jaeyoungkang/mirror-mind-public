@@ -32,6 +32,10 @@ title: Mirror Mind — Public Pages
   - [① 종합 리포트 — 개념·계보·비평·AI 재독해](learning/editology/report)
   - [② 에이전트 제품군 적용안 — 편집 주체의 근력 복원](learning/editology/agent-applications)
 
+## 디자인 리서치 (2026-07)
+
+- [Otl Aicher 1972 뮌헨 올림픽 픽토그램 시스템 — 리서치와 문답 재구성](learning/otl-aicher/)
+
 ## AI 동향 리서치 (2026-06)
 
 - [2026 에이전트 플랫폼 경쟁 — 축, 스택, 성숙도](learning/ai-trends-2026/)
