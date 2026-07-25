@@ -55,6 +55,7 @@ Aicher 픽토그램은 퍼블릭 도메인이 아니며 지금도 저작권 보�
 ## 후속 문서
 
 - [Aicher 렌즈로 본 Lighthouse 에이전틱 엔지니어링 환경](lighthouse-agentic-review) — 이 리서치의 철학 다섯 단계를 기준으로 Lighthouse의 에이전트 운영 규약을 리뷰한다.
+- [문법의 무게 — 프로세스 체계 정량 조사와 처방](lighthouse-grammar-weight-report) — 정량 실측과 문헌 리서치로 1차 리뷰를 검증·교정하고, 틀·조문·기록 세 층 분류와 처방을 정리한다.
 
 ## 출처
 

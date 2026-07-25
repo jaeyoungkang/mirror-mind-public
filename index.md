@@ -36,6 +36,7 @@ title: Mirror Mind — Public Pages
 
 - [Otl Aicher 1972 뮌헨 올림픽 픽토그램 시스템 — 리서치와 문답 재구성](learning/otl-aicher/)
   - [Aicher 렌즈로 본 Lighthouse 에이전틱 엔지니어링 환경](learning/otl-aicher/lighthouse-agentic-review)
+  - [문법의 무게 — 프로세스 체계 정량 조사와 처방](learning/otl-aicher/lighthouse-grammar-weight-report)
 
 ## AI 동향 리서치 (2026-06)
 
